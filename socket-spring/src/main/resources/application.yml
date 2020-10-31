@@ -1,7 +1,3 @@
 spring:
   resources:
     static-locations: classpath:templates/
-
-mybatis:
-    type-aliases-package: cn.erika.web.model
-    mapper-locations: classpath*:mapper/*.xml

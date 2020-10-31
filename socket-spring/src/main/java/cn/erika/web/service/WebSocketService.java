@@ -1,5 +1,7 @@
 package cn.erika.web.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -13,51 +15,60 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class WebSocketService implements Serializable {
     public static final long serialVersionUID = 1L;
+    private Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private static ConcurrentHashMap<String, WebSocketService> clientList = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, Session> clientList = new ConcurrentHashMap<>();
+
+    private String clientId;
     private Session session;
 
     @OnOpen
     public void onOpen(Session session, @PathParam("clientId") String clientId) throws IOException {
+        this.clientId = clientId;
         this.session = session;
-        clientList.put(this.session.getId(), this);
+        clientList.put(clientId, session);
+    }
+
+    @OnMessage
+    public void onMessage(Session session, String message) {
+        System.out.println(message);
+        if ("server".equals(clientId)) {
+            sendMessage(message);
+        } else {
+            Session server = clientList.get("server");
+            if (server != null) {
+                sendMessage(server, message);
+            } else {
+                sendMessage(session, "服务器不在线");
+            }
+        }
     }
 
     @OnClose
     public void onClose() {
-        if (this.session != null) {
-            clientList.remove(this.session.getId());
-        }
-    }
-
-    @OnMessage
-    public void onMessage(Session session, String message) throws IOException {
-        try {
-            System.out.println(message);
-            sendMessage(message);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        clientList.remove(clientId);
     }
 
     @OnError
-    public void onError(Session session, Throwable t) {
-        System.err.println("发生错误:");
-        System.err.println("错误信息: " + t.getMessage());
-        t.printStackTrace();
-    }
-
-    public static void sendMessageToAll(String message) throws IOException {
-        for (String client : clientList.keySet()) {
-            clientList.get(client).sendMessage(message);
+    public void onError(Session session, Throwable throwable) throws IOException {
+        log.debug("WebSocket错误: " + throwable.getMessage(), throwable);
+        if (session.isOpen()) {
+            session.close();
         }
+        onClose();
     }
 
-    public static void sendMessage(String userId, String message) throws IOException {
-        clientList.get(userId).sendMessage(message);
+    private static void sendMessage(Session session, String message) {
+        session.getAsyncRemote().sendText(message);
     }
 
-    private void sendMessage(String message) throws IOException {
-        this.session.getBasicRemote().sendText(message);
+    public static void sendMessage(String clientId, String message) {
+        sendMessage(clientList.get(clientId), message);
+    }
+
+    public static void sendMessage(String message) {
+        for (String clientId : clientList.keySet()) {
+            sendMessage(clientId, message);
+        }
     }
 }
