@@ -192,7 +192,7 @@ public class RSA {
         } catch (NoSuchAlgorithmException e) {
             throw new SecurityException("当前环境不支持该加密方法: " + e.getMessage());
         } catch (InvalidKeySpecException | InvalidKeyException e) {
-            throw new SecurityException("秘钥无效: " + Base64.getEncoder().encodeToString(key));
+            throw new SecurityException("公钥无效: " + Base64.getEncoder().encodeToString(key));
         } catch (SignatureException e) {
             throw new SecurityException("签名对象未正确初始化: " + e.getMessage());
         }

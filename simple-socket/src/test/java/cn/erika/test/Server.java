@@ -1,24 +1,36 @@
 package cn.erika.test;
 
 import cn.erika.socket.core.TcpSocket;
+import cn.erika.test.service.*;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Server extends HandlerImpl implements Runnable {
+public class Server extends CommonHandler implements Runnable {
+    private static Map<String, SocketService> serviceList = new HashMap<>();
     private Map<String, TcpSocket> linkList = new HashMap<>();
     private ServerSocket server;
     private int count = 0;
 
-    public Server(String address, int port) throws IOException {
-        InetSocketAddress address1 = new InetSocketAddress(address, port);
+    static {
+        register(DefineString.REQ_PUBLIC_KEY, new ResponsePublicKey());
+        register(DefineString.REQ_ENCRYPT, new ResponseEncrypt());
+    }
+
+    public static void register(String serviceName, SocketService service) {
+        serviceList.put(serviceName, service);
+    }
+
+    public Server(String host, int port) throws IOException {
+        InetSocketAddress address = new InetSocketAddress(host, port);
         this.server = new ServerSocket();
         try {
-            server.bind(address1);
-            System.out.println("Listen: " + address1.getAddress());
+            server.bind(address);
+            System.out.println("Listen: " + address.getAddress());
         } catch (IOException e) {
             onError(e.getMessage(), e);
         }
@@ -84,15 +96,19 @@ public class Server extends HandlerImpl implements Runnable {
     @Override
     public void onOpen(TcpSocket socket) {
         addLink(socket);
-        sendMessage(socket, "hello world");
+        System.out.println("New client link: " + socket.getSocket().getRemoteSocketAddress());
+//        sendMessage(socket, new Message("hello world", "text"));
     }
 
     @Override
     public void onClose(TcpSocket socket) {
+        System.out.println("客户端断开连接");
         if (popLink(socket)) {
             try {
-                sendMessage(socket, "bye");
+                sendMessage(socket, new Message("bye", "exit"));
                 socket.close();
+            } catch (SocketException e) {
+                log.debug("连接中断", e);
             } catch (IOException e) {
                 onError(e.getMessage(), e);
             }
@@ -102,7 +118,18 @@ public class Server extends HandlerImpl implements Runnable {
     }
 
     @Override
-    public void onError(String message, Throwable error) {
+    public void onError(String message, Throwable e) {
         System.err.println(message);
+    }
+
+    @Override
+    public void deal(TcpSocket socket, Message message) {
+        String order = message.getHead(Message.Head.REQUEST);
+        SocketService service = serviceList.get(order);
+        if (service != null) {
+            service.service(this, socket, message);
+        } else {
+            System.out.println(new String(message.getPayload(), CHARSET));
+        }
     }
 }

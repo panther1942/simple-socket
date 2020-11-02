@@ -13,7 +13,7 @@ public class StringUtils {
     public static String randomString(int len) {
         StringBuilder buffer = new StringBuilder();
         for (int i = 0; i < len; i++) {
-            int idx = random.nextInt(95) + 33;
+            int idx = random.nextInt(65) + 58;
             buffer.append(String.valueOf((char) idx));
         }
         return buffer.toString();

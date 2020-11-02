@@ -27,9 +27,8 @@ public interface Handler {
      *
      * @param socket 数据源的socket对象
      * @param data   数据
-     * @throws IOException 如果在处理过程中发生IO错误
      */
-    public void onMessage(TcpSocket socket, byte[] data) throws IOException;
+    public void onMessage(TcpSocket socket, byte[] data);
 
     /**
      * 当需要关闭指定Socket连接的时候 调用此方法
