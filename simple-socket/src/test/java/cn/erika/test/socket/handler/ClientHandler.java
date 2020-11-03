@@ -1,7 +1,7 @@
-package cn.erika.test;
+package cn.erika.test.socket.handler;
 
 import cn.erika.socket.core.TcpSocket;
-import cn.erika.test.service.*;
+import cn.erika.test.socket.service.*;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-public class Client extends CommonHandler {
+public class ClientHandler extends AbstractHandler {
     private static Map<String, SocketService> serviceList = new HashMap<>();
     private InetSocketAddress address;
     private TcpSocket socket;
@@ -22,7 +22,7 @@ public class Client extends CommonHandler {
         serviceList.put(serviceName, service);
     }
 
-    public Client(String address, int port) {
+    public ClientHandler(String address, int port) {
         this.address = new InetSocketAddress(address, port);
     }
 
@@ -37,16 +37,16 @@ public class Client extends CommonHandler {
     public static void main(String[] args) {
         String address = "localhost";
         int port = 12345;
-        Client client = new Client(address, port);
-        client.connect();
+        ClientHandler clientHandler = new ClientHandler(address, port);
+        clientHandler.connect();
 
         Scanner scanner = new Scanner(System.in);
         String line = null;
         while ((line = scanner.nextLine()) != null) {
             if (!"exit".equals(line)) {
-                client.send(line);
+                clientHandler.send(line);
             } else {
-                client.close();
+                clientHandler.close();
             }
         }
     }
@@ -68,7 +68,7 @@ public class Client extends CommonHandler {
         }
         String host = socket.getSocket().getInetAddress().getHostAddress();
         System.out.println("正在关闭连接 From: " + host);
-        close();
+        close(socket);
     }
 
     @Override
@@ -83,11 +83,16 @@ public class Client extends CommonHandler {
         if (service != null) {
             service.service(this, socket, message);
         } else {
-            System.out.println(new String(message.getPayload(), CHARSET));
+            System.out.println("Client Receive [" + socket.getSocket().getRemoteSocketAddress() + "]: " + new String(message.getPayload(), CHARSET));
         }
     }
 
     public void close() {
+        close(this.socket);
+    }
+
+    @Override
+    public void close(TcpSocket socket) {
         try {
             if (!socket.getSocket().isClosed()) {
                 sendMessage(socket, new Message("exit", "exit"));

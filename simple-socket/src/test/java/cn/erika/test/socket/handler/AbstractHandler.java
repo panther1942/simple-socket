@@ -1,4 +1,4 @@
-package cn.erika.test;
+package cn.erika.test.socket.handler;
 
 import cn.erika.socket.core.Handler;
 import cn.erika.socket.core.TcpSocket;
@@ -13,9 +13,8 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 
-public abstract class CommonHandler implements Handler {
+public abstract class AbstractHandler implements Handler {
     protected Logger log = LoggerFactory.getLogger(this.getClass());
     public static final Charset CHARSET = Charset.forName("UTF-8");
 
@@ -58,7 +57,7 @@ public abstract class CommonHandler implements Handler {
             if (isEncrypt) {
                 byte[] publicKey = socket.get(DefineString.PUBLIC_KEY);
                 if (!RSA.verify(message.toString().getBytes(CHARSET), publicKey, message.getSign())) {
-                    log.debug("收到签名信息: " + Base64.getEncoder().encodeToString(message.getSign()));
+//                    log.debug("收到签名信息: " + Base64.getEncoder().encodeToString(message.getSign()));
                     throw new SecurityException("验签失败");
                 }
             }
@@ -79,7 +78,7 @@ public abstract class CommonHandler implements Handler {
         try {
             if (isEncrypt) {
                 message.setSign(RSA.sign(message.toString().getBytes(CHARSET), privateKey));
-                log.debug("发送签名信息:" + Base64.getEncoder().encodeToString(message.getSign()));
+//                log.debug("发送签名信息:" + Base64.getEncoder().encodeToString(message.getSign()));
             }
             byte[] data = JSON.toJSONBytes(message);
             if (isEncrypt) {
@@ -98,4 +97,6 @@ public abstract class CommonHandler implements Handler {
     }
 
     public abstract void deal(TcpSocket socket, Message message);
+
+    public abstract void close(TcpSocket socket);
 }

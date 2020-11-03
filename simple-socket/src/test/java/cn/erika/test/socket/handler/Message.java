@@ -1,4 +1,4 @@
-package cn.erika.test;
+package cn.erika.test.socket.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
