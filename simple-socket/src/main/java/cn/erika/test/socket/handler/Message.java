@@ -14,7 +14,8 @@ public class Message implements Serializable {
     private static final Charset CHARSET = Charset.forName("UTF-8");
 
     public enum Head {
-        REQUEST("request"),;
+        Order("title"),
+        Type("type");
 
         private String value;
 
@@ -31,22 +32,22 @@ public class Message implements Serializable {
     }
 
     public Message(String serviceName, byte[] data) {
-        this.head.put(Head.REQUEST, serviceName);
+        this.head.put(Head.Order, serviceName);
         this.payload = data;
     }
 
     public Message(String serviceName, String data) {
-        this.head.put(Head.REQUEST, serviceName);
+        this.head.put(Head.Order, serviceName);
         this.payload = data.getBytes(CHARSET);
     }
 
     public Message(String serviceName, Object data) {
-        this.head.put(Head.REQUEST, serviceName);
+        this.head.put(Head.Order, serviceName);
         this.payload = JSON.toJSONBytes(data);
     }
 
     public Message(String serviceName, Map<String, Object> data) {
-        this.head.put(Head.REQUEST, serviceName);
+        this.head.put(Head.Order, serviceName);
         this.payload = new JSONObject(data).toJSONString().getBytes(CHARSET);
     }
 

@@ -1,26 +1,19 @@
-package cn.erika.test.socket.handler;
+package cn.erika.test.socket.handler.impl;
 
 import cn.erika.socket.core.TcpSocket;
-import cn.erika.test.socket.service.*;
+import cn.erika.test.socket.handler.AbstractHandler;
+import cn.erika.test.socket.handler.Message;
+import cn.erika.test.socket.handler.StringDefine;
+import cn.erika.test.socket.service.ISocketService;
+import cn.erika.test.socket.service.NotFoundServiceException;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Scanner;
 
 public class ClientHandler extends AbstractHandler {
-    private static Map<String, SocketService> serviceList = new HashMap<>();
     private InetSocketAddress address;
     private TcpSocket socket;
-
-    static {
-        register(DefineString.RESP_PUBLIC_KEY, new RequestEncrypt());
-    }
-
-    public static void register(String serviceName, SocketService service) {
-        serviceList.put(serviceName, service);
-    }
 
     public ClientHandler(String address, int port) {
         this.address = new InetSocketAddress(address, port);
@@ -58,7 +51,12 @@ public class ClientHandler extends AbstractHandler {
     @Override
     public void onOpen(TcpSocket socket) {
         System.out.println("成功连接到服务器");
-        new RequestPublicKey().service(this, socket, null);
+        try {
+            ISocketService service = getService(StringDefine.SEVR_PUBLICK_KEY);
+            service.request(this, socket, null);
+        } catch (NotFoundServiceException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -76,19 +74,29 @@ public class ClientHandler extends AbstractHandler {
         System.err.println(message);
     }
 
-    @Override
-    public void deal(TcpSocket socket, Message message) {
-        String order = message.getHead(Message.Head.REQUEST);
-        SocketService service = serviceList.get(order);
-        if (service != null) {
-            service.service(this, socket, message);
-        } else {
-            System.out.println("Client Receive [" + socket.getSocket().getRemoteSocketAddress() + "]: " + new String(message.getPayload(), CHARSET));
-        }
-    }
-
     public void close() {
         close(this.socket);
+    }
+
+    @Override
+    public void response(String order, TcpSocket socket, Message message) {
+        ISocketService service = null;
+        try {
+            switch (order) {
+                case StringDefine.SEVR_PUBLICK_KEY:
+                    service = getService(StringDefine.SEVR_EXCHANGE_KEY);
+                    service.request(this, socket, message);
+                    break;
+                case StringDefine.SEVR_EXCHANGE_KEY:
+                    service = getService(StringDefine.SEVR_ENCRYPT_RESULT);
+                    service.request(this, socket, message);
+                case StringDefine.SEVR_ENCRYPT_RESULT:
+                    service = getService(StringDefine.SEVR_ENCRYPT_RESULT);
+                    service.response(this, socket, message);
+            }
+        } catch (NotFoundServiceException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     @Override

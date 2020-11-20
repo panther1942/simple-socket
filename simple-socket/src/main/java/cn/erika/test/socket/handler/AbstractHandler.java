@@ -2,6 +2,11 @@ package cn.erika.test.socket.handler;
 
 import cn.erika.socket.core.Handler;
 import cn.erika.socket.core.TcpSocket;
+import cn.erika.test.socket.service.ISocketService;
+import cn.erika.test.socket.service.NotFoundServiceException;
+import cn.erika.test.socket.service.impl.EncryptResultService;
+import cn.erika.test.socket.service.impl.EncryptService;
+import cn.erika.test.socket.service.impl.PublicKeyService;
 import cn.erika.util.security.RSA;
 import cn.erika.util.security.Security;
 import cn.erika.util.security.SecurityException;
@@ -13,15 +18,22 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class AbstractHandler implements Handler {
     protected Logger log = LoggerFactory.getLogger(this.getClass());
     public static final Charset CHARSET = Charset.forName("UTF-8");
+    private static Map<String, ISocketService> serviceList = new HashMap<>();
 
-    protected static byte[] publicKey;
-    protected static byte[] privateKey;
+    private static byte[] publicKey;
+    private static byte[] privateKey;
 
     static {
+        register(StringDefine.SEVR_PUBLICK_KEY, new PublicKeyService());
+        register(StringDefine.SEVR_EXCHANGE_KEY, new EncryptService());
+        register(StringDefine.SEVR_ENCRYPT_RESULT,new EncryptResultService());
+
         try {
             byte[][] keyPair = RSA.initKey(2048);
             publicKey = keyPair[0];
@@ -39,30 +51,42 @@ public abstract class AbstractHandler implements Handler {
         return privateKey;
     }
 
+    public static void register(String serviceName, ISocketService service) {
+        serviceList.put(serviceName, service);
+    }
+
+    public static ISocketService getService(String serviceName) throws NotFoundServiceException {
+        ISocketService service = serviceList.get(serviceName);
+        if (service == null) {
+            throw new NotFoundServiceException("不存在的服务: " + serviceName);
+        }
+        return service;
+    }
+
     @Override
     public void init(TcpSocket socket) {
-        socket.set(DefineString.ENCRYPT, false);
+        socket.set(StringDefine.ENCRYPT, false);
     }
 
     @Override
     public void onMessage(TcpSocket socket, byte[] data) {
-        boolean isEncrypt = socket.get(DefineString.ENCRYPT);
+        boolean isEncrypt = socket.get(StringDefine.ENCRYPT);
         try {
             if (isEncrypt) {
-                String password = socket.get(DefineString.PASSWORD);
-                Security.Type passwordType = socket.get(DefineString.PASSWORD_TYPE);
+                String password = socket.get(StringDefine.PASSWORD);
+                Security.Type passwordType = socket.get(StringDefine.PASSWORD_TYPE);
                 data = Security.decrypt(data, passwordType, password);
             }
             Message message = JSON.parseObject(new String(data, CHARSET), Message.class);
             if (isEncrypt) {
-                byte[] publicKey = socket.get(DefineString.PUBLIC_KEY);
+                byte[] publicKey = socket.get(StringDefine.PUBLIC_KEY);
                 if (!RSA.verify(message.toString().getBytes(CHARSET), publicKey, message.getSign())) {
 //                    log.debug("收到签名信息: " + Base64.getEncoder().encodeToString(message.getSign()));
                     throw new SecurityException("验签失败");
                 }
             }
 //            log.debug("收到消息: " + new String(message.getPayload(), CHARSET));
-            if (!"exit".equalsIgnoreCase(message.getHead(Message.Head.REQUEST))) {
+            if (!"exit".equalsIgnoreCase(message.getHead(Message.Head.Order))) {
                 deal(socket, message);
             } else {
                 onClose(socket);
@@ -74,7 +98,7 @@ public abstract class AbstractHandler implements Handler {
 
     public void sendMessage(TcpSocket socket, Message message) {
 //        log.debug("发送消息: " + new String(message.getPayload(), CHARSET));
-        boolean isEncrypt = socket.get(DefineString.ENCRYPT);
+        boolean isEncrypt = socket.get(StringDefine.ENCRYPT);
         try {
             if (isEncrypt) {
                 message.setSign(RSA.sign(message.toString().getBytes(CHARSET), privateKey));
@@ -82,8 +106,8 @@ public abstract class AbstractHandler implements Handler {
             }
             byte[] data = JSON.toJSONBytes(message);
             if (isEncrypt) {
-                String password = socket.get(DefineString.PASSWORD);
-                Security.Type passwordType = socket.get(DefineString.PASSWORD_TYPE);
+                String password = socket.get(StringDefine.PASSWORD);
+                Security.Type passwordType = socket.get(StringDefine.PASSWORD_TYPE);
                 data = Security.encrypt(data, passwordType, password);
             }
             socket.send(data);
@@ -96,7 +120,22 @@ public abstract class AbstractHandler implements Handler {
         }
     }
 
-    public abstract void deal(TcpSocket socket, Message message);
+    public void deal(TcpSocket socket, Message message) {
+        String order = message.getHead(Message.Head.Order);
+        String type = message.getHead(Message.Head.Type);
+        try {
+            ISocketService service = getService(order);
+            if (StringDefine.REQUEST.equals(type)) {
+                service.response(this, socket, message);
+            } else {
+                response(order, socket, message);
+            }
+        } catch (NotFoundServiceException e) {
+            log.info("Server Receive [" + socket.getSocket().getRemoteSocketAddress() + "]: " + new String(message.getPayload(), CHARSET));
+        }
+    }
+
+    public abstract void response(String order, TcpSocket socket, Message message);
 
     public abstract void close(TcpSocket socket);
 }

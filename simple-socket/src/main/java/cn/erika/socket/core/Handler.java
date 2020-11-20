@@ -1,7 +1,5 @@
 package cn.erika.socket.core;
 
-import java.io.IOException;
-
 /**
  * 规定一些处理器必须要做的动作
  */

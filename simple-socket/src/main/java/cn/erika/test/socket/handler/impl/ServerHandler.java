@@ -1,32 +1,20 @@
-package cn.erika.test.socket.handler;
+package cn.erika.test.socket.handler.impl;
 
 import cn.erika.socket.core.TcpSocket;
-import cn.erika.test.socket.service.*;
-import cn.erika.util.StringUtils;
-import cn.erika.util.security.MessageDigest;
-import cn.erika.util.security.SecurityException;
+import cn.erika.test.socket.handler.AbstractHandler;
+import cn.erika.test.socket.handler.Message;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.SocketException;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class ServerHandler extends AbstractHandler implements Runnable {
-    private static Map<String, SocketService> serviceList = new HashMap<>();
     private ServerSocket server;
     private LinkManager linkManager;
-
-    static {
-        register(DefineString.REQ_PUBLIC_KEY, new ResponsePublicKey());
-        register(DefineString.REQ_ENCRYPT, new ResponseEncrypt());
-    }
-
-    private static void register(String serviceName, SocketService service) {
-        serviceList.put(serviceName, service);
-    }
 
     public ServerHandler(String host, int port) throws IOException {
         InetSocketAddress address = new InetSocketAddress(host, port);
@@ -74,8 +62,7 @@ public class ServerHandler extends AbstractHandler implements Runnable {
     @Override
     public void onOpen(TcpSocket socket) {
         linkManager.addLink(socket);
-        System.out.println("New client link: " + socket.getSocket().getRemoteSocketAddress());
-//        sendMessage(socket, new Message("hello world", "text"));
+        log.info("New client link: " + socket.getSocket().getRemoteSocketAddress());
     }
 
     @Override
@@ -88,17 +75,6 @@ public class ServerHandler extends AbstractHandler implements Runnable {
         System.err.println(message);
     }
 
-    @Override
-    public void deal(TcpSocket socket, Message message) {
-        String order = message.getHead(Message.Head.REQUEST);
-        SocketService service = serviceList.get(order);
-        if (service != null) {
-            service.service(this, socket, message);
-        } else {
-            System.out.println("Server Receive [" + socket.getSocket().getRemoteSocketAddress() + "]: " + new String(message.getPayload(), CHARSET));
-        }
-    }
-
     public void close() {
         try {
             if (!server.isClosed()) {
@@ -107,6 +83,11 @@ public class ServerHandler extends AbstractHandler implements Runnable {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    @Override
+    public void response(String order, TcpSocket socket, Message message) {
+
     }
 
     @Override
@@ -140,7 +121,7 @@ public class ServerHandler extends AbstractHandler implements Runnable {
         private Map<String, TcpSocket> linkList = new HashMap<>();
 
         TcpSocket addLink(TcpSocket socket) {
-            linkList.put(randomUid(), socket);
+            linkList.put(UUID.randomUUID().toString(), socket);
             return socket;
         }
 
@@ -168,15 +149,6 @@ public class ServerHandler extends AbstractHandler implements Runnable {
                 return true;
             }
             return false;
-        }
-
-        String randomUid() {
-            try {
-                byte[] uid = MessageDigest.sum(StringUtils.randomString(20).getBytes(CHARSET), MessageDigest.Type.MD5);
-                return MessageDigest.byteToHexString(uid);
-            } catch (SecurityException e) {
-                throw new RuntimeException("不支持的签名方式: MD5");
-            }
         }
     }
 }

@@ -1,11 +1,10 @@
 package cn.erika.test.cli;
 
-import cn.erika.socket.core.TcpSocket;
 import cn.erika.test.cli.service.CliService;
-import cn.erika.test.socket.handler.ClientHandler;
-import cn.erika.test.socket.handler.DefineString;
-import cn.erika.test.socket.handler.ServerHandler;
 import cn.erika.test.cli.util.KeyboardReader;
+import cn.erika.test.socket.handler.StringDefine;
+import cn.erika.test.socket.handler.impl.ClientHandler;
+import cn.erika.test.socket.handler.impl.ServerHandler;
 import cn.erika.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +16,9 @@ import java.util.Map;
 
 public class App implements Runnable {
     private Logger log = LoggerFactory.getLogger(this.getClass());
+
+    private static final String DEFAULT_ADDRESS = "localhost";
+    private static final int DEFAULT_PORT = 12345;
 
     private ServerHandler server;
     private ClientHandler client;
@@ -32,13 +34,18 @@ public class App implements Runnable {
 
     private void init() {
         CliService connService = params -> {
-            String address = params[1];
-            int port = Integer.parseInt(params[2]);
-            client = new ClientHandler(address, port);
+            if (params.length == 1) {
+                client = new ClientHandler(DEFAULT_ADDRESS, DEFAULT_PORT);
+            } else {
+                String address = params[1];
+                int port = Integer.parseInt(params[2]);
+                client = new ClientHandler(address, port);
+            }
             client.connect();
         };
         addService("connect", connService);
         addService("conn", connService);
+        addService("c", connService);
         addService("disconn", params -> {
             client.close();
         });
@@ -49,16 +56,22 @@ public class App implements Runnable {
                 log.error("服务器未启动");
             }
         });
-        addService("listen", params -> {
-            String address = params[1];
-            int port = Integer.parseInt(params[2]);
+        CliService listenService = params -> {
             try {
-                server = new ServerHandler(address, port);
+                if (params.length == 1) {
+                    server = new ServerHandler(DEFAULT_ADDRESS, DEFAULT_PORT);
+                } else {
+                    String address = params[1];
+                    int port = Integer.parseInt(params[2]);
+                    server = new ServerHandler(address, port);
+                }
+                new Thread(server).start();
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
             }
-            new Thread(server).start();
-        });
+        };
+        addService("listen", listenService);
+        addService("l", listenService);
         addService("send", params -> {
             StringBuffer message = new StringBuffer();
             if (server != null) {
@@ -95,7 +108,7 @@ public class App implements Runnable {
         log.debug("Running...");
         try {
             String line;
-            while ((line = reader.read()) != null && !DefineString.EXIT.equalsIgnoreCase(line)) {
+            while ((line = reader.read()) != null && !StringDefine.EXIT.equalsIgnoreCase(line)) {
                 String[] command = StringUtils.getParam(line);
                 try {
                     if (command.length > 0) {
