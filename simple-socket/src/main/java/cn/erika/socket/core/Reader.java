@@ -1,11 +1,18 @@
 package cn.erika.socket.core;
 
+import cn.erika.util.compress.CompressException;
+import cn.erika.util.compress.GZIP;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Date;
 
 // 根据自定协议实现的一个处理数据的类
 class Reader {
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
     private Handler handler;
     private Charset charset;
 
@@ -18,7 +25,7 @@ class Reader {
         this.charset = charset;
     }
 
-    synchronized void read(TcpSocket socket, byte[] data, int len) throws IOException {
+    synchronized void read(TcpSocket socket, byte[] data, int len) throws IOException, CompressException {
         byte[] tmp = new byte[len];
         System.arraycopy(data, 0, tmp, 0, len);
         while (tmp != null) {
@@ -49,7 +56,18 @@ class Reader {
                 tmp = tmp2;
             }
             if (pos == cache.length && (pos > 0 || info.getLen() == 0)) {
-                handler.onMessage(socket, cache);
+                byte[] uncompressData = null;
+                switch (info.getCompress()) {
+                    case NONE:
+                        uncompressData = cache;
+                        break;
+                    case GZIP:
+                        uncompressData = GZIP.uncompress(cache);
+                        break;
+                    default:
+                        throw new CompressException("不支持的压缩格式");
+                }
+                handler.onMessage(socket, uncompressData);
                 info = null;
                 cache = null;
                 pos = 0;
@@ -67,12 +85,15 @@ class Reader {
         info = new DataInfo();
         // 时间戳 13字节
         info.setTimestamp(new Date(Long.parseLong(strHead.substring(0, 13))));
+        info.setCompress(DataInfo.Compress.getByValue(Integer.parseInt(strHead.substring(13, 23))));
         // 本次传输偏移量 10字节
-        info.setPos(Long.parseLong(strHead.substring(13, 23)));
+        info.setPos(Long.parseLong(strHead.substring(23, 33)));
         // 本次传输长度 10字节
-        info.setLen(Integer.parseInt(strHead.substring(23, 33)));
+        info.setLen(Integer.parseInt(strHead.substring(33, 43)));
         byte[] tmp = new byte[len - DataInfo.LEN];
         System.arraycopy(data, DataInfo.LEN, tmp, 0, len - DataInfo.LEN);
+//        log.debug(info.toJson());
+//        log.debug(info.toString());
         return tmp;
     }
 }

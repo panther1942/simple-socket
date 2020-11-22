@@ -1,6 +1,12 @@
 package cn.erika.test.cli;
 
+import cn.erika.test.cli.service.ApplicationContext;
 import cn.erika.test.cli.service.CliService;
+import cn.erika.test.cli.service.impl.SendMsgService;
+import cn.erika.test.cli.service.impl.client.ConnectService;
+import cn.erika.test.cli.service.impl.client.DisconnectService;
+import cn.erika.test.cli.service.impl.server.DisplayClientListService;
+import cn.erika.test.cli.service.impl.server.ListenService;
 import cn.erika.test.cli.util.KeyboardReader;
 import cn.erika.test.socket.handler.StringDefine;
 import cn.erika.test.socket.handler.impl.ClientHandler;
@@ -9,22 +15,14 @@ import cn.erika.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.SocketException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class App implements Runnable {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private static final String DEFAULT_ADDRESS = "localhost";
-    private static final int DEFAULT_PORT = 12345;
-
     private ServerHandler server;
     private ClientHandler client;
     private KeyboardReader reader = KeyboardReader.getInstance();
-
-    private Map<String, CliService> serviceList = new HashMap<>();
 
     public static void main(String[] args) {
         App app = new App();
@@ -33,73 +31,29 @@ public class App implements Runnable {
     }
 
     private void init() {
-        CliService connService = params -> {
-            if (params.length == 1) {
-                client = new ClientHandler(DEFAULT_ADDRESS, DEFAULT_PORT);
-            } else {
-                String address = params[1];
-                int port = Integer.parseInt(params[2]);
-                client = new ClientHandler(address, port);
-            }
-            client.connect();
-        };
-        addService("connect", connService);
-        addService("conn", connService);
-        addService("c", connService);
-        addService("disconn", params -> {
-            client.close();
-        });
-        addService("list", params -> {
-            if (server != null) {
-                server.displayLink();
-            } else {
-                log.error("服务器未启动");
-            }
-        });
-        CliService listenService = params -> {
-            try {
-                if (params.length == 1) {
-                    server = new ServerHandler(DEFAULT_ADDRESS, DEFAULT_PORT);
-                } else {
-                    String address = params[1];
-                    int port = Integer.parseInt(params[2]);
-                    server = new ServerHandler(address, port);
-                }
-                new Thread(server).start();
-            } catch (IOException e) {
-                log.error(e.getMessage(), e);
-            }
-        };
-        addService("listen", listenService);
-        addService("l", listenService);
-        addService("send", params -> {
-            StringBuffer message = new StringBuffer();
-            if (server != null) {
-                String uid = params[1];
-                try {
-                    for (int i = 2; i < params.length; i++) {
-                        message.append(params[i]);
-                    }
-                    server.send(uid, message.toString());
-                } catch (SocketException e) {
-                    for (int i = 1; i < params.length; i++) {
-                        message.append(params[i]);
-                    }
-                    client.send(message.toString());
-                }
-            } else if (client != null) {
-                for (int i = 1; i < params.length; i++) {
-                    message.append(params[i]);
-                }
-                client.send(message.toString());
-            } else {
-                log.error("客户端和服务端均为启动");
-            }
-        });
-    }
+        try {
+            ApplicationContext.register(ConnectService.class);
+            ApplicationContext.register(DisconnectService.class);
+            ApplicationContext.register(DisplayClientListService.class);
+            ApplicationContext.register(ListenService.class);
+            ApplicationContext.register(SendMsgService.class);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        }
 
-    private void addService(String serviceName, CliService service) {
-        serviceList.put(serviceName, service);
+
+        ApplicationContext.register("connect", ConnectService.class);
+        ApplicationContext.register("conn", ConnectService.class);
+        ApplicationContext.register("c", ConnectService.class);
+        ApplicationContext.register("disconnect", DisconnectService.class);
+        ApplicationContext.register("disconn", DisconnectService.class);
+        ApplicationContext.register("d", DisconnectService.class);
+        ApplicationContext.register("listen", ListenService.class);
+        ApplicationContext.register("l", ListenService.class);
+        ApplicationContext.register("display", DisplayClientListService.class);
+        ApplicationContext.register("send", SendMsgService.class);
     }
 
 
@@ -112,7 +66,10 @@ public class App implements Runnable {
                 String[] command = StringUtils.getParam(line);
                 try {
                     if (command.length > 0) {
-                        serviceList.get(command[0]).service(command);
+                        CliService service = ApplicationContext.getService(command[0]);
+                        if (service != null) {
+                            service.service(command);
+                        }
                     }
                 } catch (NullPointerException e) {
                     log.error("不支持的命令: " + command[0]);
@@ -120,6 +77,8 @@ public class App implements Runnable {
                     log.error("命令错误: " + e.getMessage());
                 } catch (ArrayIndexOutOfBoundsException | StringIndexOutOfBoundsException e) {
                     log.error("语法错误: " + line);
+                } catch (SocketException e) {
+                    log.error(e.getMessage(), e);
                 }
             }
         } finally {

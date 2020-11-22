@@ -3,6 +3,8 @@ package cn.erika.test.socket.handler.impl;
 import cn.erika.socket.core.TcpSocket;
 import cn.erika.test.socket.handler.AbstractHandler;
 import cn.erika.test.socket.handler.Message;
+import cn.erika.test.socket.service.ISocketService;
+import cn.erika.test.socket.service.NotFoundServiceException;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -86,8 +88,15 @@ public class ServerHandler extends AbstractHandler implements Runnable {
     }
 
     @Override
-    public void response(String order, TcpSocket socket, Message message) {
-
+    public void deal(TcpSocket socket, Message message) {
+        String order = message.getHead(Message.Head.Order);
+        ISocketService service = null;
+        try {
+            service = getService(order);
+            service.server(this, socket, message);
+        } catch (NotFoundServiceException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -121,7 +130,9 @@ public class ServerHandler extends AbstractHandler implements Runnable {
         private Map<String, TcpSocket> linkList = new HashMap<>();
 
         TcpSocket addLink(TcpSocket socket) {
-            linkList.put(UUID.randomUUID().toString(), socket);
+            String uuid = UUID.randomUUID().toString();
+            socket.set("id", uuid);
+            linkList.put(uuid, socket);
             return socket;
         }
 

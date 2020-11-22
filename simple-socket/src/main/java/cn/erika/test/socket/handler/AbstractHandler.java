@@ -7,6 +7,7 @@ import cn.erika.test.socket.service.NotFoundServiceException;
 import cn.erika.test.socket.service.impl.EncryptResultService;
 import cn.erika.test.socket.service.impl.EncryptService;
 import cn.erika.test.socket.service.impl.PublicKeyService;
+import cn.erika.test.socket.service.impl.TextService;
 import cn.erika.util.security.RSA;
 import cn.erika.util.security.Security;
 import cn.erika.util.security.SecurityException;
@@ -30,9 +31,10 @@ public abstract class AbstractHandler implements Handler {
     private static byte[] privateKey;
 
     static {
-        register(StringDefine.SEVR_PUBLICK_KEY, new PublicKeyService());
+        register(StringDefine.SEVR_PUBLIC_KEY, new PublicKeyService());
         register(StringDefine.SEVR_EXCHANGE_KEY, new EncryptService());
-        register(StringDefine.SEVR_ENCRYPT_RESULT,new EncryptResultService());
+        register(StringDefine.SEVR_ENCRYPT_RESULT, new EncryptResultService());
+        register(StringDefine.SEVR_TEXT, new TextService());
 
         try {
             byte[][] keyPair = RSA.initKey(2048);
@@ -77,6 +79,7 @@ public abstract class AbstractHandler implements Handler {
                 Security.Type passwordType = socket.get(StringDefine.PASSWORD_TYPE);
                 data = Security.decrypt(data, passwordType, password);
             }
+//            log.debug("Receive: " + new String(data, CHARSET));
             Message message = JSON.parseObject(new String(data, CHARSET), Message.class);
             if (isEncrypt) {
                 byte[] publicKey = socket.get(StringDefine.PUBLIC_KEY);
@@ -97,7 +100,7 @@ public abstract class AbstractHandler implements Handler {
     }
 
     public void sendMessage(TcpSocket socket, Message message) {
-//        log.debug("发送消息: " + new String(message.getPayload(), CHARSET));
+//        log.debug("发送消息: " + new String(JSON.toJSONBytes(message), CHARSET));
         boolean isEncrypt = socket.get(StringDefine.ENCRYPT);
         try {
             if (isEncrypt) {
@@ -120,22 +123,7 @@ public abstract class AbstractHandler implements Handler {
         }
     }
 
-    public void deal(TcpSocket socket, Message message) {
-        String order = message.getHead(Message.Head.Order);
-        String type = message.getHead(Message.Head.Type);
-        try {
-            ISocketService service = getService(order);
-            if (StringDefine.REQUEST.equals(type)) {
-                service.response(this, socket, message);
-            } else {
-                response(order, socket, message);
-            }
-        } catch (NotFoundServiceException e) {
-            log.info("Server Receive [" + socket.getSocket().getRemoteSocketAddress() + "]: " + new String(message.getPayload(), CHARSET));
-        }
-    }
-
-    public abstract void response(String order, TcpSocket socket, Message message);
+    public abstract void deal(TcpSocket socket,Message message);
 
     public abstract void close(TcpSocket socket);
 }

@@ -1,5 +1,10 @@
 package cn.erika.socket.core;
 
+import cn.erika.util.compress.CompressException;
+import cn.erika.util.compress.GZIP;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -16,6 +21,7 @@ import java.util.Map;
  * 需要一个TcpHandler提供功能支持
  */
 public class TcpSocket implements Runnable {
+    private Logger log = LoggerFactory.getLogger(this.getClass());
     // 持有的Socket对象 用来响应请求
     private Socket socket;
     // 持有的Reader对象 用来解析数据
@@ -59,7 +65,7 @@ public class TcpSocket implements Runnable {
 
     @Override
     public void run() {
-        // 缓冲区 如果初始化中未设置缓冲区大小将使用默认值4096 即4k
+        // 缓冲区大小从创建的socket中获取（接收区的大小）
         try {
             int cacheSize = this.socket.getReceiveBufferSize();
             SocketAddress address = this.socket.getRemoteSocketAddress();
@@ -72,6 +78,8 @@ public class TcpSocket implements Runnable {
                 }
             } catch (IOException e) {
                 handler.onError("连接中断 From: " + address.toString(), e);
+            } catch (CompressException e) {
+                handler.onError(e.getMessage(), e);
             } finally {
                 try {
                     close();
@@ -94,6 +102,7 @@ public class TcpSocket implements Runnable {
     private void write(byte[] data, int len) throws IOException {
         int pos = 0;
         // 这里用pos标记发送数据的长度 每次发送缓冲区大小个字节 直到pos等于数据长度len
+        // 缓冲区的大小从socket获取（发送区的大小）
         int cacheSize = socket.getSendBufferSize();
         while (len - pos > cacheSize) {
             out.write(data, pos, cacheSize);
@@ -103,14 +112,32 @@ public class TcpSocket implements Runnable {
         out.flush();
     }
 
-    public void send(byte[] data) throws IOException {
-        DataInfo info = new DataInfo();
-        info.setPos(0);
-        info.setLen(data.length);
-        info.setTimestamp(new Date());
+    public synchronized void send(byte[] data) throws IOException {
         if (!socket.isClosed()) {
-            write(info.toString().getBytes(), info.toString().length());
-            write(data, data.length);
+            try {
+                DataInfo info = new DataInfo();
+                info.setTimestamp(new Date());
+                if (GlobalSettings.enableCompress) {
+                    switch (GlobalSettings.compressMethod) {
+                        case NONE:
+                            info.setCompress(DataInfo.Compress.NONE);
+                            break;
+                        case GZIP:
+                            info.setCompress(DataInfo.Compress.GZIP);
+                            data = GZIP.compress(data);
+                            break;
+                        default:
+                            throw new CompressException("不支持的压缩格式");
+//                log.debug("原始长度: " + data.length + " 压缩后: " + compressData.length + " 压缩比: " + ((float) compressData.length) / ((float) data.length));
+                    }
+                }
+                info.setPos(0);
+                info.setLen(data.length);
+                write(info.toString().getBytes(), info.toString().length());
+                write(data, data.length);
+            } catch (CompressException e) {
+                throw new IOException(e.getMessage(), e);
+            }
         } else {
             throw new IOException("连接已被关闭: " + socket.getRemoteSocketAddress());
         }

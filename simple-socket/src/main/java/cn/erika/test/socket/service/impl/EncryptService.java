@@ -20,7 +20,7 @@ public class EncryptService implements ISocketService {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Override
-    public void request(AbstractHandler handler, TcpSocket socket, Message message) {
+    public void client(AbstractHandler handler, TcpSocket socket, Message message) {
 //        log.debug("获取服务器公钥: " + Base64.getEncoder().encodeToString(message.getPayload()));
         socket.set(StringDefine.PUBLIC_KEY, message.getPayload());
         Security.Type passwordType = Security.Type.AES256ECB;
@@ -33,40 +33,37 @@ public class EncryptService implements ISocketService {
                 put("value", Base64.getEncoder().encodeToString(password.getBytes(AbstractHandler.CHARSET)));
             }
         });
-        response.addHead(Message.Head.Type, StringDefine.REQUEST);
         handler.sendMessage(socket, response);
 //        socket.set(StringDefine.ENCRYPT, true);
 //        log.debug("发送密钥，类型:" + passwordType + ", 密钥:" + password);
     }
 
     @Override
-    public void response(AbstractHandler handler, TcpSocket socket, Message message) {
+    public void server(AbstractHandler handler, TcpSocket socket, Message message) {
         Map<String, String> body = JSON.parseObject(message.getPayload(), Map.class);
         Security.Type passwordType = Security.Type.getByName(body.get("key"));
-        Message response = null;
+        Message reply = null;
         if (passwordType == null) {
             log.error("加密协商失败");
-            response = new Message(StringDefine.SEVR_ENCRYPT_RESULT, new HashMap<String, String>() {
+            reply = new Message(StringDefine.SEVR_ENCRYPT_RESULT, new HashMap<String, String>() {
                 {
                     put("code", "1");
                     put("message", "加密协商失败");
                 }
             });
-            response.addHead(Message.Head.Type, StringDefine.RESPONSE);
-            handler.sendMessage(socket, response);
+            handler.sendMessage(socket, reply);
         } else {
             String password = new String(Base64.getDecoder().decode(body.get("value")));
 
 //        log.debug("客户端发送密钥，类型:" + passwordType + ", 密钥:" + password);
             log.debug("加密协商完成");
-            response = new Message(StringDefine.SEVR_ENCRYPT_RESULT, new HashMap<String, String>() {
+            reply = new Message(StringDefine.SEVR_ENCRYPT_RESULT, new HashMap<String, String>() {
                 {
                     put("code", "0");
                     put("message", "加密协商成功");
                 }
             });
-            response.addHead(Message.Head.Type, StringDefine.RESPONSE);
-            handler.sendMessage(socket, response);
+            handler.sendMessage(socket, reply);
             socket.set(StringDefine.PASSWORD, password);
             socket.set(StringDefine.PASSWORD_TYPE, passwordType);
             socket.set(StringDefine.ENCRYPT, true);

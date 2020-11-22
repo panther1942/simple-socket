@@ -7,7 +7,7 @@ import cn.erika.test.socket.handler.StringDefine;
 
 public interface ISocketService {
 
-    public void request(AbstractHandler handler, TcpSocket socket, Message message);
+    public void client(AbstractHandler handler, TcpSocket socket, Message message);
 
-    public void response(AbstractHandler handler, TcpSocket socket, Message message);
+    public void server(AbstractHandler handler, TcpSocket socket, Message message);
 }

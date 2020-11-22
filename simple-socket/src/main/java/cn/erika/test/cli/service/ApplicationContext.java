@@ -1,25 +1,32 @@
 package cn.erika.test.cli.service;
 
-import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ApplicationContext {
-    private static LinkedList<Class<? extends CliService>> serviceMap;
-    private static ConcurrentHashMap<Class<?>, Object> objMap;
+    private static ConcurrentHashMap<Class<?>, Object> objMap = new ConcurrentHashMap<>();
 
-    public static void register(Class<? extends CliService> clazz) {
-        if (serviceMap == null) {
-            serviceMap = new LinkedList<>();
+    private static Map<String, Class<? extends CliService>> serviceMap = new HashMap<>();
+    private static Map<Class<? extends CliService>, CliService> serviceList = new HashMap<>();
+
+    public static void register(Class<? extends CliService> clazz) throws IllegalAccessException, InstantiationException {
+        serviceList.put(clazz, clazz.newInstance());
+    }
+
+    public static void register(String serviceName, Class<? extends CliService> clazz) {
+        serviceMap.put(serviceName, clazz);
+    }
+
+    public static CliService getService(String serverName) {
+        Class<? extends CliService> serviceClazz = serviceMap.get(serverName);
+        if (serviceClazz != null) {
+            return serviceList.get(serviceClazz);
         }
-        if (!serviceMap.contains(clazz)) {
-            serviceMap.add(clazz);
-        }
+        return null;
     }
 
     public static void add(Class<?> clazz, Object object) {
-        if (objMap == null) {
-            objMap = new ConcurrentHashMap<>();
-        }
         objMap.put(clazz, object);
     }
 

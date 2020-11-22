@@ -52,8 +52,8 @@ public class ClientHandler extends AbstractHandler {
     public void onOpen(TcpSocket socket) {
         System.out.println("成功连接到服务器");
         try {
-            ISocketService service = getService(StringDefine.SEVR_PUBLICK_KEY);
-            service.request(this, socket, null);
+            ISocketService service = getService(StringDefine.SEVR_PUBLIC_KEY);
+            service.client(this, socket, null);
         } catch (NotFoundServiceException e) {
             log.error(e.getMessage(), e);
         }
@@ -79,21 +79,12 @@ public class ClientHandler extends AbstractHandler {
     }
 
     @Override
-    public void response(String order, TcpSocket socket, Message message) {
+    public void deal(TcpSocket socket, Message message) {
+        String order = message.getHead(Message.Head.Order);
         ISocketService service = null;
         try {
-            switch (order) {
-                case StringDefine.SEVR_PUBLICK_KEY:
-                    service = getService(StringDefine.SEVR_EXCHANGE_KEY);
-                    service.request(this, socket, message);
-                    break;
-                case StringDefine.SEVR_EXCHANGE_KEY:
-                    service = getService(StringDefine.SEVR_ENCRYPT_RESULT);
-                    service.request(this, socket, message);
-                case StringDefine.SEVR_ENCRYPT_RESULT:
-                    service = getService(StringDefine.SEVR_ENCRYPT_RESULT);
-                    service.response(this, socket, message);
-            }
+            service = getService(order);
+            service.client(this, socket, message);
         } catch (NotFoundServiceException e) {
             log.error(e.getMessage(), e);
         }
