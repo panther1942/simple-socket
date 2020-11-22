@@ -1,9 +1,9 @@
-package cn.erika.test.cli.service.impl;
+package cn.erika.cli.service.impl;
 
-import cn.erika.test.cli.service.ApplicationContext;
-import cn.erika.test.cli.service.CliService;
-import cn.erika.test.socket.handler.impl.ClientHandler;
-import cn.erika.test.socket.handler.impl.ServerHandler;
+import cn.erika.cli.service.ApplicationContext;
+import cn.erika.cli.service.CliService;
+import cn.erika.socket.handler.impl.ClientHandler;
+import cn.erika.socket.handler.impl.ServerHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

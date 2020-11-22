@@ -1,8 +1,8 @@
-package cn.erika.test.cli.service.impl.client;
+package cn.erika.cli.service.impl.client;
 
-import cn.erika.test.cli.service.ApplicationContext;
-import cn.erika.test.cli.service.CliService;
-import cn.erika.test.socket.handler.impl.ClientHandler;
+import cn.erika.cli.service.ApplicationContext;
+import cn.erika.cli.service.CliService;
+import cn.erika.socket.handler.impl.ClientHandler;
 
 public class ConnectService implements CliService {
     private static final String DEFAULT_ADDRESS = "localhost";

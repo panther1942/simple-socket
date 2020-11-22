@@ -1,11 +1,11 @@
-package cn.erika.test.socket.handler.impl;
+package cn.erika.socket.handler.impl;
 
 import cn.erika.socket.core.TcpSocket;
-import cn.erika.test.socket.handler.AbstractHandler;
-import cn.erika.test.socket.handler.Message;
-import cn.erika.test.socket.handler.StringDefine;
-import cn.erika.test.socket.service.ISocketService;
-import cn.erika.test.socket.service.NotFoundServiceException;
+import cn.erika.socket.handler.AbstractHandler;
+import cn.erika.socket.handler.Message;
+import cn.erika.socket.handler.StringDefine;
+import cn.erika.socket.service.ISocketService;
+import cn.erika.socket.service.NotFoundServiceException;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

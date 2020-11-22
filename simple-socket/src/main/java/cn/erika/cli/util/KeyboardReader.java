@@ -1,4 +1,4 @@
-package cn.erika.test.cli.util;
+package cn.erika.cli.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

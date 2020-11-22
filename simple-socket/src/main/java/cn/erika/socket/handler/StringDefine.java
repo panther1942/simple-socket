@@ -1,4 +1,4 @@
-package cn.erika.test.socket.handler;
+package cn.erika.socket.handler;
 
 public class StringDefine {
     public static final String ENCRYPT = "encrypt";

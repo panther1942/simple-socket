@@ -1,10 +1,10 @@
-package cn.erika.test.socket.service.impl;
+package cn.erika.socket.service.impl;
 
 import cn.erika.socket.core.TcpSocket;
-import cn.erika.test.socket.handler.AbstractHandler;
-import cn.erika.test.socket.handler.Message;
-import cn.erika.test.socket.handler.StringDefine;
-import cn.erika.test.socket.service.ISocketService;
+import cn.erika.socket.handler.AbstractHandler;
+import cn.erika.socket.handler.Message;
+import cn.erika.socket.handler.StringDefine;
+import cn.erika.socket.service.ISocketService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

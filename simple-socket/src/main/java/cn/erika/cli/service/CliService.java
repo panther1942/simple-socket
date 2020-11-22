@@ -1,4 +1,4 @@
-package cn.erika.test.cli.service;
+package cn.erika.cli.service;
 
 import java.net.SocketException;
 
