@@ -1,5 +1,6 @@
 package cn.erika.cli.service.impl.server;
 
+import cn.erika.cli.service.ApplicationContext;
 import cn.erika.cli.service.CliService;
 import cn.erika.socket.handler.impl.ServerHandler;
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ public class ListenService implements CliService {
                 int port = Integer.parseInt(args[2]);
                 server = new ServerHandler(address, port);
             }
+            ApplicationContext.add(ServerHandler.class, server);
             new Thread(server).start();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
