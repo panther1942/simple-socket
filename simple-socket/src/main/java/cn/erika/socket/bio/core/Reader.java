@@ -1,4 +1,4 @@
-package cn.erika.socket.core;
+package cn.erika.socket.bio.core;
 
 import cn.erika.util.compress.CompressException;
 import cn.erika.util.compress.GZIP;
@@ -67,7 +67,7 @@ class Reader {
                     default:
                         throw new CompressException("不支持的压缩格式");
                 }
-                handler.onMessage(socket, uncompressData);
+                handler.onMessage(socket, uncompressData, info);
                 info = null;
                 cache = null;
                 pos = 0;

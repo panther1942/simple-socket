@@ -1,17 +1,18 @@
 package cn.erika.socket.handler.impl;
 
-import cn.erika.socket.core.TcpSocket;
-import cn.erika.socket.handler.AbstractHandler;
-import cn.erika.socket.handler.Message;
-import cn.erika.socket.handler.StringDefine;
-import cn.erika.socket.service.ISocketService;
-import cn.erika.socket.service.NotFoundServiceException;
+import cn.erika.socket.Constant;
+import cn.erika.socket.bio.core.TcpSocket;
+import cn.erika.socket.bio.handler.AbstractHandler;
+import cn.erika.socket.bio.handler.Message;
+import cn.erika.socket.bio.service.ISocketService;
+import cn.erika.socket.bio.service.NotFoundServiceException;
+import cn.erika.socket.handler.IClientHandler;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Scanner;
 
-public class ClientHandler extends AbstractHandler {
+public class ClientHandler extends AbstractHandler implements IClientHandler {
     private InetSocketAddress address;
     private TcpSocket socket;
 
@@ -52,7 +53,7 @@ public class ClientHandler extends AbstractHandler {
     public void onOpen(TcpSocket socket) {
         System.out.println("成功连接到服务器");
         try {
-            ISocketService service = getService(StringDefine.SEVR_PUBLIC_KEY);
+            ISocketService service = getService(Constant.SEVR_PUBLIC_KEY);
             service.client(this, socket, null);
         } catch (NotFoundServiceException e) {
             log.error(e.getMessage(), e);

@@ -1,8 +1,8 @@
-package cn.erika.socket.service;
+package cn.erika.socket.bio.service;
 
-import cn.erika.socket.core.TcpSocket;
-import cn.erika.socket.handler.AbstractHandler;
-import cn.erika.socket.handler.Message;
+import cn.erika.socket.bio.core.TcpSocket;
+import cn.erika.socket.bio.handler.AbstractHandler;
+import cn.erika.socket.bio.handler.Message;
 
 public interface ISocketService {
 

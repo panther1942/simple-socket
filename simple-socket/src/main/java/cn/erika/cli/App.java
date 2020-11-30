@@ -8,7 +8,7 @@ import cn.erika.cli.service.impl.client.DisconnectService;
 import cn.erika.cli.service.impl.server.DisplayClientListService;
 import cn.erika.cli.service.impl.server.ListenService;
 import cn.erika.cli.util.KeyboardReader;
-import cn.erika.socket.handler.StringDefine;
+import cn.erika.socket.Constant;
 import cn.erika.socket.handler.impl.ClientHandler;
 import cn.erika.socket.handler.impl.ServerHandler;
 import cn.erika.util.StringUtils;
@@ -62,7 +62,7 @@ public class App implements Runnable {
         log.debug("Running...");
         try {
             String line;
-            while ((line = reader.read()) != null && !StringDefine.EXIT.equalsIgnoreCase(line)) {
+            while ((line = reader.read()) != null && !Constant.EXIT.equalsIgnoreCase(line)) {
                 String[] command = StringUtils.getParam(line);
                 try {
                     if (command.length > 0) {

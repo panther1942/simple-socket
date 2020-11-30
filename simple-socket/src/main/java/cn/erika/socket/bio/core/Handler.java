@@ -1,4 +1,4 @@
-package cn.erika.socket.core;
+package cn.erika.socket.bio.core;
 
 /**
  * 规定一些处理器必须要做的动作
@@ -26,7 +26,7 @@ public interface Handler {
      * @param socket 数据源的socket对象
      * @param data   数据
      */
-    public void onMessage(TcpSocket socket, byte[] data);
+    public void onMessage(TcpSocket socket, byte[] data, DataInfo info);
 
     /**
      * 当需要关闭指定Socket连接的时候 调用此方法

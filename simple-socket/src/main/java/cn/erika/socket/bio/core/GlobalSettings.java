@@ -1,4 +1,4 @@
-package cn.erika.socket.core;
+package cn.erika.socket.bio.core;
 
 public class GlobalSettings {
     // 启用压缩

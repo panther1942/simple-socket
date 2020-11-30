@@ -1,10 +1,11 @@
 package cn.erika.socket.handler.impl;
 
-import cn.erika.socket.core.TcpSocket;
-import cn.erika.socket.handler.AbstractHandler;
-import cn.erika.socket.handler.Message;
-import cn.erika.socket.service.ISocketService;
-import cn.erika.socket.service.NotFoundServiceException;
+import cn.erika.socket.bio.core.TcpSocket;
+import cn.erika.socket.bio.handler.AbstractHandler;
+import cn.erika.socket.bio.handler.Message;
+import cn.erika.socket.bio.service.ISocketService;
+import cn.erika.socket.bio.service.NotFoundServiceException;
+import cn.erika.socket.handler.IServerHandler;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -14,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class ServerHandler extends AbstractHandler implements Runnable {
+public class ServerHandler extends AbstractHandler implements IServerHandler, Runnable {
     private ServerSocket server;
     private LinkManager linkManager;
 

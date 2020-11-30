@@ -1,4 +1,4 @@
-package cn.erika.socket.core;
+package cn.erika.socket.bio.core;
 
 import cn.erika.util.compress.CompressException;
 import cn.erika.util.compress.GZIP;

@@ -1,6 +1,6 @@
-package cn.erika.socket.handler;
+package cn.erika.socket;
 
-public class StringDefine {
+public class Constant {
     public static final String ENCRYPT = "encrypt";
     public static final String PUBLIC_KEY = "publicKey";
     public static final String PRIVATE_KEY = "privateKey";

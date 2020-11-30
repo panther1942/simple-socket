@@ -1,4 +1,4 @@
-package cn.erika.socket.core;
+package cn.erika.socket.bio.core;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -9,8 +9,8 @@ public class DataInfo implements Serializable {
 
     private Date timestamp;
     private Compress compress = Compress.NONE; // 0: none 1: gzip
-    private int len;
     private long pos;
+    private int len;
 
     public Date getTimestamp() {
         return timestamp;
@@ -28,20 +28,20 @@ public class DataInfo implements Serializable {
         this.compress = compress;
     }
 
-    public int getLen() {
-        return len;
-    }
-
-    public void setLen(int len) {
-        this.len = len;
-    }
-
     public long getPos() {
         return pos;
     }
 
     public void setPos(long pos) {
         this.pos = pos;
+    }
+
+    public int getLen() {
+        return len;
+    }
+
+    public void setLen(int len) {
+        this.len = len;
     }
 
     @Override

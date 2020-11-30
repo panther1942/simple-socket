@@ -1,9 +1,9 @@
-package cn.erika.socket.service.impl;
+package cn.erika.socket.bio.service.impl;
 
-import cn.erika.socket.core.TcpSocket;
-import cn.erika.socket.handler.AbstractHandler;
-import cn.erika.socket.handler.Message;
-import cn.erika.socket.service.ISocketService;
+import cn.erika.socket.bio.core.TcpSocket;
+import cn.erika.socket.bio.handler.AbstractHandler;
+import cn.erika.socket.bio.handler.Message;
+import cn.erika.socket.bio.service.ISocketService;
 
 public class TextService implements ISocketService {
     @Override
