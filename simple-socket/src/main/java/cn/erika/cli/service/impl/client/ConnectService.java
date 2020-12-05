@@ -8,6 +8,9 @@ import cn.erika.config.GlobalSettings;
 import cn.erika.socket.handler.IClient;
 import cn.erika.socket.handler.impl.BIOClient;
 
+/**
+ * 客户端连接服务器的方法
+ */
 @Component("connect")
 public class ConnectService implements CliService {
 

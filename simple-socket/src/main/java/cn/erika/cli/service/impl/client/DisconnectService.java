@@ -6,6 +6,9 @@ import cn.erika.cli.App;
 import cn.erika.cli.service.CliService;
 import cn.erika.socket.handler.IClient;
 
+/**
+ * 客户端断开连接的方法
+ */
 @Component("disconnect")
 public class DisconnectService implements CliService {
 

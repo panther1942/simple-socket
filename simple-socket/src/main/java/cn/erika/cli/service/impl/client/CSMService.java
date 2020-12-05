@@ -8,6 +8,9 @@ import cn.erika.socket.handler.IClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 客户端发文本信息的方法
+ */
 @Component("c_send")
 public class CSMService implements CliService {
     private Logger log = LoggerFactory.getLogger(this.getClass());

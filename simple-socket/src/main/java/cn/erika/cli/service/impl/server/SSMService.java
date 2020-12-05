@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+/**
+ * 服务器向客户端发送文本消息的方法
+ */
 @Component("s_send")
 public class SSMService implements CliService {
     private Logger log = LoggerFactory.getLogger(this.getClass());

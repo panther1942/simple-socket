@@ -11,6 +11,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+/**
+ * 服务器启动监听端口的方法
+ */
 @Component("listen")
 public class ListenService implements CliService {
     private Logger log = LoggerFactory.getLogger(this.getClass());

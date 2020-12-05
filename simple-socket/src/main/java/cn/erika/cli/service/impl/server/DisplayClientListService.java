@@ -8,6 +8,9 @@ import cn.erika.socket.handler.IServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 服务器显示接入连接的方法
+ */
 @Component("display")
 public class DisplayClientListService implements CliService {
     private Logger log = LoggerFactory.getLogger(this.getClass());
