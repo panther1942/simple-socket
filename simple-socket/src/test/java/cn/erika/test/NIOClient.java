@@ -1,4 +1,4 @@
-package cn.erika.socket.handler.impl.test;
+package cn.erika.test;
 
 import cn.erika.cli.util.KeyboardReader;
 
