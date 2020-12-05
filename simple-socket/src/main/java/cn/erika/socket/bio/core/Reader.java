@@ -1,7 +1,7 @@
 package cn.erika.socket.bio.core;
 
+import cn.erika.socket.common.component.DataInfo;
 import cn.erika.util.compress.CompressException;
-import cn.erika.util.compress.GZIP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,15 +13,13 @@ import java.util.Date;
 class Reader {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private Handler handler;
     private Charset charset;
 
     private DataInfo info;
     private byte[] cache;
     private int pos = 0;
 
-    public Reader(Handler handler, Charset charset) {
-        this.handler = handler;
+    public Reader(Charset charset) {
         this.charset = charset;
     }
 
@@ -56,18 +54,7 @@ class Reader {
                 tmp = tmp2;
             }
             if (pos == cache.length && (pos > 0 || info.getLen() == 0)) {
-                byte[] uncompressData = null;
-                switch (info.getCompress()) {
-                    case NONE:
-                        uncompressData = cache;
-                        break;
-                    case GZIP:
-                        uncompressData = GZIP.uncompress(cache);
-                        break;
-                    default:
-                        throw new CompressException("不支持的压缩格式");
-                }
-                handler.onMessage(socket, uncompressData, info);
+                socket.receive(info, cache);
                 info = null;
                 cache = null;
                 pos = 0;

@@ -1,0 +1,28 @@
+package cn.erika.cli.service.impl.client;
+
+import cn.erika.aop.annotation.Component;
+import cn.erika.aop.exception.BeanException;
+import cn.erika.cli.App;
+import cn.erika.cli.service.CliService;
+import cn.erika.socket.handler.IClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Component("c_send")
+public class CSMService implements CliService {
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
+    @Override
+    public void service(String[] args) throws BeanException {
+        IClient client = App.getBean(IClient.class);
+        if (client != null) {
+            StringBuffer message = new StringBuffer();
+            for (int i = 1; i < args.length; i++) {
+                message.append(args[i]);
+            }
+            client.send(message.toString());
+        } else {
+            log.error("客户端未启动");
+        }
+    }
+}

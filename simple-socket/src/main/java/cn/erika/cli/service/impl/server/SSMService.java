@@ -8,17 +8,22 @@ import cn.erika.socket.handler.IServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component("display")
-public class DisplayClientListService implements CliService {
+import java.io.IOException;
+
+@Component("s_send")
+public class SSMService implements CliService {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Override
-    public void service(String[] args) throws BeanException {
+    public void service(String[] args) throws IOException, BeanException {
         IServer server = App.getBean(IServer.class);
+        StringBuffer message = new StringBuffer();
         if (server != null) {
-            server.displayLink();
-        } else {
-            log.error("服务器未启动");
+            String uid = args[1];
+            for (int i = 2; i < args.length; i++) {
+                message.append(args[i]);
+            }
+            server.send(uid, message.toString());
         }
     }
 }

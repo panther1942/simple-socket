@@ -1,14 +1,17 @@
 package cn.erika.cli.service.impl.client;
 
-import cn.erika.cli.service.ApplicationContext;
+import cn.erika.aop.annotation.Component;
+import cn.erika.aop.exception.BeanException;
+import cn.erika.cli.App;
 import cn.erika.cli.service.CliService;
-import cn.erika.socket.handler.impl.ClientHandler;
+import cn.erika.socket.handler.IClient;
 
+@Component("disconnect")
 public class DisconnectService implements CliService {
 
     @Override
-    public void service(String[] args) {
-        ClientHandler client = ApplicationContext.get(ClientHandler.class);
+    public void service(String[] args) throws BeanException {
+        IClient client = App.getBean(IClient.class);
         if (client != null) {
             client.close();
         }

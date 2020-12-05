@@ -1,31 +1,32 @@
 package cn.erika.cli.service.impl.server;
 
-import cn.erika.cli.service.ApplicationContext;
+import cn.erika.aop.annotation.Component;
+import cn.erika.cli.App;
 import cn.erika.cli.service.CliService;
-import cn.erika.socket.handler.impl.ServerHandler;
+import cn.erika.config.GlobalSettings;
+import cn.erika.socket.handler.IServer;
+import cn.erika.socket.handler.impl.BIOServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+@Component("listen")
 public class ListenService implements CliService {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private static final String DEFAULT_ADDRESS = "localhost";
-    private static final int DEFAULT_PORT = 12345;
-
     @Override
     public void service(String[] args) {
-        ServerHandler server = null;
+        IServer server = null;
         try {
             if (args.length == 1) {
-                server = new ServerHandler(DEFAULT_ADDRESS, DEFAULT_PORT);
+                server = new BIOServer(GlobalSettings.DEFAULT_ADDRESS, GlobalSettings.DEFAULT_PORT);
             } else {
                 String address = args[1];
                 int port = Integer.parseInt(args[2]);
-                server = new ServerHandler(address, port);
+                server = new BIOServer(address, port);
             }
-            ApplicationContext.add(ServerHandler.class, server);
+            App.addBean(IServer.class, server);
             new Thread(server).start();
         } catch (IOException e) {
             log.error(e.getMessage(), e);

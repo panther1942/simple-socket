@@ -1,9 +1,8 @@
 package cn.erika.socket.bio.core;
 
+import cn.erika.socket.common.component.*;
+import cn.erika.config.Constant;
 import cn.erika.util.compress.CompressException;
-import cn.erika.util.compress.GZIP;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,16 +19,14 @@ import java.util.Map;
  * 作为Socket的包装类 用于增强Socket的功能
  * 需要一个TcpHandler提供功能支持
  */
-public class TcpSocket implements Runnable {
-    private Logger log = LoggerFactory.getLogger(this.getClass());
+public class TcpSocket implements BaseSocket, Runnable {
     // 持有的Socket对象 用来响应请求
     private Socket socket;
     // 持有的Reader对象 用来解析数据
     private Reader reader;
     // 持有的Handler对象 在连接建立后初始化连接属性和处理连接后的动作
     private Handler handler;
-    // 记录连接开始的时间
-    private Date startTime;
+    private Charset charset;
     // 记录连接的属性
     private Map<String, Object> attr = new HashMap<>();
 
@@ -38,14 +35,16 @@ public class TcpSocket implements Runnable {
 
     public TcpSocket(Socket socket, Handler handler, Charset charset) throws IOException {
         this.handler = handler;
-        this.reader = new Reader(handler, charset);
+        this.charset = charset;
+        this.reader = new Reader(charset);
         this.socket = socket;
         onEstablished();
     }
 
     public TcpSocket(SocketAddress address, Handler handler, Charset charset) throws IOException {
         this.handler = handler;
-        this.reader = new Reader(handler, charset);
+        this.charset = charset;
+        this.reader = new Reader(charset);
         this.socket = new Socket();
         this.socket.setReuseAddress(true);
         this.socket.connect(address);
@@ -53,7 +52,7 @@ public class TcpSocket implements Runnable {
     }
 
     private void onEstablished() throws IOException {
-        startTime = new Date();
+        set(Constant.LINK_TIME, new Date());
         handler.init(this);
         in = socket.getInputStream();
         out = socket.getOutputStream();
@@ -81,11 +80,7 @@ public class TcpSocket implements Runnable {
             } catch (CompressException e) {
                 handler.onError(e.getMessage(), e);
             } finally {
-                try {
-                    close();
-                } catch (IOException e) {
-                    handler.onError("断开连接的过程中发生错误", e);
-                }
+                close();
             }
         } catch (SocketException e) {
             handler.onError(e.getMessage(), e);
@@ -99,7 +94,7 @@ public class TcpSocket implements Runnable {
      * @param len  发送数据的实际长度
      * @throws IOException 如果传输过程发生错误
      */
-    private void write(byte[] data, int len) throws IOException {
+    public void write(byte[] data, int len) throws IOException {
         int pos = 0;
         // 这里用pos标记发送数据的长度 每次发送缓冲区大小个字节 直到pos等于数据长度len
         // 缓冲区的大小从socket获取（发送区的大小）
@@ -112,40 +107,19 @@ public class TcpSocket implements Runnable {
         out.flush();
     }
 
-    public synchronized void send(byte[] data) throws IOException {
-        if (!socket.isClosed()) {
-            try {
-                DataInfo info = new DataInfo();
-                info.setTimestamp(new Date());
-                if (GlobalSettings.enableCompress) {
-                    switch (GlobalSettings.compressMethod) {
-                        case NONE:
-                            info.setCompress(DataInfo.Compress.NONE);
-                            break;
-                        case GZIP:
-                            info.setCompress(DataInfo.Compress.GZIP);
-                            data = GZIP.compress(data);
-                            break;
-                        default:
-                            throw new CompressException("不支持的压缩格式");
-//                log.debug("原始长度: " + data.length + " 压缩后: " + compressData.length + " 压缩比: " + ((float) compressData.length) / ((float) data.length));
-                    }
-                }
-                info.setPos(0);
-                info.setLen(data.length);
-                write(info.toString().getBytes(), info.toString().length());
-                write(data, data.length);
-            } catch (CompressException e) {
-                throw new IOException(e.getMessage(), e);
-            }
-        } else {
-            throw new IOException("连接已被关闭: " + socket.getRemoteSocketAddress());
-        }
+    @Override
+    public boolean isClosed() {
+        return this.socket.isClosed();
     }
 
-    public void close() throws IOException {
-        if (!socket.isClosed()) {
-            socket.close();
+    @Override
+    public void close() {
+        try {
+            if (!socket.isClosed()) {
+                socket.close();
+            }
+        } catch (IOException e) {
+            handler.onError(e.getMessage(), e);
         }
     }
 
@@ -154,32 +128,50 @@ public class TcpSocket implements Runnable {
      *
      * @return 包含的Socket对象
      */
+    @Override
     public Socket getSocket() {
         return this.socket;
     }
 
-    // 获取连接开始时间
-    public Date linkTime() {
-        return this.startTime;
-    }
-
     // 设置连接额外属性
     @SuppressWarnings("unchecked")
+    @Override
     public <T> T set(String k, Object v) {
         return (T) this.attr.put(k, v);
     }
 
     // 获取连接额外属性
     @SuppressWarnings("unchecked")
+    @Override
     public <T> T get(String k) {
         return (T) this.attr.get(k);
     }
 
     // 移除连接额外属性
     @SuppressWarnings("unchecked")
+    @Override
     public <T> T remove(String k) {
         return (T) this.attr.remove(k);
     }
 
+    @Override
+    public synchronized void send(Message message) {
+        try {
+            DataInfo info = Processor.beforeSend(this, message);
+            write(info.toString().getBytes(charset), info.toString().length());
+            write(info.getData(), info.getData().length);
+        } catch (Exception e) {
+            handler.onError(e.getMessage(), e);
+        }
+    }
 
+    @Override
+    public void receive(DataInfo info, byte[] data) {
+        try {
+            Message message = Processor.beforeRead(this, info, data);
+            handler.onMessage(this, info, message);
+        } catch (Exception e) {
+            handler.onError(e.getMessage(), e);
+        }
+    }
 }

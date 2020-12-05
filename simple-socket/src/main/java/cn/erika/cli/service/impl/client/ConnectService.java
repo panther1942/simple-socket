@@ -1,28 +1,30 @@
 package cn.erika.cli.service.impl.client;
 
-import cn.erika.cli.service.ApplicationContext;
+import cn.erika.aop.annotation.Component;
+import cn.erika.aop.exception.BeanException;
+import cn.erika.cli.App;
 import cn.erika.cli.service.CliService;
-import cn.erika.socket.handler.impl.ClientHandler;
+import cn.erika.config.GlobalSettings;
+import cn.erika.socket.handler.IClient;
+import cn.erika.socket.handler.impl.BIOClient;
 
+@Component("connect")
 public class ConnectService implements CliService {
-    private static final String DEFAULT_ADDRESS = "localhost";
-    private static final int DEFAULT_PORT = 12345;
-
 
     @Override
-    public void service(String[] args) {
-        ClientHandler client = ApplicationContext.get(ClientHandler.class);
+    public void service(String[] args) throws BeanException {
+        IClient client = App.getBean(IClient.class);
         if (client != null) {
             client.close();
         }
         if (args.length == 1) {
-            client = new ClientHandler(DEFAULT_ADDRESS, DEFAULT_PORT);
-        }else{
+            client = new BIOClient(GlobalSettings.DEFAULT_ADDRESS, GlobalSettings.DEFAULT_PORT);
+        } else {
             String address = args[1];
             int port = Integer.parseInt(args[2]);
-            client = new ClientHandler(address, port);
+            client = new BIOClient(address, port);
         }
         client.connect();
-        ApplicationContext.add(ClientHandler.class, client);
+        App.addBean(IClient.class, client);
     }
 }

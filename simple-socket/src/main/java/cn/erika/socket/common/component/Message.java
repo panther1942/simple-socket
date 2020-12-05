@@ -1,11 +1,9 @@
-package cn.erika.socket.bio.handler;
+package cn.erika.socket.common.component;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import cn.erika.config.Constant;
 
 import java.io.Serializable;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,30 +35,37 @@ public class Message implements Serializable {
     }
 
     private Map<Head, Object> head = new HashMap<>();
-    private byte[] payload;
+    private Map<String, Object> payload = new HashMap<>();
     private byte[] sign;
 
     public Message() {
     }
 
-    public Message(String serviceName, byte[] data) {
+    public Message(String serviceName) {
         this.head.put(Head.Order, serviceName);
-        this.payload = data;
     }
 
-    public Message(String serviceName, String data) {
-        this.head.put(Head.Order, serviceName);
-        this.payload = data.getBytes(CHARSET);
+    public Message(String serviceName, Map<String, Object> payload) {
+        this(serviceName);
+        this.payload = payload;
     }
 
-    public Message(String serviceName, Object data) {
-        this.head.put(Head.Order, serviceName);
-        this.payload = JSON.toJSONBytes(data);
+    public Message(String serviceName, String message) {
+        this(serviceName);
+        this.payload.put(Constant.MESSAGE, message);
     }
 
-    public Message(String serviceName, Map<String, Object> data) {
-        this.head.put(Head.Order, serviceName);
-        this.payload = new JSONObject(data).toJSONString().getBytes(CHARSET);
+    public void add(String key, Object value) {
+        this.payload.put(key, value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T get(String key) {
+        return (T) payload.get(key);
+    }
+
+    public void set(Map<String, Object> payload) {
+        this.payload = payload;
     }
 
     public void addHead(Head key, Object value) {
@@ -85,11 +90,11 @@ public class Message implements Serializable {
         this.head = head;
     }
 
-    public byte[] getPayload() {
+    public Map<String, Object> getPayload() {
         return payload;
     }
 
-    public void setPayload(byte[] payload) {
+    public void setPayload(Map<String, Object> payload) {
         this.payload = payload;
     }
 
@@ -105,7 +110,7 @@ public class Message implements Serializable {
     public String toString() {
         return "Message{" +
                 "head=" + head +
-                ", payload=" + Arrays.toString(payload) +
+                ", payload=" + payload +
                 '}';
     }
 }

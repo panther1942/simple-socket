@@ -50,6 +50,9 @@ public class Security {
         }
 
         public static Type getByName(String name) {
+            if (name == null) {
+                return null;
+            }
             for (Type type : Type.values()) {
                 if (type.getValue().equals(name)) {
                     return type;

@@ -1,11 +1,11 @@
 package cn.erika.socket.handler.impl;
 
+import cn.erika.socket.bio.core.AbstractHandler;
 import cn.erika.socket.bio.core.TcpSocket;
-import cn.erika.socket.bio.handler.AbstractHandler;
-import cn.erika.socket.bio.handler.Message;
-import cn.erika.socket.bio.service.ISocketService;
-import cn.erika.socket.bio.service.NotFoundServiceException;
-import cn.erika.socket.handler.IServerHandler;
+import cn.erika.socket.common.component.BaseSocket;
+import cn.erika.socket.common.component.Message;
+import cn.erika.config.Constant;
+import cn.erika.socket.handler.IServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -15,11 +15,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class ServerHandler extends AbstractHandler implements IServerHandler, Runnable {
+public class BIOServer extends AbstractHandler implements IServer, Runnable {
     private ServerSocket server;
     private LinkManager linkManager;
 
-    public ServerHandler(String host, int port) throws IOException {
+    public BIOServer(String host, int port) throws IOException {
         InetSocketAddress address = new InetSocketAddress(host, port);
         this.linkManager = new LinkManager();
         this.server = new ServerSocket();
@@ -35,7 +35,7 @@ public class ServerHandler extends AbstractHandler implements IServerHandler, Ru
         String address = "localhost";
         int port = 12345;
         try {
-            new Thread(new ServerHandler(address, port)).start();
+            new Thread(new BIOServer(address, port)).start();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -53,23 +53,29 @@ public class ServerHandler extends AbstractHandler implements IServerHandler, Ru
         System.out.println("运行中断");
     }
 
-    public void send(String uid, String message) throws SocketException {
-        TcpSocket socket = linkManager.getLink(uid);
-        if (socket == null) {
-            throw new SocketException("连接不存在");
-        } else {
-            sendMessage(socket, new Message("text", message));
+    @Override
+    public void send(String uid, String message) {
+        BaseSocket socket = linkManager.getLink(uid);
+        try {
+            if (socket == null) {
+                throw new SocketException("连接不存在");
+            } else {
+                socket.send(new Message(Constant.TEXT, message));
+            }
+        } catch (SocketException e) {
+            log.warn("UID: " + uid + " 不存在");
         }
     }
 
     @Override
-    public void onOpen(TcpSocket socket) {
+    public void onOpen(BaseSocket socket) {
         linkManager.addLink(socket);
         log.info("New client link: " + socket.getSocket().getRemoteSocketAddress());
+        socket.set(Constant.TYPE, Constant.SERVER);
     }
 
     @Override
-    public void onClose(TcpSocket socket) {
+    public void onClose(BaseSocket socket) {
         close(socket);
     }
 
@@ -78,6 +84,7 @@ public class ServerHandler extends AbstractHandler implements IServerHandler, Ru
         System.err.println(message);
     }
 
+    @Override
     public void close() {
         try {
             if (!server.isClosed()) {
@@ -89,63 +96,46 @@ public class ServerHandler extends AbstractHandler implements IServerHandler, Ru
     }
 
     @Override
-    public void deal(TcpSocket socket, Message message) {
-        String order = message.getHead(Message.Head.Order);
-        ISocketService service = null;
-        try {
-            service = getService(order);
-            service.server(this, socket, message);
-        } catch (NotFoundServiceException e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public void close(TcpSocket socket) {
+    public void close(BaseSocket socket) {
         System.out.println("客户端断开连接");
         if (linkManager.popLink(socket)) {
-            try {
-                sendMessage(socket, new Message("bye", "exit"));
-                socket.close();
-            } catch (SocketException e) {
-                log.debug("连接中断", e);
-            } catch (IOException e) {
-                onError(e.getMessage(), e);
-            }
+            socket.send(new Message(Constant.EXIT, "exit"));
+            socket.close();
         } else {
             System.err.println("未知异常");
         }
     }
 
+    @Override
     public void displayLink() {
         for (String id : linkManager.linkList.keySet()) {
             System.out.println("id: " + id + " From: " + linkManager.getLink(id).getSocket().getRemoteSocketAddress());
         }
     }
 
-    public TcpSocket getSocket(String uid) {
+    public BaseSocket getSocket(String uid) {
         return linkManager.getLink(uid);
     }
 
     private class LinkManager {
-        private Map<String, TcpSocket> linkList = new HashMap<>();
+        private Map<String, BaseSocket> linkList = new HashMap<>();
 
-        TcpSocket addLink(TcpSocket socket) {
+        BaseSocket addLink(BaseSocket socket) {
             String uuid = UUID.randomUUID().toString();
             socket.set("id", uuid);
             linkList.put(uuid, socket);
             return socket;
         }
 
-        TcpSocket getLink(String uid) {
+        BaseSocket getLink(String uid) {
             return linkList.get(uid);
         }
 
-        TcpSocket delLink(String uid) {
+        BaseSocket delLink(String uid) {
             return linkList.remove(uid);
         }
 
-        String isExistLink(TcpSocket socket) {
+        String isExistLink(BaseSocket socket) {
             for (String uid : linkList.keySet()) {
                 if (socket.equals(linkList.get(uid))) {
                     return uid;
@@ -154,7 +144,7 @@ public class ServerHandler extends AbstractHandler implements IServerHandler, Ru
             return null;
         }
 
-        boolean popLink(TcpSocket socket) {
+        boolean popLink(BaseSocket socket) {
             String uid = isExistLink(socket);
             if (uid != null) {
                 delLink(uid);

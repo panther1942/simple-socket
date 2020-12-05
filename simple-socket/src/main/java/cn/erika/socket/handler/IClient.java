@@ -22,5 +22,11 @@ package cn.erika.socket.handler;
 // 或者就是map的K-V对 这样也方便 你有啥就在key上做命名规范好了
 // 好 就定K-V对的map了 反正KEY全部放常量表（Constant类）里
 // 困了 睡!
-public interface IClientHandler {
+public interface IClient {
+
+    public void connect();
+
+    public void close();
+
+    public void send(String message);
 }
