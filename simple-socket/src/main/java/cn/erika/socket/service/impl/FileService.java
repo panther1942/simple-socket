@@ -1,11 +1,12 @@
-package cn.erika.socket.bio.service.impl;
+package cn.erika.socket.service.impl;
 
 import cn.erika.config.Constant;
-import cn.erika.socket.bio.core.AbstractHandler;
-import cn.erika.socket.bio.core.TcpSocket;
+import cn.erika.socket.handler.impl.AbstractHandler;
+import cn.erika.socket.core.TcpSocket;
 import cn.erika.socket.common.component.BaseSocket;
 import cn.erika.socket.common.component.Message;
 import cn.erika.socket.common.exception.FileException;
+import cn.erika.socket.service.ISocketService;
 import cn.erika.util.security.MessageDigest;
 import cn.erika.util.security.SecurityException;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ import java.util.HashMap;
 AOP搞起来也是为了这个
 
  */
-public class FileService {
+public class FileService implements ISocketService{
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     public void uploadRequest(TcpSocket socket, File file, String filename) throws IOException, FileException {
@@ -54,7 +55,7 @@ public class FileService {
 
             }
 
-
+            @Override
             public void onReady(BaseSocket socket) {
                 try {
                     MessageDigest.Type algorithmSign = MessageDigest.Type.SHA384;
@@ -84,11 +85,16 @@ public class FileService {
             public void onError(String message, Throwable error) {
 
             }
-
-            @Override
-            public void close(BaseSocket socket) {
-
-            }
         };
+    }
+
+    @Override
+    public void client(BaseSocket socket, Message message) {
+
+    }
+
+    @Override
+    public void server(BaseSocket socket, Message message) {
+
     }
 }

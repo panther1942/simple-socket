@@ -12,24 +12,11 @@ public class Message implements Serializable {
     private static final Charset CHARSET = Charset.forName("UTF-8");
 
     public enum Head {
-        Order("title"),
-        Type("type"),
-        Compress("compress");
+        Order("title"),;
 
         private String value;
 
         Head(String value) {
-            this.value = value;
-        }
-    }
-
-    public enum Compress {
-        None(0),
-        GZIP(1),;
-
-        private int value;
-
-        Compress(int value) {
             this.value = value;
         }
     }

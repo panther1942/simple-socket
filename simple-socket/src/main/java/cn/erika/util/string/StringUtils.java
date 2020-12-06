@@ -1,4 +1,4 @@
-package cn.erika.util;
+package cn.erika.util.string;
 
 import java.util.ArrayList;
 import java.util.List;

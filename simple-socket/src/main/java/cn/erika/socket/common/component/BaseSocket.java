@@ -7,6 +7,8 @@ public interface BaseSocket {
 
     public void receive(DataInfo info, byte[] data);
 
+    public void ready();
+
     public Socket getSocket();
 
     public boolean isClosed();

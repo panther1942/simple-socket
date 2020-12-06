@@ -1,6 +1,6 @@
 package cn.erika.util.security;
 
-import cn.erika.util.StringUtils;
+import cn.erika.util.string.StringUtils;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;

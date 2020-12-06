@@ -1,4 +1,4 @@
-package cn.erika.util;
+package cn.erika.util.string;
 
 public class ConsoleUtils {
 

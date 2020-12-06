@@ -1,4 +1,4 @@
-package cn.erika.socket.bio.core;
+package cn.erika.socket.core;
 
 import cn.erika.socket.common.component.DataInfo;
 import cn.erika.util.compress.CompressException;
@@ -10,7 +10,7 @@ import java.nio.charset.Charset;
 import java.util.Date;
 
 // 根据自定协议实现的一个处理数据的类
-class Reader {
+class TcpReader {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     private Charset charset;
@@ -19,7 +19,7 @@ class Reader {
     private byte[] cache;
     private int pos = 0;
 
-    public Reader(Charset charset) {
+    public TcpReader(Charset charset) {
         this.charset = charset;
     }
 

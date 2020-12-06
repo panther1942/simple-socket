@@ -4,11 +4,11 @@ import cn.erika.aop.annotation.PackageScan;
 import cn.erika.aop.component.SocketApplication;
 import cn.erika.aop.exception.BeanException;
 import cn.erika.cli.service.CliService;
-import cn.erika.cli.util.KeyboardReader;
+import cn.erika.util.string.KeyboardReader;
 import cn.erika.config.Constant;
 import cn.erika.socket.handler.IClient;
 import cn.erika.socket.handler.IServer;
-import cn.erika.util.StringUtils;
+import cn.erika.util.string.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

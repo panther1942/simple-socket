@@ -1,6 +1,6 @@
 package cn.erika.test;
 
-import cn.erika.cli.util.KeyboardReader;
+import cn.erika.util.string.KeyboardReader;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

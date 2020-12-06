@@ -14,6 +14,7 @@ public class Constant {
 
     public static final String PUBLIC_KEY = "publicKey";
     public static final String PRIVATE_KEY = "privateKey";
+    public static final String SESSION_TOKEN = "sessionToken";
 
     public static final String ENCRYPT_TYPE = "encryptType";
     public static final String ENCRYPT_CODE = "encryptCode";
@@ -34,7 +35,9 @@ public class Constant {
     public static final String SRV_EXCHANGE_KEY = "exchangeKey";
     public static final String SRV_EXCHANGE_PASSWORD = "exchangePassword";
     public static final String SRV_EXCHANGE_RESULT = "encryptResult";
+    public static final String SRV_EXCHANGE_TOKEN = "exchangeToken";
     public static final String SRV_TEXT = "text";
-    public static final String SRV_UPLOAD_REQUEST = "uploadFile";
+    public static final String SRV_UPLOAD_REQUEST = "uploadFileRequest";
+    public static final String SRV_UPLOAD = "uploadFile";
     public static final String SRV_LOGIN = "login";
 }

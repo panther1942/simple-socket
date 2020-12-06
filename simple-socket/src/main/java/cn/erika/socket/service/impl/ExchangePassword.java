@@ -1,12 +1,12 @@
-package cn.erika.socket.bio.service.impl;
+package cn.erika.socket.service.impl;
 
 import cn.erika.aop.annotation.Component;
-import cn.erika.socket.bio.service.ISocketService;
+import cn.erika.socket.service.ISocketService;
 import cn.erika.socket.common.component.BaseSocket;
 import cn.erika.socket.common.component.Message;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
-import cn.erika.util.StringUtils;
+import cn.erika.util.string.StringUtils;
 import cn.erika.util.security.Security;
 import cn.erika.util.security.SecurityException;
 import org.slf4j.Logger;

@@ -1,5 +1,8 @@
 package cn.erika.socket.handler;
 
+import cn.erika.socket.common.component.BaseSocket;
+import cn.erika.socket.common.exception.TokenException;
+
 public interface IServer extends Runnable {
 
     public void close();
@@ -7,4 +10,8 @@ public interface IServer extends Runnable {
     public void displayLink();
 
     public void send(String uid, String message);
+
+    public void addToken(BaseSocket socket, String token) throws TokenException;
+
+    public void checkToken(String token, String publicKey) throws TokenException;
 }

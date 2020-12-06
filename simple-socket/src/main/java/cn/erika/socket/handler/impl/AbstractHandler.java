@@ -1,4 +1,4 @@
-package cn.erika.socket.bio.core;
+package cn.erika.socket.handler.impl;
 
 import cn.erika.aop.exception.BeanException;
 import cn.erika.cli.App;
@@ -37,6 +37,11 @@ public abstract class AbstractHandler implements Handler {
     }
 
     @Override
+    public void onReady(BaseSocket socket) {
+        log.info("通讯就绪");
+    }
+
+    @Override
     public void onMessage(BaseSocket socket, DataInfo info, Message message) {
         try {
             if (!Constant.EXIT.equalsIgnoreCase(message.getHead(Message.Head.Order))) {
@@ -50,6 +55,4 @@ public abstract class AbstractHandler implements Handler {
             log.error(e.getMessage(), e);
         }
     }
-
-    public abstract void close(BaseSocket socket);
 }

@@ -1,7 +1,7 @@
 package cn.erika.socket.handler.impl;
 
-import cn.erika.socket.bio.core.AbstractHandler;
-import cn.erika.socket.bio.core.TcpSocket;
+import cn.erika.socket.common.exception.TokenException;
+import cn.erika.socket.core.TcpSocket;
 import cn.erika.socket.common.component.BaseSocket;
 import cn.erika.socket.common.component.Message;
 import cn.erika.config.Constant;
@@ -12,12 +12,14 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.SocketException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class BIOServer extends AbstractHandler implements IServer, Runnable {
     private ServerSocket server;
     private LinkManager linkManager;
+    private Map<String, BaseSocket> tokenList = new LinkedHashMap<>();
 
     public BIOServer(String host, int port) throws IOException {
         InetSocketAddress address = new InetSocketAddress(host, port);
@@ -95,9 +97,7 @@ public class BIOServer extends AbstractHandler implements IServer, Runnable {
         }
     }
 
-    @Override
     public void close(BaseSocket socket) {
-        System.out.println("客户端断开连接");
         if (linkManager.popLink(socket)) {
             socket.send(new Message(Constant.EXIT, "exit"));
             socket.close();
@@ -113,8 +113,28 @@ public class BIOServer extends AbstractHandler implements IServer, Runnable {
         }
     }
 
-    public BaseSocket getSocket(String uid) {
-        return linkManager.getLink(uid);
+    @Override
+    public void addToken(BaseSocket socket, String token) throws TokenException {
+        if (!token.contains(token)) {
+            tokenList.put(token, socket);
+        } else {
+            throw new TokenException("存在相同的token");
+        }
+    }
+
+    @Override
+    public void checkToken(String token, String publicKey) throws TokenException {
+        BaseSocket socket = tokenList.get(token);
+        if (socket == null) {
+            throw new TokenException("token无效");
+        } else {
+            String originKey = socket.get(Constant.PUBLIC_KEY);
+            if (originKey.equalsIgnoreCase(publicKey)) {
+                tokenList.remove(token);
+            } else {
+                throw new TokenException("token不匹配");
+            }
+        }
     }
 
     private class LinkManager {

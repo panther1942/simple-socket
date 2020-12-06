@@ -4,7 +4,7 @@ import cn.erika.aop.annotation.Component;
 import cn.erika.aop.exception.BeanException;
 import cn.erika.aop.scan.PackageScanner;
 import cn.erika.aop.scan.PackageScannerHandler;
-import cn.erika.socket.bio.service.ISocketService;
+import cn.erika.socket.service.ISocketService;
 import cn.erika.socket.common.component.BaseSocket;
 import cn.erika.socket.common.component.Message;
 import cn.erika.config.Constant;

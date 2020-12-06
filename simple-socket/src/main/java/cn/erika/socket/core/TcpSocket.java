@@ -1,5 +1,6 @@
-package cn.erika.socket.bio.core;
+package cn.erika.socket.core;
 
+import cn.erika.aop.exception.BeanException;
 import cn.erika.socket.common.component.*;
 import cn.erika.config.Constant;
 import cn.erika.util.compress.CompressException;
@@ -23,7 +24,7 @@ public class TcpSocket implements BaseSocket, Runnable {
     // 持有的Socket对象 用来响应请求
     private Socket socket;
     // 持有的Reader对象 用来解析数据
-    private Reader reader;
+    private TcpReader reader;
     // 持有的Handler对象 在连接建立后初始化连接属性和处理连接后的动作
     private Handler handler;
     private Charset charset;
@@ -36,7 +37,7 @@ public class TcpSocket implements BaseSocket, Runnable {
     public TcpSocket(Socket socket, Handler handler, Charset charset) throws IOException {
         this.handler = handler;
         this.charset = charset;
-        this.reader = new Reader(charset);
+        this.reader = new TcpReader(charset);
         this.socket = socket;
         onEstablished();
     }
@@ -44,7 +45,7 @@ public class TcpSocket implements BaseSocket, Runnable {
     public TcpSocket(SocketAddress address, Handler handler, Charset charset) throws IOException {
         this.handler = handler;
         this.charset = charset;
-        this.reader = new Reader(charset);
+        this.reader = new TcpReader(charset);
         this.socket = new Socket();
         this.socket.setReuseAddress(true);
         this.socket.connect(address);
@@ -59,7 +60,11 @@ public class TcpSocket implements BaseSocket, Runnable {
         Thread t = new Thread(this);
         t.setDaemon(true);
         t.start();
-        handler.onOpen(this);
+        try {
+            handler.onOpen(this);
+        } catch (BeanException e) {
+            handler.onError(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -173,5 +178,10 @@ public class TcpSocket implements BaseSocket, Runnable {
         } catch (Exception e) {
             handler.onError(e.getMessage(), e);
         }
+    }
+
+    @Override
+    public void ready() {
+        handler.onReady(this);
     }
 }

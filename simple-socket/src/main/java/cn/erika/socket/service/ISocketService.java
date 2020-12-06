@@ -1,7 +1,6 @@
-package cn.erika.socket.bio.service;
+package cn.erika.socket.service;
 
 import cn.erika.socket.common.component.BaseSocket;
-import cn.erika.socket.common.component.Handler;
 import cn.erika.socket.common.component.Message;
 
 public interface ISocketService {
