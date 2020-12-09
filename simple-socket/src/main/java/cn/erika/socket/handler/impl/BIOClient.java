@@ -2,10 +2,10 @@ package cn.erika.socket.handler.impl;
 
 import cn.erika.aop.exception.BeanException;
 import cn.erika.cli.App;
-import cn.erika.socket.core.TcpSocket;
+import cn.erika.config.Constant;
 import cn.erika.socket.common.component.BaseSocket;
 import cn.erika.socket.common.component.Message;
-import cn.erika.config.Constant;
+import cn.erika.socket.core.TcpSocket;
 import cn.erika.socket.handler.IClient;
 
 import java.io.IOException;
@@ -30,8 +30,13 @@ public class BIOClient extends AbstractHandler implements IClient {
 
     @Override
     public void send(String message) {
-        Message msg = new Message(Constant.TEXT, message);
+        Message msg = new Message(Constant.SRV_TEXT, message);
         socket.send(msg);
+    }
+
+    @Override
+    public void upload(String filepath, String filename) throws BeanException {
+        App.execute(socket, Constant.SRV_PRE_UPLOAD, socket, null);
     }
 
     @Override

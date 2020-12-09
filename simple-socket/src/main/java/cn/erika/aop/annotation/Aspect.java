@@ -1,6 +1,6 @@
 package cn.erika.aop.annotation;
 
-import cn.erika.aop.bean.Advice;
+import cn.erika.aop.component.Advice;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

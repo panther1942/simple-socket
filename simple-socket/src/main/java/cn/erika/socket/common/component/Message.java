@@ -4,7 +4,7 @@ import cn.erika.config.Constant;
 
 import java.io.Serializable;
 import java.nio.charset.Charset;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Message implements Serializable {
@@ -21,8 +21,8 @@ public class Message implements Serializable {
         }
     }
 
-    private Map<Head, Object> head = new HashMap<>();
-    private Map<String, Object> payload = new HashMap<>();
+    private Map<Head, Object> head = new LinkedHashMap<>();
+    private Map<String, Object> payload = new LinkedHashMap<>();
     private byte[] sign;
 
     public Message() {

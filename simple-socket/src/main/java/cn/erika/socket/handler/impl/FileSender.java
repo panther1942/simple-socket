@@ -5,31 +5,37 @@ import cn.erika.cli.App;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
 import cn.erika.socket.common.component.BaseSocket;
+import cn.erika.socket.common.component.Message;
 import cn.erika.socket.core.TcpSocket;
 
 import java.io.IOException;
 import java.net.SocketAddress;
 
 public class FileSender extends AbstractHandler {
-    private TcpSocket socket;
+    private Message message;
 
-    public FileSender(BaseSocket socket, String sessionToken) throws IOException {
+    public FileSender(BaseSocket socket, Message message) throws IOException {
         SocketAddress address = socket.getSocket().getRemoteSocketAddress();
-        this.socket = new TcpSocket(address, this, GlobalSettings.charset);
-        this.socket.set(Constant.SESSION_TOKEN, sessionToken);
-        this.socket.set(Constant.PUBLIC_KEY, socket.get(Constant.PUBLIC_KEY));
+        this.message = message;
+        TcpSocket fileSocket = new TcpSocket(address, this, GlobalSettings.charset);
+        fileSocket.set(Constant.PARENT_SOCKET, socket);
+        // 传输文件需要的信息包括 文件绝对路径，文件名，读取偏移量
     }
 
     @Override
     public void onOpen(BaseSocket socket) throws BeanException {
         socket.set(Constant.TYPE, Constant.CLIENT);
+        String sessionToken = message.get(Constant.SESSION_TOKEN);
+        socket.set(Constant.SESSION_TOKEN, sessionToken);
+        socket.set(Constant.PUBLIC_KEY, socket.get(Constant.PUBLIC_KEY));
+        socket.set(Constant.PRIVATE_KEY, socket.get(Constant.PRIVATE_KEY));
         App.execute(socket, Constant.SRV_EXCHANGE_TOKEN, socket, null);
     }
 
     @Override
     public void onReady(BaseSocket socket) {
         try {
-            App.execute(socket, Constant.SRV_UPLOAD, socket, null);
+            App.execute(socket, Constant.SRV_UPLOAD, socket, message);
         } catch (BeanException e) {
             onError(e.getMessage(), e);
         }
@@ -37,11 +43,11 @@ public class FileSender extends AbstractHandler {
 
     @Override
     public void onClose(BaseSocket socket) {
-
+        socket.close();
     }
 
     @Override
     public void onError(String message, Throwable error) {
-
+        log.error(message, error);
     }
 }

@@ -1,5 +1,7 @@
 package cn.erika.socket.handler;
 
+import cn.erika.aop.exception.BeanException;
+
 // cli或者web程序调用的服务全部放在这里 让handler去实现 这样管理方便
 // 计划添加NIO的实现类 好麻烦 让我再写几个NIO的demo熟悉一下
 // 因为一个客户端接入就要开一个线程 这样并发肯定上不去 读写效率也上不去 系统开销还大
@@ -29,4 +31,6 @@ public interface IClient {
     public void close();
 
     public void send(String message);
+
+    public void upload(String filepath, String filename) throws BeanException;
 }

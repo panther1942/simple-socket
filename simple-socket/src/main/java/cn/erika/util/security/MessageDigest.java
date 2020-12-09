@@ -72,6 +72,10 @@ public class MessageDigest {
             this.value = value;
         }
 
+        public String getValue() {
+            return value;
+        }
+
         public static Type getByName(String name) {
             for (Type type : Type.values()) {
                 if (type.value.equals(name)) {

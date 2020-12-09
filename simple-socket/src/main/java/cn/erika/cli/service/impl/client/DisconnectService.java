@@ -15,8 +15,6 @@ public class DisconnectService implements CliService {
     @Override
     public void service(String[] args) throws BeanException {
         IClient client = App.getBean(IClient.class);
-        if (client != null) {
-            client.close();
-        }
+        client.close();
     }
 }

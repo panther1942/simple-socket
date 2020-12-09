@@ -48,8 +48,6 @@ public class App extends SocketApplication implements Runnable {
                     log.error("命令错误: " + e.getMessage());
                 } catch (ArrayIndexOutOfBoundsException | StringIndexOutOfBoundsException e) {
                     log.error("语法错误: " + line);
-                } catch (IOException e) {
-                    log.error(e.getMessage(), e);
                 } catch (BeanException e) {
                     log.error(e.getMessage());
                 }

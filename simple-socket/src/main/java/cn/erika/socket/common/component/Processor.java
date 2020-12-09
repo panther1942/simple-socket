@@ -8,6 +8,8 @@ import cn.erika.util.security.RSA;
 import cn.erika.util.security.Security;
 import cn.erika.util.security.SecurityException;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.parser.Feature;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -43,11 +45,16 @@ public class Processor {
     }
 
     public static DataInfo beforeSend(BaseSocket socket, Message message) throws SecurityException, IOException {
+        // 因为可能直接拿上次用过的message，所以需要先去掉签名
+        message.setSign(null);
         boolean isEncrypt = socket.get(Constant.ENCRYPT);
         if (isEncrypt) {
-            message.setSign(RSA.sign(message.toString().getBytes(CHARSET), GlobalSettings.privateKey));
+            message.setSign(RSA.sign(JSON.toJSONBytes(message,
+                    SerializerFeature.SortField),
+                    GlobalSettings.privateKey));
         }
-        byte[] data = JSON.toJSONBytes(message);
+        byte[] data = JSON.toJSONBytes(message,
+                SerializerFeature.SortField);
         if (isEncrypt) {
             String password = socket.get(Constant.ENCRYPT_CODE);
             Security.Type passwordType = socket.get(Constant.ENCRYPT_TYPE);
@@ -73,12 +80,18 @@ public class Processor {
                 Security.Type passwordType = socket.get(Constant.ENCRYPT_TYPE);
                 data = Security.decrypt(data, passwordType, password);
             }
-            Message message = JSON.parseObject(new String(data, CHARSET), Message.class);
+            Message message = JSON.parseObject(new String(data, CHARSET), Message.class, Feature.OrderedField);
             if (isEncrypt) {
                 byte[] publicKey = socket.get(Constant.PUBLIC_KEY);
-                if (!RSA.verify(message.toString().getBytes(CHARSET), publicKey, message.getSign())) {
+                byte[] sign = message.getSign();
+                message.setSign(null);
+                if (!RSA.verify(JSON.toJSONBytes(message,
+//                        SerializerFeature.MapSortField,
+                        SerializerFeature.SortField),
+                        publicKey, sign)) {
                     throw new SecurityException("验签失败");
                 }
+                message.setSign(sign);
             }
             return message;
         } catch (CompressException e) {

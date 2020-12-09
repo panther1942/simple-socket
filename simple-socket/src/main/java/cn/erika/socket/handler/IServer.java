@@ -13,5 +13,5 @@ public interface IServer extends Runnable {
 
     public void addToken(BaseSocket socket, String token) throws TokenException;
 
-    public void checkToken(String token, String publicKey) throws TokenException;
+    public BaseSocket checkToken(String token, String publicKey) throws TokenException;
 }

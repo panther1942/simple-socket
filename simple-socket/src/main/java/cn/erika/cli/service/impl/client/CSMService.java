@@ -18,14 +18,10 @@ public class CSMService implements CliService {
     @Override
     public void service(String[] args) throws BeanException {
         IClient client = App.getBean(IClient.class);
-        if (client != null) {
-            StringBuffer message = new StringBuffer();
-            for (int i = 1; i < args.length; i++) {
-                message.append(args[i]);
-            }
-            client.send(message.toString());
-        } else {
-            log.error("客户端未启动");
+        StringBuffer message = new StringBuffer();
+        for (int i = 1; i < args.length; i++) {
+            message.append(args[i]);
         }
+        client.send(message.toString());
     }
 }

@@ -4,6 +4,7 @@ import cn.erika.aop.annotation.Component;
 import cn.erika.aop.exception.BeanException;
 import cn.erika.cli.App;
 import cn.erika.config.Constant;
+import cn.erika.config.GlobalSettings;
 import cn.erika.socket.common.component.BaseSocket;
 import cn.erika.socket.common.component.Message;
 import cn.erika.socket.common.exception.TokenException;
@@ -17,9 +18,9 @@ public class ExchangeToken implements ISocketService {
         if (message == null) {
             message = new Message(Constant.SRV_EXCHANGE_TOKEN);
             message.add(Constant.SESSION_TOKEN, socket.get(Constant.SESSION_TOKEN));
-            message.add(Constant.PUBLIC_KEY, socket.get(Constant.PUBLIC_KEY));
+            message.add(Constant.PUBLIC_KEY, GlobalSettings.publicKey);
             socket.send(message);
-        }else{
+        } else {
             socket.ready();
         }
     }
@@ -32,8 +33,8 @@ public class ExchangeToken implements ISocketService {
                 String token = message.get(Constant.SESSION_TOKEN);
                 String publicKey = message.get(Constant.PUBLIC_KEY);
                 try {
-                    server.checkToken(token, publicKey);
-                    // 如果这里发生server的空指针异常说明服务器未启动 但是这是不可能的
+                    socket.set(Constant.PARENT_SOCKET, server.checkToken(token, publicKey));
+                    socket.set(Constant.SESSION_TOKEN, token);
                     Message reply = new Message(Constant.SRV_EXCHANGE_TOKEN);
                     socket.send(reply);
                 } catch (TokenException e) {

@@ -26,4 +26,6 @@ public class GlobalSettings {
     public static byte[] privateKey;
     public static byte[] publicKey;
 
+    public static String baseDir = "download/";
+
 }

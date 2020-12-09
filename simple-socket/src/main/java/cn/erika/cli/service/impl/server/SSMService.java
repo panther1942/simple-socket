@@ -18,7 +18,7 @@ public class SSMService implements CliService {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Override
-    public void service(String[] args) throws IOException, BeanException {
+    public void service(String[] args) throws BeanException {
         IServer server = App.getBean(IServer.class);
         StringBuffer message = new StringBuffer();
         if (server != null) {

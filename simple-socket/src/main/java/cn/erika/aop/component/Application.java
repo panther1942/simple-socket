@@ -4,8 +4,8 @@ import cn.erika.aop.annotation.Aspect;
 import cn.erika.aop.annotation.Component;
 import cn.erika.aop.annotation.PackageScan;
 import cn.erika.aop.annotation.ServiceMapping;
-import cn.erika.aop.bean.Advice;
 import cn.erika.aop.exception.BeanException;
+import cn.erika.aop.exception.NoSuchBeanException;
 import cn.erika.aop.scan.PackageScanner;
 import cn.erika.aop.scan.PackageScannerHandler;
 
@@ -23,6 +23,7 @@ public abstract class Application {
 
     // 因为使用懒加载策略 所以需要使用ConcurrentHashMap保证线程安全
     private static Map<Class<?>, Object> beanList = new ConcurrentHashMap<>();
+    private static Map<String, Object> storage = new ConcurrentHashMap<>();
     private static Map<String, Class<?>> aliasList = new HashMap<>();
     private static Map<String, Method> serviceList = new HashMap<>();
     private static List<Class<?>> exclusionBean = new LinkedList<>();
@@ -94,6 +95,29 @@ public abstract class Application {
         }
     }
 
+    public static void add(String key, Object value) {
+        storage.put(key, value);
+    }
+
+    public static <T> T get(String key) throws BeanException {
+        T target = null;
+        if (storage.containsKey(key)) {
+            Object obj = storage.get(key);
+            try {
+                target = (T) obj;
+            } catch (ClassCastException e) {
+                throw new BeanException(e.getMessage(), e);
+            }
+        }
+        return target;
+    }
+
+    public static <T> T pop(String key) throws BeanException {
+        T target = get(key);
+        storage.remove(key);
+        return target;
+    }
+
     public static void addBean(Class<?> clazz, Object obj) {
         beanList.put(clazz, obj);
     }
@@ -112,8 +136,8 @@ public abstract class Application {
             return bean;
         } else {
             if (exclusionBean.contains(clazz)) {
-                return null;
-            }else{
+                throw new NoSuchBeanException("不存在类型为: " + clazz.getName() + " 的bean");
+            } else {
                 bean = createBean(clazz);
                 beanList.put(clazz, bean);
                 return bean;
@@ -129,7 +153,7 @@ public abstract class Application {
             }
         }
         if (target.size() == 0) {
-            throw new BeanException("未找到名称为: " + name + " 的bean");
+            throw new NoSuchBeanException("未找到名称为: " + name + " 的bean");
         } else if (target.size() > 1) {
             StringBuffer buffer = new StringBuffer("不明确的服务: ");
             for (String srvName : target) {
@@ -138,7 +162,7 @@ public abstract class Application {
             }
             buffer.deleteCharAt(buffer.length() - 1);
             throw new BeanException(buffer.toString());
-        }else{
+        } else {
             return getBean(aliasList.get(target.get(0)));
         }
     }

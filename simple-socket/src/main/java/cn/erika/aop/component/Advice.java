@@ -1,4 +1,4 @@
-package cn.erika.aop.bean;
+package cn.erika.aop.component;
 
 import java.lang.reflect.Method;
 

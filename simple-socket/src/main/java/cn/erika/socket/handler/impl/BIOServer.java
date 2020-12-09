@@ -1,25 +1,26 @@
 package cn.erika.socket.handler.impl;
 
-import cn.erika.socket.common.exception.TokenException;
-import cn.erika.socket.core.TcpSocket;
+import cn.erika.config.Constant;
 import cn.erika.socket.common.component.BaseSocket;
 import cn.erika.socket.common.component.Message;
-import cn.erika.config.Constant;
+import cn.erika.socket.common.exception.TokenException;
+import cn.erika.socket.core.TcpSocket;
 import cn.erika.socket.handler.IServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.SocketException;
+import java.util.Base64;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BIOServer extends AbstractHandler implements IServer, Runnable {
     private ServerSocket server;
     private LinkManager linkManager;
-    private Map<String, BaseSocket> tokenList = new LinkedHashMap<>();
+    private ConcurrentHashMap<String, BaseSocket> tokenList = new ConcurrentHashMap<>();
 
     public BIOServer(String host, int port) throws IOException {
         InetSocketAddress address = new InetSocketAddress(host, port);
@@ -115,24 +116,26 @@ public class BIOServer extends AbstractHandler implements IServer, Runnable {
 
     @Override
     public void addToken(BaseSocket socket, String token) throws TokenException {
-        if (!token.contains(token)) {
+        if (!tokenList.containsKey(token)) {
             tokenList.put(token, socket);
         } else {
-            throw new TokenException("存在相同的token");
+            throw new TokenException("存在相同的token: " + token);
         }
     }
 
     @Override
-    public void checkToken(String token, String publicKey) throws TokenException {
+    public BaseSocket checkToken(String token, String publicKey) throws TokenException {
         BaseSocket socket = tokenList.get(token);
         if (socket == null) {
             throw new TokenException("token无效");
         } else {
-            String originKey = socket.get(Constant.PUBLIC_KEY);
-            if (originKey.equalsIgnoreCase(publicKey)) {
+            byte[] pubKey = socket.get(Constant.PUBLIC_KEY);
+            if (Base64.getEncoder().encodeToString(pubKey).equalsIgnoreCase(publicKey)) {
+                socket.set(Constant.SESSION_TOKEN, token);
                 tokenList.remove(token);
+                return socket;
             } else {
-                throw new TokenException("token不匹配");
+                throw new TokenException("token不匹配: " + token);
             }
         }
     }
