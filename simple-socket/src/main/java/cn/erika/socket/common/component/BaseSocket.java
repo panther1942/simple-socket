@@ -1,6 +1,7 @@
 package cn.erika.socket.common.component;
 
-import java.net.Socket;
+import java.io.IOException;
+import java.net.SocketAddress;
 
 public interface BaseSocket {
     public void send(Message message);
@@ -9,7 +10,7 @@ public interface BaseSocket {
 
     public void ready();
 
-    public Socket getSocket();
+    public SocketAddress getRemoteAddress() throws IOException;
 
     public boolean isClosed();
 

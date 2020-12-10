@@ -51,8 +51,7 @@ public class BIOClient extends AbstractHandler implements IClient {
         if (socket == null || socket.isClosed()) {
             return;
         }
-        String host = socket.getSocket().getInetAddress().getHostAddress();
-        System.out.println("正在关闭连接 From: " + host);
+        System.out.println("正在关闭");
         close(socket);
     }
 
@@ -67,7 +66,7 @@ public class BIOClient extends AbstractHandler implements IClient {
     }
 
     public void close(BaseSocket socket) {
-        if (!socket.getSocket().isClosed()) {
+        if (!socket.isClosed()) {
             Message msg = new Message(Constant.EXIT);
             socket.send(msg);
             socket.close();

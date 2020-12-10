@@ -15,7 +15,7 @@ public class FileSender extends AbstractHandler {
     private Message message;
 
     public FileSender(BaseSocket socket, Message message) throws IOException {
-        SocketAddress address = socket.getSocket().getRemoteSocketAddress();
+        SocketAddress address = socket.getRemoteAddress();
         this.message = message;
         TcpSocket fileSocket = new TcpSocket(address, this, GlobalSettings.charset);
         fileSocket.set(Constant.PARENT_SOCKET, socket);

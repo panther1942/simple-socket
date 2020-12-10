@@ -1,6 +1,9 @@
 package cn.erika.socket.common.component;
 
 import cn.erika.aop.exception.BeanException;
+import cn.erika.socket.common.exception.TokenException;
+
+import java.io.IOException;
 
 /**
  * 规定一些处理器必须要做的动作
@@ -20,7 +23,7 @@ public interface Handler {
      *
      * @param socket 对应的Socket对象
      */
-    public void onOpen(BaseSocket socket) throws BeanException;
+    public void onOpen(BaseSocket socket) throws BeanException, IOException;
 
     public void onReady(BaseSocket socket);
 

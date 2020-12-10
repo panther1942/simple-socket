@@ -1,52 +1,72 @@
 package cn.erika.socket.handler.impl;
 
-import cn.erika.socket.nio.core.AbstractHandler;
-import cn.erika.socket.nio.core.TcpChannel;
+import cn.erika.aop.exception.BeanException;
+import cn.erika.socket.common.component.BaseSocket;
+import cn.erika.socket.core.TcpChannel;
+import cn.erika.socket.handler.IServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
-public class NIOServer extends AbstractHandler {
+public class NIOServer extends AbstractServerHandler implements IServer, Runnable {
     private ServerSocketChannel server;
-    private Map<SocketChannel, TcpChannel> channelMap = new HashMap<>();
+    private Selector selector = Selector.open();
+    private Map<SelectionKey, TcpChannel> channelMap = new HashMap<>();
 
     public NIOServer(String address, int port) throws IOException {
-        super();
+        this.linkManager = new LinkManager();
         this.server = ServerSocketChannel.open();
         this.server.configureBlocking(false);
         this.server.bind(new InetSocketAddress(address, port));
-        register(this.server, SelectionKey.OP_ACCEPT);
+        this.server.register(selector, SelectionKey.OP_ACCEPT);
     }
 
     @Override
-    public void onAccept(SelectionKey selectionKey) {
-        try {
-            SocketChannel channel = server.accept();
-            channelMap.put(channel, new TcpChannel(channel, this, charset));
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void run() {
+        while (this.server.isOpen()) {
+            try {
+                int events = selector.select();
+                System.out.println(events);
+                if (events > 0) {
+                    Iterator<SelectionKey> keys = selector.selectedKeys().iterator();
+                    while (keys.hasNext()) {
+                        SelectionKey key = keys.next();
+                        keys.remove();
+                        if (key.isAcceptable()) {
+                            TcpChannel channel = new TcpChannel(server.accept(), this, CHARSET);
+                            channel.register(selector, SelectionKey.OP_READ);
+                            channelMap.put(key, channel);
+                        } else if (key.isReadable()) {
+                            TcpChannel channel = channelMap.get(key);
+                            channel.read();
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                onError(e.getMessage(), e);
+            }
         }
     }
 
     @Override
-    public void onOpen(SelectionKey selectionKey) {
-
+    public void onOpen(BaseSocket socket) throws BeanException, IOException {
+        System.out.println("新连接接入: " + socket.getRemoteAddress().toString());
     }
 
     @Override
-    public void onEstablished(TcpChannel channel) {
-
-    }
-
-    @Override
-    public void onMessage(SelectionKey selectionKey) {
-        TcpChannel channel = channelMap.get((SocketChannel) selectionKey.channel());
-        channel.read();
-
+    public void close() {
+        try {
+            if (server.isOpen()) {
+                server.close();
+            }
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 }

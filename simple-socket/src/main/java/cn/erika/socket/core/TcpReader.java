@@ -1,5 +1,6 @@
 package cn.erika.socket.core;
 
+import cn.erika.socket.common.component.BaseSocket;
 import cn.erika.socket.common.component.DataInfo;
 import cn.erika.util.compress.CompressException;
 import org.slf4j.Logger;
@@ -23,7 +24,7 @@ class TcpReader {
         this.charset = charset;
     }
 
-    synchronized void read(TcpSocket socket, byte[] data, int len) throws IOException, CompressException {
+    synchronized void read(BaseSocket socket, byte[] data, int len) throws IOException, CompressException {
         byte[] tmp = new byte[len];
         System.arraycopy(data, 0, tmp, 0, len);
         while (tmp != null) {

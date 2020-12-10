@@ -5,6 +5,8 @@ import cn.erika.socket.common.exception.TokenException;
 
 public interface IServer extends Runnable {
 
+    public void listen();
+
     public void close();
 
     public void displayLink();

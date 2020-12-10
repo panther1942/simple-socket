@@ -24,7 +24,6 @@ public class ExchangeKey implements ISocketService {
         Message request = new Message(Constant.SRV_EXCHANGE_KEY);
         request.add(Constant.PUBLIC_KEY, GlobalSettings.publicKey);
         socket.send(request);
-//        log.debug("发送公钥: " + Base64.getEncoder().encodeToString(AbstractHandler.getPublicKey()));
     }
 
     @Override

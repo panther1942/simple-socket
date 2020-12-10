@@ -2,18 +2,21 @@ package cn.erika.socket.handler.impl;
 
 import cn.erika.aop.exception.BeanException;
 import cn.erika.cli.App;
+import cn.erika.config.Constant;
+import cn.erika.config.GlobalSettings;
 import cn.erika.socket.common.component.BaseSocket;
 import cn.erika.socket.common.component.DataInfo;
 import cn.erika.socket.common.component.Handler;
 import cn.erika.socket.common.component.Message;
-import cn.erika.config.Constant;
-import cn.erika.config.GlobalSettings;
+import cn.erika.socket.common.exception.TokenException;
 import cn.erika.util.security.RSA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AbstractHandler implements Handler {
     protected Logger log = LoggerFactory.getLogger(this.getClass());
@@ -54,5 +57,10 @@ public abstract class AbstractHandler implements Handler {
             //未知的服务请求
             log.error(e.getMessage(), e);
         }
+    }
+
+    @Override
+    public void onError(String message, Throwable error) {
+        log.error(message, error);
     }
 }
