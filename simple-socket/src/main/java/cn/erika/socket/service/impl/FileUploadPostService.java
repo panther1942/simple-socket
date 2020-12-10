@@ -6,6 +6,7 @@ import cn.erika.cli.App;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
 import cn.erika.socket.common.component.BaseSocket;
+import cn.erika.socket.common.component.FileInfo;
 import cn.erika.socket.common.component.Message;
 import cn.erika.socket.service.ISocketService;
 import cn.erika.util.security.MessageDigest;
@@ -15,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
 @Component(Constant.SRV_POST_UPLOAD)
 public class FileUploadPostService implements ISocketService {
@@ -32,21 +32,20 @@ public class FileUploadPostService implements ISocketService {
     public void server(BaseSocket socket, Message message) {
         socket.close();
         log.info("传输完成 正在进行数据校验");
-        Map<String, Object> record = null;
         try {
             String sessionToken = socket.get(Constant.SESSION_TOKEN);
-            record = App.get(sessionToken);
-            String filename = (String) record.get(Constant.FILENAME);
-            String algorithmSign = (String) record.get(Constant.ALGORITHM);
-            String sign = (String) record.get(Constant.SIGN);
+            FileInfo info = App.get(sessionToken);
+            String filename = info.getFilename();
+            MessageDigest.Type algorithmSign = info.getAlgorithmSign();
+            byte[] sign = info.getSign();
 
             File file = new File(BASE_DIR + filename);
             log.info("文件位置: " + file.getAbsolutePath());
             String currentSign = MessageDigest.byteToHexString(
-                    MessageDigest.sum(file, MessageDigest.Type.getByName(algorithmSign))
+                    MessageDigest.sum(file, algorithmSign)
             );
             BaseSocket parent = socket.get(Constant.PARENT_SOCKET);
-            if (sign.equalsIgnoreCase(currentSign)) {
+            if (MessageDigest.byteToHexString(sign).equalsIgnoreCase(currentSign)) {
                 log.info("数据完整");
                 parent.send(new Message(Constant.SRV_POST_UPLOAD, "接收完成"));
             } else {

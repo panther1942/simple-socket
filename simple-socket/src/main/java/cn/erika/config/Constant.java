@@ -32,10 +32,8 @@ public class Constant {
     public static final String RECEIVE_STATUS = "receiveStatus";
     public static final String FILEPATH = "filepath";
     public static final String FILENAME = "filename";
-    public static final String FILE_LENGTH = "fileLength";
-    public static final String ALGORITHM = "algorithmSign";
-    public static final String SIGN = "sign";
     public static final String FILE_POS = "filePos";
+    public static final String FILE_INFO = "fileInfo";
     public static final String PAYLOAD = "payload";
 
     public static final String SRV_EXCHANGE_KEY = "srv_exchangeKey";

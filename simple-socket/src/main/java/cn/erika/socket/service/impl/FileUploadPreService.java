@@ -6,6 +6,7 @@ import cn.erika.cli.App;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
 import cn.erika.socket.common.component.BaseSocket;
+import cn.erika.socket.common.component.FileInfo;
 import cn.erika.socket.common.component.Message;
 import cn.erika.socket.common.exception.FileException;
 import cn.erika.socket.common.exception.TokenException;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -68,7 +70,8 @@ public class FileUploadPreService implements ISocketService {
         // 如果没有或者校验失败 检查当前目录是否可写/文件是否可写 发送准备好的信号
         // 如果校验正确（文件完整） 或者 目录或文件不可写 则发出拒绝信号
         try {
-            String filename = message.get(Constant.FILENAME);
+            FileInfo info = message.get(Constant.FILE_INFO);
+            String filename = info.getFilename();
             File baseDir = new File(BASE_DIR);
             File file = new File(BASE_DIR + filename);
             if (!baseDir.exists()) {
@@ -76,7 +79,7 @@ public class FileUploadPreService implements ISocketService {
             }
             if (!file.exists()) {
                 file.createNewFile();
-            }else{
+            } else {
                 file.delete();
                 file.createNewFile();
             }
@@ -85,15 +88,7 @@ public class FileUploadPreService implements ISocketService {
             }
             try {
                 // 考虑一下把文件的元信息记录一下
-                App.add(sessionToken, new HashMap<String, Object>() {
-                    {
-                        put(Constant.FILEPATH, message.get(Constant.FILEPATH));
-                        put(Constant.FILENAME, message.get(Constant.FILENAME));
-                        put(Constant.FILE_LENGTH, message.get(Constant.FILE_LENGTH));
-                        put(Constant.ALGORITHM, message.get(Constant.ALGORITHM));
-                        put(Constant.SIGN, message.get(Constant.SIGN));
-                    }
-                });
+                App.add(sessionToken, message.get(Constant.FILE_INFO));
                 IServer server = App.getBean(IServer.class);
 
                 server.addToken(socket, sessionToken);
@@ -126,14 +121,19 @@ public class FileUploadPreService implements ISocketService {
                 } else {
                     log.info("文件完整路径: " + file.getAbsolutePath() + " 文件名: " + filename + " 文件长度: " + file.length());
                 }
-                String sign = MessageDigest.byteToHexString(MessageDigest.sum(file, algorithmSign));
+                log.info("计算文件签名");
+                byte[] sign = MessageDigest.sum(file, algorithmSign);
+                log.info("文件签名: "+ Base64.getEncoder().encodeToString(sign));
 
                 Message request = new Message(Constant.SRV_PRE_UPLOAD);
-                request.add(Constant.FILEPATH, file.getAbsolutePath());
-                request.add(Constant.FILENAME, filename);
-                request.add(Constant.FILE_LENGTH, file.length());
-                request.add(Constant.ALGORITHM, algorithmSign.getValue());
-                request.add(Constant.SIGN, sign);
+                FileInfo info = new FileInfo();
+                info.setFilename(filename);
+                info.setFilepath(file.getAbsolutePath());
+                info.setFileLength(file.length());
+                info.setAlgorithmSign(algorithmSign);
+                info.setSign(sign);
+                request.add(Constant.FILE_INFO,info);
+
                 socket.send(request);
             } catch (SecurityException e) {
                 log.error("当前系统不支持这种签名算法: " + algorithmSign.getValue());

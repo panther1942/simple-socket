@@ -6,16 +6,14 @@ import cn.erika.cli.App;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
 import cn.erika.socket.common.component.BaseSocket;
+import cn.erika.socket.common.component.FileInfo;
 import cn.erika.socket.common.component.Message;
 import cn.erika.socket.service.ISocketService;
-import cn.erika.util.string.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.text.DecimalFormat;
-import java.util.Base64;
-import java.util.Map;
 
 @Component(Constant.SRV_UPLOAD)
 public class FileUploadService implements ISocketService {
@@ -25,7 +23,8 @@ public class FileUploadService implements ISocketService {
 
     @Override
     public void client(BaseSocket socket, Message message) {
-        String filepath = message.get(Constant.FILEPATH);
+        FileInfo info = message.get(Constant.FILE_INFO);
+        String filepath = info.getFilepath();
         long skip = message.get(Constant.FILE_POS);
         File file = new File(filepath);
 
@@ -64,9 +63,9 @@ public class FileUploadService implements ISocketService {
     public void server(BaseSocket socket, Message message) {
         try {
             String sessionToken = socket.get(Constant.SESSION_TOKEN);
-            Map<String, Object> record = App.get(sessionToken);
-            String filename = (String) record.get(Constant.FILENAME);
-            long fileLength = (long) record.get(Constant.FILE_LENGTH);
+            FileInfo info = App.get(sessionToken);
+            String filename = info.getFilename();
+            long fileLength = info.getFileLength();
             long filePos = message.get(Constant.FILE_POS);
             byte[] data = message.get(Constant.PAYLOAD);
 
