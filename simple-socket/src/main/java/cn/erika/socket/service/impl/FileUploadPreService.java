@@ -128,15 +128,13 @@ public class FileUploadPreService implements ISocketService {
                 }
                 String sign = MessageDigest.byteToHexString(MessageDigest.sum(file, algorithmSign));
 
-                socket.send(new Message(Constant.SRV_PRE_UPLOAD, new HashMap<String, Object>() {
-                    {
-                        put(Constant.FILEPATH, file.getAbsolutePath());
-                        put(Constant.FILENAME, filename);
-                        put(Constant.FILE_LENGTH, file.length());
-                        put(Constant.ALGORITHM, algorithmSign.getValue());
-                        put(Constant.SIGN, sign);
-                    }
-                }));
+                Message request = new Message(Constant.SRV_PRE_UPLOAD);
+                request.add(Constant.FILEPATH, file.getAbsolutePath());
+                request.add(Constant.FILENAME, filename);
+                request.add(Constant.FILE_LENGTH, file.length());
+                request.add(Constant.ALGORITHM, algorithmSign.getValue());
+                request.add(Constant.SIGN, sign);
+                socket.send(request);
             } catch (SecurityException e) {
                 log.error("当前系统不支持这种签名算法: " + algorithmSign.getValue());
             } catch (FileException | IOException e) {

@@ -21,11 +21,8 @@ public class ExchangeKey implements ISocketService {
     @Override
     public void client(BaseSocket socket, Message message) {
         // 向客户端请求公钥的时候不需要请求体 message只需要放上order就能获取客户端的公钥
-        Message request = new Message(Constant.SRV_EXCHANGE_KEY, new HashMap<String, Object>() {
-            {
-                put(Constant.PUBLIC_KEY, GlobalSettings.publicKey);
-            }
-        });
+        Message request = new Message(Constant.SRV_EXCHANGE_KEY);
+        request.add(Constant.PUBLIC_KEY, GlobalSettings.publicKey);
         socket.send(request);
 //        log.debug("发送公钥: " + Base64.getEncoder().encodeToString(AbstractHandler.getPublicKey()));
     }
@@ -36,16 +33,13 @@ public class ExchangeKey implements ISocketService {
         // TODO 这里需要个统一异常处理方便拓展功能 毕竟把异常处理写的到处都是很不美/爽
         // TODO 还需要个DEBUG功能 到处写log.debug要吐了 写完还要记得删 相当不爽
         try {
-            String clientPublicKey = message.get(Constant.PUBLIC_KEY);
+            byte[] clientPublicKey = message.get(Constant.PUBLIC_KEY);
             if (clientPublicKey == null) {
                 throw new SecurityException("缺少公钥信息");
             }
-            socket.set(Constant.PUBLIC_KEY, Base64.getDecoder().decode(clientPublicKey));
-            Message reply = new Message(Constant.SRV_EXCHANGE_PASSWORD, new HashMap<String, Object>() {
-                {
-                    put(Constant.PUBLIC_KEY, GlobalSettings.publicKey);
-                }
-            });
+            socket.set(Constant.PUBLIC_KEY, clientPublicKey);
+            Message reply = new Message(Constant.SRV_EXCHANGE_PASSWORD);
+            reply.add(Constant.PUBLIC_KEY, GlobalSettings.publicKey);
             socket.send(reply);
             log.debug("对端请求加密通信");
         } catch (SecurityException e) {

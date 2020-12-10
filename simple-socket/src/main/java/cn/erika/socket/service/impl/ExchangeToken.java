@@ -31,7 +31,7 @@ public class ExchangeToken implements ISocketService {
             if (message != null) {
                 IServer server = App.getBean(IServer.class);
                 String token = message.get(Constant.SESSION_TOKEN);
-                String publicKey = message.get(Constant.PUBLIC_KEY);
+                byte[] publicKey = message.get(Constant.PUBLIC_KEY);
                 try {
                     socket.set(Constant.PARENT_SOCKET, server.checkToken(token, publicKey));
                     socket.set(Constant.SESSION_TOKEN, token);

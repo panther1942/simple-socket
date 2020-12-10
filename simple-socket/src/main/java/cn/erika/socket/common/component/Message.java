@@ -32,11 +32,6 @@ public class Message implements Serializable {
         this.head.put(Head.Order, serviceName);
     }
 
-    public Message(String serviceName, Map<String, Object> payload) {
-        this(serviceName);
-        this.payload = payload;
-    }
-
     public Message(String serviceName, String message) {
         this(serviceName);
         this.payload.put(Constant.MESSAGE, message);

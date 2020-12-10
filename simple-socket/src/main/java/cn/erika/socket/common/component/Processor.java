@@ -7,11 +7,9 @@ import cn.erika.util.compress.GZIP;
 import cn.erika.util.security.RSA;
 import cn.erika.util.security.Security;
 import cn.erika.util.security.SecurityException;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.parser.Feature;
-import com.alibaba.fastjson.serializer.SerializerFeature;
+import cn.erika.util.string.SerialUtils;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Date;
 
@@ -49,12 +47,9 @@ public class Processor {
         message.setSign(null);
         boolean isEncrypt = socket.get(Constant.ENCRYPT);
         if (isEncrypt) {
-            message.setSign(RSA.sign(JSON.toJSONBytes(message,
-                    SerializerFeature.SortField),
-                    GlobalSettings.privateKey));
+            message.setSign(RSA.sign(SerialUtils.serialObject(message), GlobalSettings.privateKey));
         }
-        byte[] data = JSON.toJSONBytes(message,
-                SerializerFeature.SortField);
+        byte[] data = SerialUtils.serialObject(message);
         if (isEncrypt) {
             String password = socket.get(Constant.ENCRYPT_CODE);
             Security.Type passwordType = socket.get(Constant.ENCRYPT_TYPE);
@@ -80,15 +75,12 @@ public class Processor {
                 Security.Type passwordType = socket.get(Constant.ENCRYPT_TYPE);
                 data = Security.decrypt(data, passwordType, password);
             }
-            Message message = JSON.parseObject(new String(data, CHARSET), Message.class, Feature.OrderedField);
+            Message message = SerialUtils.serialObject(data);
             if (isEncrypt) {
                 byte[] publicKey = socket.get(Constant.PUBLIC_KEY);
                 byte[] sign = message.getSign();
                 message.setSign(null);
-                if (!RSA.verify(JSON.toJSONBytes(message,
-//                        SerializerFeature.MapSortField,
-                        SerializerFeature.SortField),
-                        publicKey, sign)) {
+                if (!RSA.verify(SerialUtils.serialObject(message), publicKey, sign)) {
                     throw new SecurityException("验签失败");
                 }
                 message.setSign(sign);

@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
 
 @Component(Constant.SRV_UPLOAD)
@@ -27,8 +26,7 @@ public class FileUploadService implements ISocketService {
     @Override
     public void client(BaseSocket socket, Message message) {
         String filepath = message.get(Constant.FILEPATH);
-        Object filePos = message.get(Constant.FILE_POS);
-        long skip = StringUtils.parseLong(filePos);
+        long skip = message.get(Constant.FILE_POS);
         File file = new File(filepath);
 
         try (FileInputStream in = new FileInputStream(file)) {
@@ -51,11 +49,9 @@ public class FileUploadService implements ISocketService {
                 socket.send(msg);
             }
             log.info("发送完成");
-            socket.send(new Message(Constant.SRV_POST_UPLOAD, new HashMap<String, Object>() {
-                {
-                    put(Constant.SEND_STATUS, "发送完成");
-                }
-            }));
+            Message request = new Message(Constant.SRV_POST_UPLOAD);
+            request.add(Constant.SEND_STATUS, "发送完成");
+            socket.send(request);
             socket.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -70,17 +66,14 @@ public class FileUploadService implements ISocketService {
             String sessionToken = socket.get(Constant.SESSION_TOKEN);
             Map<String, Object> record = App.get(sessionToken);
             String filename = (String) record.get(Constant.FILENAME);
-            Object fileLength = record.get(Constant.FILE_LENGTH);
-            Object filePos = message.get(Constant.FILE_POS);
-            long length = StringUtils.parseLong(fileLength);
-            long pos = StringUtils.parseLong(filePos);
-            String payload = message.get(Constant.PAYLOAD);
-            byte[] data = Base64.getDecoder().decode(payload.getBytes(GlobalSettings.charset));
+            long fileLength = (long) record.get(Constant.FILE_LENGTH);
+            long filePos = message.get(Constant.FILE_POS);
+            byte[] data = message.get(Constant.PAYLOAD);
 
             File file = new File(BASE_DIR + filename);
             try (FileOutputStream out = new FileOutputStream(file, true)) {
                 log.debug("解析完成 写入数据:" + data.length);
-                log.info("当前进度: " + df.format((pos + data.length) / (double) length));
+                log.info("当前进度: " + df.format((filePos + data.length) / (double) fileLength));
                 out.write(data, 0, data.length);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();

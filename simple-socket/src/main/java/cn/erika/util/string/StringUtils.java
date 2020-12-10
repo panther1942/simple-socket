@@ -33,12 +33,4 @@ public class StringUtils {
     public static boolean isEmpty(String target) {
         return target == null || "".equals(target.trim());
     }
-
-    public static long parseLong(Object object) {
-        if (object.getClass().equals(Integer.class)) {
-            return (int) object;
-        } else {
-            return (long) object;
-        }
-    }
 }

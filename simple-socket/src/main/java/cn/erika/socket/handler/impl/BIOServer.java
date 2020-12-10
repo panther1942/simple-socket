@@ -124,13 +124,14 @@ public class BIOServer extends AbstractHandler implements IServer, Runnable {
     }
 
     @Override
-    public BaseSocket checkToken(String token, String publicKey) throws TokenException {
+    public BaseSocket checkToken(String token, byte[] publicKey) throws TokenException {
         BaseSocket socket = tokenList.get(token);
         if (socket == null) {
             throw new TokenException("token无效");
         } else {
             byte[] pubKey = socket.get(Constant.PUBLIC_KEY);
-            if (Base64.getEncoder().encodeToString(pubKey).equalsIgnoreCase(publicKey)) {
+            Base64.Encoder encoder = Base64.getEncoder();
+            if (encoder.encodeToString(pubKey).equalsIgnoreCase(encoder.encodeToString(publicKey))) {
                 socket.set(Constant.SESSION_TOKEN, token);
                 tokenList.remove(token);
                 return socket;
