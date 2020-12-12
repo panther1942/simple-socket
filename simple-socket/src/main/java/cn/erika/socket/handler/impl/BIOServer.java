@@ -14,8 +14,7 @@ import java.net.SocketException;
 public class BIOServer extends AbstractServerHandler implements IServer, Runnable {
     private ServerSocket server;
 
-    public BIOServer(String host, int port) throws IOException {
-        InetSocketAddress address = new InetSocketAddress(host, port);
+    public BIOServer(InetSocketAddress address) throws IOException {
         this.linkManager = new LinkManager();
         this.server = new ServerSocket();
         try {
@@ -23,16 +22,6 @@ public class BIOServer extends AbstractServerHandler implements IServer, Runnabl
             System.out.println("Listen: " + address.getAddress());
         } catch (IOException e) {
             onError(e.getMessage(), e);
-        }
-    }
-
-    public static void main(String[] args) {
-        String address = "localhost";
-        int port = 12345;
-        try {
-            new Thread(new BIOServer(address, port)).start();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 

@@ -5,8 +5,10 @@ public class Constant {
     public static final String CLIENT = "client";
     public static final String SERVER = "server";
 
-    public static final String TEXT = "text";
-    public static final String BIN = "binary";
+    public static final String BIO = "bio";
+    public static final String NIO = "nio";
+    public static final String AIO = "aio";
+
     public static final String EXIT = "exit";
     public static final String ENCRYPT = "encrypt";
     public static final String LINK_TIME = "link_time";

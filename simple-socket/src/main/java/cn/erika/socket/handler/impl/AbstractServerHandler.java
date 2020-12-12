@@ -37,7 +37,7 @@ public abstract class AbstractServerHandler extends AbstractHandler implements I
             if (socket == null) {
                 throw new SocketException("连接不存在");
             } else {
-                socket.send(new Message(Constant.TEXT, message));
+                socket.send(new Message(Constant.SRV_TEXT, message));
             }
         } catch (SocketException e) {
             log.warn("UID: " + uid + " 不存在");

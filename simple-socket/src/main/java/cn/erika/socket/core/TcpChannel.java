@@ -44,7 +44,7 @@ public class TcpChannel implements BaseChannel {
         this.reader = new TcpReader(charset);
         this.channel = SocketChannel.open();
         this.channel.configureBlocking(false);
-        this.channel.bind(address);
+        this.channel.connect(address);
         if (this.channel.isConnectionPending()) {
             this.channel.finishConnect();
         }
@@ -69,16 +69,16 @@ public class TcpChannel implements BaseChannel {
         try {
             int cacheSize = channel.socket().getReceiveBufferSize();
             ByteBuffer buffer = ByteBuffer.allocate(cacheSize);
-            SocketAddress address = null;
             try {
-                address = this.channel.getRemoteAddress();
                 if (channel.read(buffer) > 0) {
                     buffer.flip();
                     byte[] data = buffer.array();
-                    reader.read(this, data, data.length);
+                    if (data.length > 0) {
+                        reader.read(this, data, data.length);
+                    }
                 }
             } catch (IOException e) {
-                handler.onError("连接中断 From: " + address.toString(), e);
+                handler.onError("连接中断", e);
             } catch (CompressException e) {
                 handler.onError(e.getMessage(), e);
             } finally {

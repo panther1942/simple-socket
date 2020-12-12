@@ -10,6 +10,8 @@ public class GlobalSettings {
     public static final int DEFAULT_PORT = 12345;
     public static Charset charset = Charset.forName("UTF-8");
 
+    public static String type = Constant.BIO;
+
     public static String username = "admin";
     public static String password = "admin";
 

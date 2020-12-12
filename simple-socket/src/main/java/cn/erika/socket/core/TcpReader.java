@@ -64,12 +64,15 @@ class TcpReader {
     }
 
     private byte[] getDataInfo(byte[] data, int len) {
-        if (len < DataInfo.LEN) {
+        if (len == 0 || len < DataInfo.LEN) {
             return data;
         }
         byte[] bHead = new byte[DataInfo.LEN];
         System.arraycopy(data, 0, bHead, 0, DataInfo.LEN);
         String strHead = new String(bHead, charset);
+        if("".equals(strHead.trim())){
+            return new byte[0];
+        }
         info = new DataInfo();
         // 时间戳 13字节
         info.setTimestamp(new Date(Long.parseLong(strHead.substring(0, 13))));

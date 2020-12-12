@@ -5,11 +5,15 @@ import cn.erika.aop.exception.BeanException;
 import cn.erika.aop.exception.NoSuchBeanException;
 import cn.erika.cli.App;
 import cn.erika.cli.service.CliService;
+import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
 import cn.erika.socket.handler.IClient;
 import cn.erika.socket.handler.impl.BIOClient;
+import cn.erika.socket.handler.impl.NIOClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
 
 /**
  * 客户端连接服务器的方法
@@ -29,12 +33,25 @@ public class ConnectService implements CliService {
         } catch (NoSuchBeanException e) {
             logger.debug("客户端未启动，尝试启动客户端");
         }
+        InetSocketAddress address = null;
         if (args.length == 1) {
-            client = new BIOClient(GlobalSettings.DEFAULT_ADDRESS, GlobalSettings.DEFAULT_PORT);
+            address = new InetSocketAddress(GlobalSettings.DEFAULT_ADDRESS, GlobalSettings.DEFAULT_PORT);
         } else {
-            String address = args[1];
+            String host = args[1];
             int port = Integer.parseInt(args[2]);
-            client = new BIOClient(address, port);
+            address = new InetSocketAddress(host, port);
+        }
+        switch (GlobalSettings.type) {
+            case Constant.BIO:
+                client = new BIOClient(address);
+                break;
+            case Constant.NIO:
+                client = new NIOClient(address);
+                break;
+            case Constant.AIO:
+//                break;
+            default:
+                throw new BeanException("不支持的Socket类型");
         }
         client.connect();
         App.addBean(IClient.class, client);
