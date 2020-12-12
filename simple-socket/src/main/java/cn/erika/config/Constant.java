@@ -9,6 +9,9 @@ public class Constant {
     public static final String NIO = "nio";
     public static final String AIO = "aio";
 
+    public static final String LINUX = "Linux";
+    public static final String WINDOWS = "Windows";
+
     public static final String EXIT = "exit";
     public static final String ENCRYPT = "encrypt";
     public static final String LINK_TIME = "link_time";

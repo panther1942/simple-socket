@@ -1,5 +1,7 @@
 package cn.erika.aop.scan;
 
+import cn.erika.config.Constant;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -12,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Matcher;
 
 // 包扫描器
 // 注意!!! loadClass可能会导致提前触发依赖缺失的异常
@@ -58,7 +61,21 @@ public class PackageScanner {
     // 开始扫描
     // 基本原理就是读取class文件 分析其路径名
     private void scan(String packageName) {
-        String dirName = packageName.replaceAll("\\.", File.separator);
+        String systemName = System.getProperty("os.name");
+        if (systemName == null) {
+            System.err.println("无法获取操作系统类型");
+            System.exit(1);
+        }
+        System.out.println(systemName);
+        String dirName = null;
+        if (systemName.startsWith(Constant.LINUX)) {
+            dirName = packageName.replaceAll("\\.", File.separator);
+        } else if (systemName.startsWith(Constant.WINDOWS)) {
+            dirName = packageName.replaceAll("\\.", Matcher.quoteReplacement(File.separator));
+        } else {
+            System.err.println("不支持的操作系统");
+            System.exit(1);
+        }
         Enumeration<URL> dirs = null;
         try {
             dirs = Thread.currentThread().getContextClassLoader().getResources(dirName);
