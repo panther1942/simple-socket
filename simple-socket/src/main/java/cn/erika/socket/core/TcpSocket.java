@@ -1,9 +1,8 @@
 package cn.erika.socket.core;
 
 import cn.erika.aop.exception.BeanException;
-import cn.erika.socket.common.component.*;
 import cn.erika.config.Constant;
-import cn.erika.util.compress.CompressException;
+import cn.erika.socket.common.component.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,7 +23,7 @@ public class TcpSocket implements BaseSocket, Runnable {
     // 持有的Socket对象 用来响应请求
     private Socket socket;
     // 持有的Reader对象 用来解析数据
-    private TcpReader reader;
+    private ByteReader reader;
     // 持有的Handler对象 在连接建立后初始化连接属性和处理连接后的动作
     private Handler handler;
     private Charset charset;
@@ -35,17 +34,19 @@ public class TcpSocket implements BaseSocket, Runnable {
     private OutputStream out;
 
     public TcpSocket(Socket socket, Handler handler, Charset charset) throws IOException {
+        set(Constant.TYPE, Constant.SERVER);
         this.handler = handler;
         this.charset = charset;
-        this.reader = new TcpReader(charset);
+        this.reader = new ByteReader(charset);
         this.socket = socket;
         onEstablished();
     }
 
     public TcpSocket(SocketAddress address, Handler handler, Charset charset) throws IOException {
+        set(Constant.TYPE, Constant.CLIENT);
         this.handler = handler;
         this.charset = charset;
-        this.reader = new TcpReader(charset);
+        this.reader = new ByteReader(charset);
         this.socket = new Socket();
         this.socket.setReuseAddress(true);
         this.socket.connect(address);
@@ -82,8 +83,6 @@ public class TcpSocket implements BaseSocket, Runnable {
                 }
             } catch (IOException e) {
                 handler.onError("连接中断 From: " + address.toString(), e);
-            } catch (CompressException e) {
-                handler.onError(e.getMessage(), e);
             } finally {
                 close();
             }

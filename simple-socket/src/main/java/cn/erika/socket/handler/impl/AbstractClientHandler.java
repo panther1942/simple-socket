@@ -8,6 +8,7 @@ import cn.erika.socket.common.component.Message;
 import cn.erika.socket.handler.IClient;
 
 import java.net.InetSocketAddress;
+import java.nio.channels.Selector;
 
 public abstract class AbstractClientHandler extends AbstractHandler implements IClient {
     protected InetSocketAddress address;
@@ -17,7 +18,6 @@ public abstract class AbstractClientHandler extends AbstractHandler implements I
     @Override
     public void onOpen(BaseSocket socket) throws BeanException {
         System.out.println("成功连接到服务器");
-        socket.set(Constant.TYPE, Constant.CLIENT);
         App.execute(socket, Constant.SRV_EXCHANGE_KEY, socket, null);
     }
 

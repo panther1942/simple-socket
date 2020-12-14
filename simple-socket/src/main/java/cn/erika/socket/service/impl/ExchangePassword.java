@@ -21,12 +21,12 @@ public class ExchangePassword implements ISocketService {
 
     @Override
     public void client(BaseSocket socket, Message message) {
-//        log.debug("获取服务器公钥: " + Base64.getEncoder().encodeToString(message.getPayload()));
         try {
             byte[] serverPublicKey = message.get(Constant.PUBLIC_KEY);
             if (serverPublicKey == null) {
                 throw new SecurityException("缺少公钥信息");
             }
+            log.debug("获取服务器公钥: " + Base64.getEncoder().encodeToString(serverPublicKey));
             socket.set(Constant.PUBLIC_KEY, serverPublicKey);
 
             Security.Type encryptType = GlobalSettings.passwordType;
@@ -37,11 +37,10 @@ public class ExchangePassword implements ISocketService {
             request.add(Constant.ENCRYPT_TYPE, encryptType.getValue());
             request.add(Constant.ENCRYPT_CODE, Base64.getEncoder().encodeToString(encryptCode.getBytes(GlobalSettings.charset)));
             socket.send(request);
+            log.debug("发送密钥，类型:" + encryptType.getValue() + ", 密钥:" + encryptCode);
         } catch (SecurityException e) {
             log.error(e.getMessage(), e);
         }
-//        socket.set(Constant.ENCRYPT, true);
-//        log.debug("发送密钥，类型:" + passwordType + ", 密钥:" + password);
     }
 
     @Override
@@ -54,7 +53,6 @@ public class ExchangePassword implements ISocketService {
             }
             encryptCode = new String(Base64.getDecoder().decode(encryptCode));
 //            log.debug("客户端发送密钥，类型:" + encryptType + ", 密钥:" + encryptCode);
-
             log.debug("加密协商完成");
             Message reply = new Message(Constant.SRV_EXCHANGE_RESULT);
             reply.add(Constant.RESULT, true);

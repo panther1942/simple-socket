@@ -11,6 +11,8 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.Iterator;
+import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -26,6 +28,8 @@ public class NIOServer implements Runnable {
     private ServerSocketChannel server;
     private Selector selector;
     private ExecutorService service = Executors.newFixedThreadPool(GlobalSettings.poolSize);
+    private Vector<SocketChannel> channels = new Vector<>();
+
 
     public NIOServer() {
         try {
@@ -76,18 +80,20 @@ public class NIOServer implements Runnable {
         while (this.server.isOpen()) {
             try {
                 int events = selector.select();
-                System.out.println(events);
+//                System.out.println(events);
                 if (events > 0) {
                     Iterator<SelectionKey> keys = selector.selectedKeys().iterator();
                     while (keys.hasNext()) {
                         SelectionKey key = keys.next();
                         keys.remove();
-                        System.out.println("Key status: " + key.readyOps());
+//                        System.out.println("Key status: " + key.readyOps());
                         if (key.isAcceptable()) {
                             SocketChannel channel = server.accept();
-
                             accept(channel);
+                            channels.add(channel);
                         } else {
+                            SocketChannel channel = (SocketChannel) key.channel();
+                            System.out.println(channels.contains(channel));
                             service.submit(new Handler(key));
                         }
                     }

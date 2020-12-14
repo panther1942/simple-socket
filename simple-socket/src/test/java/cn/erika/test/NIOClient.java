@@ -87,7 +87,7 @@ public class NIOClient implements Runnable {
         while (client.isOpen()) {
             try {
                 int events = selector.select();
-                System.out.println(events);
+//                System.out.println(events);
                 if (events > 0) {
                     Iterator<SelectionKey> keys = selector.selectedKeys().iterator();
                     while (keys.hasNext()) {
@@ -109,7 +109,7 @@ public class NIOClient implements Runnable {
     public void write(String message) {
         try {
 //            client.register(selector, SelectionKey.OP_WRITE);
-            System.out.println("Write status: " + ((client.validOps() & SelectionKey.OP_WRITE) == SelectionKey.OP_WRITE));
+//            System.out.println("Write status: " + ((client.validOps() & SelectionKey.OP_WRITE) == SelectionKey.OP_WRITE));
             client.write(ByteBuffer.wrap(message.getBytes()));
             selector.wakeup();
 //            client.register(selector, SelectionKey.OP_READ);

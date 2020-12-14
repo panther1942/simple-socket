@@ -1,9 +1,7 @@
 package cn.erika.socket.core;
 
-import cn.erika.aop.exception.BeanException;
 import cn.erika.config.Constant;
 import cn.erika.socket.common.component.*;
-import cn.erika.util.compress.CompressException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +10,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
@@ -20,67 +18,57 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TcpChannel implements BaseChannel {
+public class TcpChannel implements BaseSocket {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     private SocketChannel channel;
-    private TcpReader reader;
+    private BufferReader reader;
     private Handler handler;
     private Charset charset;
+    private Selector selector;
     private Map<String, Object> attr = new HashMap<>();
 
-        public TcpChannel(SocketChannel channel, Handler handler, Charset charset) throws IOException {
+    public TcpChannel(SocketChannel channel, Handler handler, Selector selector, Charset charset) throws IOException {
+        set(Constant.TYPE, Constant.SERVER);
         this.handler = handler;
+        this.selector = selector;
         this.charset = charset;
-        this.reader = new TcpReader(charset);
+        this.reader = new BufferReader(charset);
         this.channel = channel;
         this.channel.configureBlocking(false);
+        this.channel.register(selector, SelectionKey.OP_READ);
         onEstablished();
     }
 
-    public TcpChannel(InetSocketAddress address, Handler handler, Charset charset) throws IOException {
+    public TcpChannel(InetSocketAddress address, Handler handler, Selector selector, Charset charset) throws IOException {
+        set(Constant.TYPE, Constant.CLIENT);
         this.handler = handler;
+        this.selector = selector;
         this.charset = charset;
-        this.reader = new TcpReader(charset);
+        this.reader = new BufferReader(charset);
         this.channel = SocketChannel.open();
         this.channel.configureBlocking(false);
+        this.channel.register(selector, SelectionKey.OP_CONNECT);
         this.channel.connect(address);
-        if (this.channel.isConnectionPending()) {
-            this.channel.finishConnect();
-        }
         onEstablished();
     }
 
     private void onEstablished() throws IOException {
         set(Constant.LINK_TIME, new Date());
         handler.init(this);
-        try {
-            handler.onOpen(this);
-        } catch (BeanException e) {
-            handler.onError(e.getMessage(), e);
-        }
     }
 
-    private void write(byte[] data) throws IOException {
-        channel.write(ByteBuffer.wrap(data));
-    }
-
-    public void read(){
+    public void read() {
         try {
             int cacheSize = channel.socket().getReceiveBufferSize();
             ByteBuffer buffer = ByteBuffer.allocate(cacheSize);
             try {
                 if (channel.read(buffer) > 0) {
                     buffer.flip();
-                    byte[] data = buffer.array();
-                    if (data.length > 0) {
-                        reader.read(this, data, data.length);
-                    }
+                    reader.read(this, buffer);
                 }
             } catch (IOException e) {
                 handler.onError("连接中断", e);
-            } catch (CompressException e) {
-                handler.onError(e.getMessage(), e);
             } finally {
                 close();
             }
@@ -93,8 +81,14 @@ public class TcpChannel implements BaseChannel {
     public synchronized void send(Message message) {
         try {
             DataInfo info = Processor.beforeSend(this, message);
-            write(info.toString().getBytes(charset));
-            write(info.getData());
+            byte[] bInfo = info.toString().getBytes(charset);
+            byte[] bData = info.getData();
+            byte[] data = new byte[bInfo.length + bData.length];
+            System.arraycopy(bInfo, 0, data, 0, bInfo.length);
+            System.arraycopy(bData, 0, data, bInfo.length, bData.length);
+            channel.write(ByteBuffer.wrap(data));
+            selector.wakeup();
+            channel.register(selector,SelectionKey.OP_READ);
         } catch (Exception e) {
             handler.onError(e.getMessage(), e);
         }
@@ -122,13 +116,13 @@ public class TcpChannel implements BaseChannel {
 
     @Override
     public boolean isClosed() {
-        return !this.channel.isConnected();
+        return !this.channel.isOpen();
     }
 
     @Override
     public void close() {
         try {
-            if (channel.isConnected()) {
+            if (channel.isOpen()) {
                 channel.close();
             }
         } catch (IOException e) {
@@ -155,10 +149,5 @@ public class TcpChannel implements BaseChannel {
     @Override
     public <T> T remove(String k) {
         return (T) this.attr.remove(k);
-    }
-
-    @Override
-    public void register(Selector selector, int selectorStatus) throws ClosedChannelException {
-        this.channel.register(selector, selectorStatus);
     }
 }

@@ -2,22 +2,26 @@ package cn.erika.socket.handler.impl;
 
 import cn.erika.aop.exception.BeanException;
 import cn.erika.config.Constant;
+import cn.erika.config.GlobalSettings;
 import cn.erika.socket.common.component.BaseSocket;
 import cn.erika.socket.core.TcpChannel;
 import cn.erika.socket.handler.IServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.nio.channels.*;
-import java.util.HashMap;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class NIOServer extends AbstractServerHandler implements IServer, Runnable {
     private ServerSocketChannel server;
     private Selector selector = Selector.open();
-    private Map<SocketAddress, TcpChannel> channelMap = new HashMap<>();
+    private ConcurrentHashMap<SocketChannel, TcpChannel> channelMap = new ConcurrentHashMap<>();
 
     public NIOServer(InetSocketAddress address) throws IOException {
         this.linkManager = new LinkManager();
@@ -29,7 +33,7 @@ public class NIOServer extends AbstractServerHandler implements IServer, Runnabl
 
     @Override
     public void run() {
-        while (this.server.isOpen()) {
+        while (true) {
             try {
                 int events = selector.select();
                 if (events > 0) {
@@ -40,12 +44,13 @@ public class NIOServer extends AbstractServerHandler implements IServer, Runnabl
                         try {
                             if (key.isAcceptable()) {
                                 SocketChannel sc = server.accept();
-                                TcpChannel channel = new TcpChannel(sc, this, CHARSET);
-                                channel.register(selector, SelectionKey.OP_READ);
-                                channelMap.put(sc.getRemoteAddress(), channel);
-                            } else if (key.isReadable()) {
+                                sc.configureBlocking(false);
+                                sc.register(selector, SelectionKey.OP_READ);
+                                TcpChannel channel = new TcpChannel(sc, this, selector, CHARSET);
+                                channelMap.put(sc, channel);
+                            } else {
                                 SocketChannel sc = (SocketChannel) key.channel();
-                                TcpChannel channel = channelMap.get(sc.getRemoteAddress());
+                                TcpChannel channel = channelMap.get(sc);
                                 channel.read();
                             }
                         } catch (NullPointerException e) {

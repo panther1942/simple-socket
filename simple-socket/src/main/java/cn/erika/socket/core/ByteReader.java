@@ -1,6 +1,5 @@
 package cn.erika.socket.core;
 
-import cn.erika.socket.common.component.BaseSocket;
 import cn.erika.socket.common.component.DataInfo;
 import cn.erika.util.compress.CompressException;
 import org.slf4j.Logger;
@@ -11,7 +10,7 @@ import java.nio.charset.Charset;
 import java.util.Date;
 
 // 根据自定协议实现的一个处理数据的类
-class TcpReader {
+class ByteReader {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     private Charset charset;
@@ -20,11 +19,11 @@ class TcpReader {
     private byte[] cache;
     private int pos = 0;
 
-    public TcpReader(Charset charset) {
+    public ByteReader(Charset charset) {
         this.charset = charset;
     }
 
-    synchronized void read(BaseSocket socket, byte[] data, int len) throws IOException, CompressException {
+    synchronized void read(TcpSocket socket, byte[] data, int len) throws IOException {
         byte[] tmp = new byte[len];
         System.arraycopy(data, 0, tmp, 0, len);
         while (tmp != null) {

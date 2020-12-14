@@ -41,7 +41,6 @@ public class BIOServer extends AbstractServerHandler implements IServer, Runnabl
     public void onOpen(BaseSocket socket) throws IOException {
         linkManager.addLink(socket);
         log.info("New client link: " + socket.getRemoteAddress());
-        socket.set(Constant.TYPE, Constant.SERVER);
     }
 
     @Override
