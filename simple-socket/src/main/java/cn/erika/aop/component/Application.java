@@ -139,7 +139,12 @@ public abstract class Application {
                 throw new NoSuchBeanException("不存在类型为: " + clazz.getName() + " 的bean");
             } else {
                 bean = createBean(clazz);
-                beanList.put(clazz, bean);
+                Component component = clazz.getAnnotation(Component.class);
+                if (component != null) {
+                    if (Component.Type.SingleTon.equals(component.type())) {
+                        beanList.put(clazz, bean);
+                    }
+                }
                 return bean;
             }
         }
@@ -173,6 +178,9 @@ public abstract class Application {
         try {
             Object target = clazz.newInstance();
             InvocationProxy proxy = new InvocationProxy(target);
+            if (target.getClass().getInterfaces().length == 0) {
+                throw new BeanException("代理类必须实现一个接口，且调用该类的方法必须在接口中声明");
+            }
             return (T) Proxy.newProxyInstance(
                     target.getClass().getClassLoader(),
                     target.getClass().getInterfaces(),
