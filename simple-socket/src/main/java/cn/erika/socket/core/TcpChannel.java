@@ -1,7 +1,7 @@
 package cn.erika.socket.core;
 
 import cn.erika.config.Constant;
-import cn.erika.socket.component.*;
+import cn.erika.socket.component.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,9 +80,18 @@ public class TcpChannel implements BaseSocket {
             DataInfo info = Processor.beforeSend(this, message);
             byte[] bInfo = info.toString().getBytes(charset);
             byte[] bData = info.getData();
-            byte[] data = new byte[bInfo.length + bData.length];
-            System.arraycopy(bInfo, 0, data, 0, bInfo.length);
-            System.arraycopy(bData, 0, data, bInfo.length, bData.length);
+            send(bInfo);
+            send(bData);
+        } catch (ClosedChannelException e) {
+            handler.onClose(this);
+        } catch (Exception e) {
+            handler.onError(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void send(byte[] data) {
+        try {
             channel.write(ByteBuffer.wrap(data));
             selector.wakeup();
             channel.register(selector, SelectionKey.OP_READ);

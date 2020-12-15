@@ -5,11 +5,18 @@ import cn.erika.aop.exception.BeanException;
 import cn.erika.cli.App;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
-import cn.erika.socket.core.BaseSocket;
 import cn.erika.socket.component.Message;
+import cn.erika.socket.core.BaseSocket;
 import cn.erika.socket.exception.TokenException;
 import cn.erika.socket.handler.IServer;
 import cn.erika.socket.service.ISocketService;
+import cn.erika.util.security.RSA;
+import cn.erika.util.security.Security;
+import cn.erika.util.security.SecurityException;
+import cn.erika.util.string.SerialUtils;
+import cn.erika.util.string.StringUtils;
+
+import java.io.IOException;
 
 @Component(Constant.SRV_EXCHANGE_TOKEN)
 public class ExchangeToken implements ISocketService {
@@ -21,7 +28,22 @@ public class ExchangeToken implements ISocketService {
             message.add(Constant.PUBLIC_KEY, GlobalSettings.publicKey);
             socket.send(message);
         } else {
-            socket.ready();
+            try {
+                Security.Type passwordType = SerialUtils.serialObject(RSA.decryptByPrivateKey(
+                        message.get(Constant.ENCRYPT_TYPE), GlobalSettings.privateKey
+                ));
+                String password = SerialUtils.serialObject(RSA.decryptByPrivateKey(
+                        message.get(Constant.ENCRYPT_CODE), GlobalSettings.privateKey
+                ));
+                socket.set(Constant.ENCRYPT_TYPE, passwordType);
+                socket.set(Constant.ENCRYPT_CODE, password);
+                socket.set(Constant.ENCRYPT, true);
+                socket.ready();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (SecurityException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -34,10 +56,26 @@ public class ExchangeToken implements ISocketService {
                 byte[] publicKey = message.get(Constant.PUBLIC_KEY);
                 try {
                     socket.set(Constant.PARENT_SOCKET, server.checkToken(token, publicKey));
+                    socket.set(Constant.PUBLIC_KEY, publicKey);
                     socket.set(Constant.SESSION_TOKEN, token);
                     Message reply = new Message(Constant.SRV_EXCHANGE_TOKEN);
+                    Security.Type passwordType = GlobalSettings.passwordType;
+                    String password = StringUtils.randomString(GlobalSettings.passwordLength);
+                    socket.set(Constant.ENCRYPT_TYPE, passwordType);
+                    socket.set(Constant.ENCRYPT_CODE, password);
+                    reply.add(Constant.ENCRYPT_CODE, RSA.encryptByPublicKey(
+                            SerialUtils.serialObject(password), publicKey
+                    ));
+                    reply.add(Constant.ENCRYPT_TYPE, RSA.encryptByPublicKey(
+                            SerialUtils.serialObject(passwordType), publicKey
+                    ));
                     socket.send(reply);
+                    socket.set(Constant.ENCRYPT, true);
                 } catch (TokenException e) {
+                    e.printStackTrace();
+                } catch (SecurityException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }

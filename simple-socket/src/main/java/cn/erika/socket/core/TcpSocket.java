@@ -93,15 +93,21 @@ public class TcpSocket implements BaseSocket, Runnable {
         }
     }
 
-    /**
-     * 实现了Socket的写方法 并尝试解决2G以上字节流的问题(int最大值为2G)
-     *
-     * @param data 要发送的数据 是否编码由具体实现决定
-     * @param len  发送数据的实际长度
-     * @throws IOException 如果传输过程发生错误
-     */
-    private void write(byte[] data, int len) throws IOException {
+    @Override
+    public synchronized void send(Message message) {
+        try {
+            DataInfo info = Processor.beforeSend(this, message);
+            send(info.toString().getBytes(charset));
+            send(info.getData());
+        } catch (Exception e) {
+            handler.onError(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void send(byte[] data) throws IOException {
         int pos = 0;
+        int len = data.length;
         // 这里用pos标记发送数据的长度 每次发送缓冲区大小个字节 直到pos等于数据长度len
         // 缓冲区的大小从socket获取（发送区的大小）
         int cacheSize = socket.getSendBufferSize();
@@ -111,17 +117,6 @@ public class TcpSocket implements BaseSocket, Runnable {
         }
         out.write(data, pos, len - pos);
         out.flush();
-    }
-
-    @Override
-    public synchronized void send(Message message) {
-        try {
-            DataInfo info = Processor.beforeSend(this, message);
-            write(info.toString().getBytes(charset), info.toString().length());
-            write(info.getData(), info.getData().length);
-        } catch (Exception e) {
-            handler.onError(e.getMessage(), e);
-        }
     }
 
     @Override

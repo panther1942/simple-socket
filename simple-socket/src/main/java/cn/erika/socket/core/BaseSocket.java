@@ -8,6 +8,8 @@ import java.net.SocketAddress;
 public interface BaseSocket {
     public void send(Message message);
 
+    public void send(byte[] data) throws IOException;
+
     public void receive(DataInfo info, byte[] data);
 
     public void ready();

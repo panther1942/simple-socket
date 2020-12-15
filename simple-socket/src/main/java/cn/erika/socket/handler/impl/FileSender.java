@@ -28,7 +28,6 @@ public class FileSender extends AbstractHandler {
         String sessionToken = message.get(Constant.SESSION_TOKEN);
         socket.set(Constant.SESSION_TOKEN, sessionToken);
         socket.set(Constant.PUBLIC_KEY, socket.get(Constant.PUBLIC_KEY));
-        socket.set(Constant.PRIVATE_KEY, socket.get(Constant.PRIVATE_KEY));
         App.execute(socket, Constant.SRV_EXCHANGE_TOKEN, socket, null);
     }
 
