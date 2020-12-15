@@ -2,7 +2,9 @@ package cn.erika.socket.core;
 
 import cn.erika.aop.exception.BeanException;
 import cn.erika.config.Constant;
-import cn.erika.socket.common.component.*;
+import cn.erika.socket.component.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,10 +22,11 @@ import java.util.Map;
  * 需要一个TcpHandler提供功能支持
  */
 public class TcpSocket implements BaseSocket, Runnable {
+    private Logger log = LoggerFactory.getLogger(this.getClass());
     // 持有的Socket对象 用来响应请求
     private Socket socket;
     // 持有的Reader对象 用来解析数据
-    private ByteReader reader;
+    private TcpReader reader;
     // 持有的Handler对象 在连接建立后初始化连接属性和处理连接后的动作
     private Handler handler;
     private Charset charset;
@@ -37,7 +40,7 @@ public class TcpSocket implements BaseSocket, Runnable {
         set(Constant.TYPE, Constant.SERVER);
         this.handler = handler;
         this.charset = charset;
-        this.reader = new ByteReader(charset);
+        this.reader = new TcpReader(charset);
         this.socket = socket;
         onEstablished();
     }
@@ -46,7 +49,7 @@ public class TcpSocket implements BaseSocket, Runnable {
         set(Constant.TYPE, Constant.CLIENT);
         this.handler = handler;
         this.charset = charset;
-        this.reader = new ByteReader(charset);
+        this.reader = new TcpReader(charset);
         this.socket = new Socket();
         this.socket.setReuseAddress(true);
         this.socket.connect(address);
@@ -73,7 +76,6 @@ public class TcpSocket implements BaseSocket, Runnable {
         // 缓冲区大小从创建的socket中获取（接收区的大小）
         try {
             int cacheSize = this.socket.getReceiveBufferSize();
-            SocketAddress address = this.socket.getRemoteSocketAddress();
             byte[] cache = new byte[cacheSize];
             int len;
             try {
@@ -82,7 +84,7 @@ public class TcpSocket implements BaseSocket, Runnable {
                     reader.read(this, cache, len);
                 }
             } catch (IOException e) {
-                handler.onError("连接中断 From: " + address.toString(), e);
+                handler.onClose(this);
             } finally {
                 close();
             }
@@ -151,10 +153,12 @@ public class TcpSocket implements BaseSocket, Runnable {
     public void close() {
         try {
             if (!socket.isClosed()) {
+                SocketAddress address = socket.getRemoteSocketAddress();
                 socket.close();
+                log.info("关闭连接: [" + address + "]");
             }
         } catch (IOException e) {
-            handler.onError(e.getMessage(), e);
+            log.warn(e.getMessage());
         }
     }
 

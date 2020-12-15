@@ -1,4 +1,4 @@
-package cn.erika.socket.common.exception;
+package cn.erika.socket.exception;
 
 public class TokenException extends Exception {
     public TokenException(String message) {

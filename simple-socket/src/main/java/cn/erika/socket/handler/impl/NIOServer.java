@@ -1,9 +1,5 @@
 package cn.erika.socket.handler.impl;
 
-import cn.erika.aop.exception.BeanException;
-import cn.erika.config.Constant;
-import cn.erika.config.GlobalSettings;
-import cn.erika.socket.common.component.BaseSocket;
 import cn.erika.socket.core.TcpChannel;
 import cn.erika.socket.handler.IServer;
 
@@ -15,8 +11,6 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class NIOServer extends AbstractServerHandler implements IServer, Runnable {
     private ServerSocketChannel server;
@@ -29,6 +23,7 @@ public class NIOServer extends AbstractServerHandler implements IServer, Runnabl
         this.server.configureBlocking(false);
         this.server.bind(address);
         this.server.register(selector, SelectionKey.OP_ACCEPT);
+        log.info("Listen: " + address.getAddress());
     }
 
     @Override
@@ -41,21 +36,25 @@ public class NIOServer extends AbstractServerHandler implements IServer, Runnabl
                     while (keys.hasNext()) {
                         SelectionKey key = keys.next();
                         keys.remove();
-                        try {
-                            if (key.isAcceptable()) {
+                        if (key.isAcceptable()) {
+                            try {
                                 SocketChannel sc = server.accept();
                                 sc.configureBlocking(false);
                                 sc.register(selector, SelectionKey.OP_READ);
                                 TcpChannel channel = new TcpChannel(sc, this, selector, CHARSET);
                                 channelMap.put(sc, channel);
-                            } else {
-                                SocketChannel sc = (SocketChannel) key.channel();
-                                TcpChannel channel = channelMap.get(sc);
-                                channel.read();
+                                onOpen(channel);
+                            } catch (IOException e) {
+                                log.error(e.getMessage());
                             }
-                        } catch (NullPointerException e) {
-                            e.printStackTrace();
-                            System.exit(1);
+                        } else {
+                            SocketChannel sc = (SocketChannel) key.channel();
+                            TcpChannel channel = channelMap.get(sc);
+                            try {
+                                channel.read();
+                            } catch (IOException e) {
+                                close(channel);
+                            }
                         }
                     }
                 }
@@ -66,9 +65,8 @@ public class NIOServer extends AbstractServerHandler implements IServer, Runnabl
     }
 
     @Override
-    public void onOpen(BaseSocket socket) throws BeanException, IOException {
-        socket.set(Constant.TYPE, Constant.SERVER);
-        System.out.println("新连接接入: " + socket.getRemoteAddress().toString());
+    public boolean isClosed() {
+        return !server.isOpen();
     }
 
     @Override
@@ -76,9 +74,10 @@ public class NIOServer extends AbstractServerHandler implements IServer, Runnabl
         try {
             if (server.isOpen()) {
                 server.close();
+                log.info("关闭服务器");
             }
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            log.error(e.getMessage());
         }
     }
 }

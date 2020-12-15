@@ -10,6 +10,7 @@ import cn.erika.aop.scan.PackageScanner;
 import cn.erika.aop.scan.PackageScannerHandler;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
@@ -197,6 +198,7 @@ public abstract class Application {
         return beanList.containsKey(clazz);
     }
 
+    // 排除列表中的bean不会被创建 只能手动创建并添加到列表中
     public static void excludeBean(Class<?> clazz) {
         exclusionBean.add(clazz);
     }
@@ -217,16 +219,20 @@ public abstract class Application {
             boolean flag = false;
             for (Method method : methods) {
                 if (!method.getName().equals(name)) {
+                    // 首先 名字不同的直接忽略
                     continue;
                 }
                 Class<?>[] types = method.getParameterTypes();
-                if (types.length == argTypes.length) {
+                if (argTypes != null && types.length == argTypes.length) {
                     for (int i = 0; i < types.length; i++) {
                         if (argTypes[i] == null) {
+                            // 如果传入的参数部分为空 则匹配这个位置任意类型的参数
                             flag = true;
                         } else if (types[i].isAssignableFrom(argTypes[i])) {
+                            // 如果参数类型匹配 或为其子类
                             flag = true;
                         } else {
+                            // 如果既不为空 且参数类型又不匹配
                             flag = false;
                             break;
                         }
@@ -235,6 +241,10 @@ public abstract class Application {
                         targetMethod.add(method);
                         flag = false;
                     }
+                } else if (argTypes == null) {
+                    // 如果传入的参数个数为0 就是没有传入参数
+                    // 那么匹配所有同名方法
+                    targetMethod.add(method);
                 }
             }
             if (targetMethod.size() == 0) {
@@ -296,7 +306,11 @@ public abstract class Application {
                     advice.finished(method, args);
                 }
             } else {
-                return method.invoke(target, args);
+                try {
+                    return method.invoke(target, args);
+                } catch (InvocationTargetException e) {
+                    throw e.getTargetException();
+                }
             }
         }
     }

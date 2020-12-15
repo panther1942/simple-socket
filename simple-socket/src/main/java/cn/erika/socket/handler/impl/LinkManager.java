@@ -1,6 +1,7 @@
 package cn.erika.socket.handler.impl;
 
-import cn.erika.socket.common.component.BaseSocket;
+import cn.erika.config.Constant;
+import cn.erika.socket.core.BaseSocket;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,9 +11,9 @@ public class LinkManager {
     private Map<String, BaseSocket> linkList = new HashMap<>();
 
     BaseSocket addLink(BaseSocket socket) {
-        String uuid = UUID.randomUUID().toString();
-        socket.set("id", uuid);
-        linkList.put(uuid, socket);
+        String uid = UUID.randomUUID().toString();
+        socket.set(Constant.UID, uid);
+        linkList.put(uid, socket);
         return socket;
     }
 

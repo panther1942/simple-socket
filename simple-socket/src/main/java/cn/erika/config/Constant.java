@@ -4,6 +4,7 @@ public class Constant {
     public static final String TYPE = "type";
     public static final String CLIENT = "client";
     public static final String SERVER = "server";
+    public static final String UID = "uid";
 
     public static final String BIO = "bio";
     public static final String NIO = "nio";

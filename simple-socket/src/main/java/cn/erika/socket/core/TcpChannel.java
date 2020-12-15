@@ -1,7 +1,7 @@
 package cn.erika.socket.core;
 
 import cn.erika.config.Constant;
-import cn.erika.socket.common.component.*;
+import cn.erika.socket.component.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +10,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -22,9 +23,9 @@ public class TcpChannel implements BaseSocket {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     private SocketChannel channel;
-    private BufferReader reader;
     private Handler handler;
     private Charset charset;
+    private TcpReader reader;
     private Selector selector;
     private Map<String, Object> attr = new HashMap<>();
 
@@ -33,7 +34,7 @@ public class TcpChannel implements BaseSocket {
         this.handler = handler;
         this.selector = selector;
         this.charset = charset;
-        this.reader = new BufferReader(charset);
+        this.reader = new TcpReader(charset);
         this.channel = channel;
         this.channel.configureBlocking(false);
         this.channel.register(selector, SelectionKey.OP_READ);
@@ -45,7 +46,7 @@ public class TcpChannel implements BaseSocket {
         this.handler = handler;
         this.selector = selector;
         this.charset = charset;
-        this.reader = new BufferReader(charset);
+        this.reader = new TcpReader(charset);
         this.channel = SocketChannel.open();
         this.channel.configureBlocking(false);
         this.channel.register(selector, SelectionKey.OP_CONNECT);
@@ -58,19 +59,15 @@ public class TcpChannel implements BaseSocket {
         handler.init(this);
     }
 
-    public void read() {
+    public void read() throws IOException {
         try {
             int cacheSize = channel.socket().getReceiveBufferSize();
             ByteBuffer buffer = ByteBuffer.allocate(cacheSize);
-            try {
-                if (channel.read(buffer) > 0) {
-                    buffer.flip();
-                    reader.read(this, buffer);
-                }
-            } catch (IOException e) {
-                handler.onError("连接中断", e);
-            } finally {
-                close();
+            if (channel.read(buffer) > 0) {
+                buffer.flip();
+                byte[] data = buffer.array();
+                int len = buffer.limit();
+                reader.read(this, data, len);
             }
         } catch (SocketException e) {
             handler.onError(e.getMessage(), e);
@@ -88,7 +85,9 @@ public class TcpChannel implements BaseSocket {
             System.arraycopy(bData, 0, data, bInfo.length, bData.length);
             channel.write(ByteBuffer.wrap(data));
             selector.wakeup();
-            channel.register(selector,SelectionKey.OP_READ);
+            channel.register(selector, SelectionKey.OP_READ);
+        } catch (ClosedChannelException e) {
+            handler.onClose(this);
         } catch (Exception e) {
             handler.onError(e.getMessage(), e);
         }
@@ -123,10 +122,12 @@ public class TcpChannel implements BaseSocket {
     public void close() {
         try {
             if (channel.isOpen()) {
+                SocketAddress address = channel.getRemoteAddress();
                 channel.close();
+                log.info("关闭连接: [" + address + "]");
             }
         } catch (IOException e) {
-            handler.onError(e.getMessage(), e);
+            log.warn(e.getMessage());
         }
     }
 

@@ -5,11 +5,11 @@ import cn.erika.aop.exception.BeanException;
 import cn.erika.cli.App;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
-import cn.erika.socket.common.component.BaseSocket;
-import cn.erika.socket.common.component.FileInfo;
-import cn.erika.socket.common.component.Message;
-import cn.erika.socket.common.exception.FileException;
-import cn.erika.socket.common.exception.TokenException;
+import cn.erika.socket.component.FileInfo;
+import cn.erika.socket.component.Message;
+import cn.erika.socket.core.BaseSocket;
+import cn.erika.socket.exception.FileException;
+import cn.erika.socket.exception.TokenException;
 import cn.erika.socket.handler.IServer;
 import cn.erika.socket.handler.impl.FileSender;
 import cn.erika.socket.service.ISocketService;
@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.UUID;
 
 /*
@@ -65,10 +64,6 @@ public class FileUploadPreService implements ISocketService {
     public void server(BaseSocket socket, Message message) {
         String sessionToken = UUID.randomUUID().toString();
         log.info("准备接收客户端发送文件: " + message.toString());
-        // TODO 检查本地下载目录下是否有该文件
-        // 如果有 则校验完整性 1、比较文件大小 2、比较文件签名 3、数据库查询状态标志（可选）
-        // 如果没有或者校验失败 检查当前目录是否可写/文件是否可写 发送准备好的信号
-        // 如果校验正确（文件完整） 或者 目录或文件不可写 则发出拒绝信号
         try {
             FileInfo info = message.get(Constant.FILE_INFO);
             String filename = info.getFilename();
@@ -90,12 +85,20 @@ public class FileUploadPreService implements ISocketService {
                 // 考虑一下把文件的元信息记录一下
                 App.add(sessionToken, message.get(Constant.FILE_INFO));
                 IServer server = App.getBean(IServer.class);
-
-                server.addToken(socket, sessionToken);
-                message.add(Constant.SESSION_TOKEN, sessionToken);
-                message.add(Constant.RECEIVE_STATUS, Constant.SUCCESS);
-                // 先不管断点续传
-                message.add(Constant.FILE_POS, 0L);
+                // TODO 检查本地下载目录下是否有该文件
+                // 如果有 则校验完整性 1、比较文件大小 2、比较文件签名 3、数据库查询状态标志（可选）
+                // 如果没有或者校验失败 检查当前目录是否可写/文件是否可写 发送准备好的信号
+                // 如果校验正确（文件完整） 或者 目录或文件不可写 则发出拒绝信号
+                if (true) {
+                    // 检查通过 接收的话
+                    server.addToken(socket, sessionToken);
+                    message.add(Constant.SESSION_TOKEN, sessionToken);
+                    message.add(Constant.RECEIVE_STATUS, Constant.SUCCESS);
+                    // 先不管断点续传
+                    message.add(Constant.FILE_POS, 0L);
+                } else {
+                    message.add(Constant.RECEIVE_STATUS, Constant.FAILED);
+                }
                 socket.send(message);
             } catch (BeanException e) {
                 e.printStackTrace();
@@ -123,7 +126,7 @@ public class FileUploadPreService implements ISocketService {
                 }
                 log.info("计算文件签名");
                 byte[] sign = MessageDigest.sum(file, algorithmSign);
-                log.info("文件签名: "+ Base64.getEncoder().encodeToString(sign));
+                log.info("文件签名: " + Base64.getEncoder().encodeToString(sign));
 
                 Message request = new Message(Constant.SRV_PRE_UPLOAD);
                 FileInfo info = new FileInfo();
@@ -132,7 +135,7 @@ public class FileUploadPreService implements ISocketService {
                 info.setFileLength(file.length());
                 info.setAlgorithmSign(algorithmSign);
                 info.setSign(sign);
-                request.add(Constant.FILE_INFO,info);
+                request.add(Constant.FILE_INFO, info);
 
                 socket.send(request);
             } catch (SecurityException e) {

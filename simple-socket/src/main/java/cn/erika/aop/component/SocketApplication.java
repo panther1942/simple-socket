@@ -4,10 +4,12 @@ import cn.erika.aop.annotation.Component;
 import cn.erika.aop.exception.BeanException;
 import cn.erika.aop.scan.PackageScanner;
 import cn.erika.aop.scan.PackageScannerHandler;
-import cn.erika.socket.service.ISocketService;
-import cn.erika.socket.common.component.BaseSocket;
-import cn.erika.socket.common.component.Message;
 import cn.erika.config.Constant;
+import cn.erika.socket.core.BaseSocket;
+import cn.erika.socket.component.Message;
+import cn.erika.socket.service.ISocketService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -16,6 +18,7 @@ import java.util.Map;
 
 public abstract class SocketApplication extends Application {
     private static Map<String, Class<? extends ISocketService>> socketServiceList = new HashMap<>();
+    private static Logger log = LoggerFactory.getLogger(SocketApplication.class);
 
     static {
         PackageScanner scanner = PackageScanner.getInstance();

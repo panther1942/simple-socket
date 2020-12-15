@@ -4,6 +4,7 @@ import cn.erika.aop.exception.BeanException;
 import cn.erika.socket.core.TcpChannel;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -12,6 +13,7 @@ import java.util.Iterator;
 
 public class NIOClient extends AbstractClientHandler implements Runnable {
     private Selector selector;
+    private Thread thread;
 
     public NIOClient(InetSocketAddress address) {
         this.address = address;
@@ -22,7 +24,9 @@ public class NIOClient extends AbstractClientHandler implements Runnable {
         try {
             this.selector = Selector.open();
             this.socket = new TcpChannel(address, this, selector, CHARSET);
-            new Thread(this).start();
+            this.thread = new Thread(this);
+            thread.setDaemon(true);
+            thread.start();
         } catch (IOException e) {
             onError(e.getMessage(), e);
         }
@@ -30,7 +34,7 @@ public class NIOClient extends AbstractClientHandler implements Runnable {
 
     @Override
     public void run() {
-        while (true) {
+        while (!this.socket.isClosed()) {
             try {
                 int events = selector.select();
                 if (events > 0) {
@@ -41,26 +45,36 @@ public class NIOClient extends AbstractClientHandler implements Runnable {
                         if (key.isConnectable()) {
                             finishConnect(key);
                         } else if (key.isReadable()) {
-//                            SocketChannel channel = (SocketChannel) key.channel();
                             TcpChannel channel = (TcpChannel) this.socket;
                             channel.read();
                         }
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
-            } catch (BeanException e) {
-                e.printStackTrace();
+                onError(e.getMessage(), e);
             }
         }
     }
 
-    private void finishConnect(SelectionKey key) throws IOException, BeanException {
-        SocketChannel channel = (SocketChannel) key.channel();
-        if (channel.isConnectionPending()) {
-            channel.finishConnect();
+    private void finishConnect(SelectionKey key) throws IOException {
+        try {
+            SocketChannel channel = (SocketChannel) key.channel();
+            if (channel.isConnectionPending()) {
+                channel.finishConnect();
+            }
+            channel.register(this.selector, SelectionKey.OP_READ);
+            onOpen(this.socket);
+        } catch (ConnectException e) {
+            log.warn(e.getMessage());
+            onClose(this.socket);
+        } catch (BeanException e) {
+            onError(e.getMessage(), e);
         }
-        channel.register(this.selector, SelectionKey.OP_READ);
-        onOpen(this.socket);
+    }
+
+    @Override
+    public void close() {
+        super.close();
+        System.out.println(thread.isInterrupted());
     }
 }

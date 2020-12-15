@@ -5,9 +5,9 @@ import cn.erika.aop.exception.BeanException;
 import cn.erika.cli.App;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
-import cn.erika.socket.common.component.BaseSocket;
-import cn.erika.socket.common.component.Message;
-import cn.erika.socket.common.exception.TokenException;
+import cn.erika.socket.core.BaseSocket;
+import cn.erika.socket.component.Message;
+import cn.erika.socket.exception.TokenException;
 import cn.erika.socket.handler.IServer;
 import cn.erika.socket.service.ISocketService;
 

@@ -1,15 +1,11 @@
 package cn.erika.socket.handler.impl;
 
-import cn.erika.config.Constant;
-import cn.erika.socket.common.component.BaseSocket;
-import cn.erika.socket.common.component.Message;
 import cn.erika.socket.core.TcpSocket;
 import cn.erika.socket.handler.IServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.net.SocketException;
 
 public class BIOServer extends AbstractServerHandler implements IServer, Runnable {
     private ServerSocket server;
@@ -19,7 +15,7 @@ public class BIOServer extends AbstractServerHandler implements IServer, Runnabl
         this.server = new ServerSocket();
         try {
             server.bind(address);
-            System.out.println("Listen: " + address.getAddress());
+            log.info("Listen: " + address.getAddress());
         } catch (IOException e) {
             onError(e.getMessage(), e);
         }
@@ -34,13 +30,12 @@ public class BIOServer extends AbstractServerHandler implements IServer, Runnabl
                 onError(e.getMessage(), e);
             }
         }
-        System.out.println("运行中断");
+        log.warn("运行中断");
     }
 
     @Override
-    public void onOpen(BaseSocket socket) throws IOException {
-        linkManager.addLink(socket);
-        log.info("New client link: " + socket.getRemoteAddress());
+    public boolean isClosed() {
+        return server.isClosed();
     }
 
     @Override
@@ -48,9 +43,10 @@ public class BIOServer extends AbstractServerHandler implements IServer, Runnabl
         try {
             if (!server.isClosed()) {
                 server.close();
+                log.info("关闭服务器");
             }
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            log.error(e.getMessage());
         }
     }
 }

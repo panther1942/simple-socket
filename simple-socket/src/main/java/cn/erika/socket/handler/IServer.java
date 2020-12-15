@@ -1,11 +1,13 @@
 package cn.erika.socket.handler;
 
-import cn.erika.socket.common.component.BaseSocket;
-import cn.erika.socket.common.exception.TokenException;
+import cn.erika.socket.core.BaseSocket;
+import cn.erika.socket.exception.TokenException;
 
 public interface IServer extends Runnable {
 
     public void listen();
+
+    public boolean isClosed();
 
     public void close();
 

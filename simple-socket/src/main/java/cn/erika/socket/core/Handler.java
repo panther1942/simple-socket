@@ -1,7 +1,7 @@
-package cn.erika.socket.common.component;
+package cn.erika.socket.core;
 
 import cn.erika.aop.exception.BeanException;
-import cn.erika.socket.common.exception.TokenException;
+import cn.erika.socket.component.Message;
 
 import java.io.IOException;
 

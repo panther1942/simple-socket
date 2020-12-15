@@ -3,7 +3,7 @@ package cn.erika.test;
 import cn.erika.aop.annotation.PackageScan;
 import cn.erika.aop.component.Application;
 import cn.erika.aop.exception.BeanException;
-import cn.erika.socket.common.component.Message;
+import cn.erika.socket.component.Message;
 import cn.erika.util.compress.CompressException;
 import cn.erika.util.compress.GZIP;
 import cn.erika.util.string.SerialUtils;

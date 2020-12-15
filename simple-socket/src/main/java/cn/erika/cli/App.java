@@ -4,15 +4,13 @@ import cn.erika.aop.annotation.PackageScan;
 import cn.erika.aop.component.SocketApplication;
 import cn.erika.aop.exception.BeanException;
 import cn.erika.cli.service.CliService;
-import cn.erika.util.string.KeyboardReader;
 import cn.erika.config.Constant;
 import cn.erika.socket.handler.IClient;
 import cn.erika.socket.handler.IServer;
+import cn.erika.util.string.KeyboardReader;
 import cn.erika.util.string.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 @PackageScan("cn.erika")
 public class App extends SocketApplication implements Runnable {
@@ -54,18 +52,21 @@ public class App extends SocketApplication implements Runnable {
             }
         } finally {
             log.info("退出运行");
-            try {
-                IClient client = getBean(IClient.class);
+            try{
                 IServer server = getBean(IServer.class);
-
-                if (client != null) {
-                    client.close();
-                }
                 if (server != null) {
                     server.close();
                 }
             } catch (BeanException e) {
-                log.error(e.getMessage());
+                log.info("服务器未运行");
+            }
+            try {
+                IClient client = getBean(IClient.class);
+                if (client != null) {
+                    client.close();
+                }
+            } catch (BeanException e) {
+                log.info("客户端未运行");
             }
         }
     }

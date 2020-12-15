@@ -1,7 +1,8 @@
-package cn.erika.socket.common.component;
+package cn.erika.socket.core;
 
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
+import cn.erika.socket.component.Message;
 import cn.erika.util.compress.CompressException;
 import cn.erika.util.compress.GZIP;
 import cn.erika.util.security.RSA;

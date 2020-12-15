@@ -28,9 +28,13 @@ public class ListenService implements CliService {
         IServer server = null;
         try {
             try {
-                App.getBean(IServer.class);
-                log.warn("服务器正在运行");
+                server = App.getBean(IServer.class);
             } catch (NoSuchBeanException e) {
+                log.debug("服务器未启动");
+            }
+            if (server != null && !server.isClosed()) {
+                log.warn("服务器正在运行");
+            } else {
                 InetSocketAddress address = null;
                 if (args.length == 1) {
                     address = new InetSocketAddress(GlobalSettings.DEFAULT_ADDRESS, GlobalSettings.DEFAULT_PORT);
@@ -47,12 +51,11 @@ public class ListenService implements CliService {
                         server = new NIOServer(address);
                         break;
                     case Constant.AIO:
-//                break;
                     default:
                         throw new BeanException("不支持的Socket类型");
                 }
                 App.addBean(IServer.class, server);
-                new Thread(server).start();
+                server.listen();
             }
         } catch (IOException e) {
             throw new BeanException(e.getMessage(), e);

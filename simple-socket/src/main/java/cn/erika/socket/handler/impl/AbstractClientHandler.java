@@ -3,12 +3,11 @@ package cn.erika.socket.handler.impl;
 import cn.erika.aop.exception.BeanException;
 import cn.erika.cli.App;
 import cn.erika.config.Constant;
-import cn.erika.socket.common.component.BaseSocket;
-import cn.erika.socket.common.component.Message;
+import cn.erika.socket.core.BaseSocket;
+import cn.erika.socket.component.Message;
 import cn.erika.socket.handler.IClient;
 
 import java.net.InetSocketAddress;
-import java.nio.channels.Selector;
 
 public abstract class AbstractClientHandler extends AbstractHandler implements IClient {
     protected InetSocketAddress address;
@@ -26,7 +25,6 @@ public abstract class AbstractClientHandler extends AbstractHandler implements I
         if (socket == null || socket.isClosed()) {
             return;
         }
-        System.out.println("正在关闭");
         close(socket);
     }
 

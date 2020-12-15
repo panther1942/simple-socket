@@ -1,9 +1,9 @@
 package cn.erika.socket.handler.impl;
 
 import cn.erika.config.Constant;
-import cn.erika.socket.common.component.BaseSocket;
-import cn.erika.socket.common.component.Message;
-import cn.erika.socket.common.exception.TokenException;
+import cn.erika.socket.core.BaseSocket;
+import cn.erika.socket.component.Message;
+import cn.erika.socket.exception.TokenException;
 import cn.erika.socket.handler.IServer;
 
 import java.io.IOException;
@@ -11,7 +11,7 @@ import java.net.SocketException;
 import java.util.Base64;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class AbstractServerHandler extends AbstractHandler implements IServer{
+public abstract class AbstractServerHandler extends AbstractHandler implements IServer {
     protected LinkManager linkManager;
     private ConcurrentHashMap<String, BaseSocket> tokenList = new ConcurrentHashMap<>();
 
@@ -45,21 +45,27 @@ public abstract class AbstractServerHandler extends AbstractHandler implements I
     }
 
     @Override
+    public void onOpen(BaseSocket socket) throws IOException {
+        linkManager.addLink(socket);
+        log.info("New client link: " + socket.getRemoteAddress());
+    }
+
+    @Override
     public void onClose(BaseSocket socket) {
         close(socket);
     }
 
     @Override
     public void listen() {
-        new Thread(this).start();
+        Thread thread = new Thread(this);
+        thread.setDaemon(true);
+        thread.start();
     }
 
     public void close(BaseSocket socket) {
         if (linkManager.popLink(socket)) {
             socket.send(new Message(Constant.EXIT, Constant.EXIT));
             socket.close();
-        } else {
-            System.err.println("未知异常");
         }
     }
 

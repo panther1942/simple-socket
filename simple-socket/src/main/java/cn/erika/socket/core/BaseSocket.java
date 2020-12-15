@@ -1,4 +1,6 @@
-package cn.erika.socket.common.component;
+package cn.erika.socket.core;
+
+import cn.erika.socket.component.Message;
 
 import java.io.IOException;
 import java.net.SocketAddress;

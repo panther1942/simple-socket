@@ -1,4 +1,4 @@
-package cn.erika.socket.common.component;
+package cn.erika.socket.component;
 
 import cn.erika.util.security.MessageDigest;
 
