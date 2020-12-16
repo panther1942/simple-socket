@@ -23,7 +23,7 @@ class TcpReader {
 
     // 因为一个socket或者channel对应一个reader 所以没必要加锁
     // 下面负责的逻辑是处理粘包的 因为尝试次数太多 忘了当初是咋想的了 反正目前这个逻辑是正确的（大概吧） 反正没出错
-    void read(BaseSocket socket, byte[] data, int len) throws IOException {
+    synchronized void read(BaseSocket socket, byte[] data, int len) throws IOException {
         // 因为数组长度和有效数据的长度很有可能不一致 因此需要按照读取的长度拷贝一次数组
         byte[] tmp = new byte[len];
         System.arraycopy(data, 0, tmp, 0, len);

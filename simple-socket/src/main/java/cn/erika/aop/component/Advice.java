@@ -11,8 +11,11 @@ public interface Advice {
     public void success(Method method, Object[] args, Object result);
 
     // 如果执行失败
-    public void failed(Method method, Object[] args, Throwable error);
+    public Object failed(Method method, Object[] args, Throwable error);
 
     // 在执行后
     public void finished(Method method, Object[] args);
+
+    // 如果before返回false则执行
+    public Object cancel(Method method,Object[] args);
 }

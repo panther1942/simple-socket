@@ -1,12 +1,12 @@
 package cn.erika.aop.component;
 
-import cn.erika.aop.annotation.Component;
 import cn.erika.aop.exception.BeanException;
 import cn.erika.aop.scan.PackageScanner;
 import cn.erika.aop.scan.PackageScannerHandler;
 import cn.erika.config.Constant;
-import cn.erika.socket.core.BaseSocket;
+import cn.erika.socket.annotation.SocketServiceMapping;
 import cn.erika.socket.component.Message;
+import cn.erika.socket.core.BaseSocket;
 import cn.erika.socket.service.ISocketService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,17 +20,20 @@ public abstract class SocketApplication extends Application {
     private static Map<String, Class<? extends ISocketService>> socketServiceList = new HashMap<>();
     private static Logger log = LoggerFactory.getLogger(SocketApplication.class);
 
-    static {
+    @Override
+    public void afterStartup() {
+        super.afterStartup();
         PackageScanner scanner = PackageScanner.getInstance();
         scanner.addHandler(new PackageScannerHandler() {
             @Override
             public boolean filter(Class<?> clazz) {
-                return ISocketService.class.isAssignableFrom(clazz) && clazz.getAnnotation(Component.class) != null;
+                return ISocketService.class.isAssignableFrom(clazz) && clazz.getAnnotation(SocketServiceMapping.class) != null;
             }
 
+            @SuppressWarnings("unchecked")
             @Override
             public void deal(Class<?> clazz) {
-                Component component = clazz.getAnnotation(Component.class);
+                SocketServiceMapping component = clazz.getAnnotation(SocketServiceMapping.class);
                 Class<ISocketService> service = (Class<ISocketService>) clazz;
                 if (component != null) {
                     socketServiceList.put(component.value(), service);

@@ -22,7 +22,7 @@ import java.util.regex.Matcher;
 public class PackageScanner {
 
     private static final String CHARSET = "UTF-8";
-    private static PackageScanner scanner = null;
+    private static PackageScanner scanner;
     // 要扫描的包名
     private List<String> packageList = new LinkedList<>();
     // 处理器列表

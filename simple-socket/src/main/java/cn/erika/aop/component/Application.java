@@ -29,8 +29,31 @@ public abstract class Application {
     private static Map<String, Method> serviceList = new HashMap<>();
     private static List<Class<?>> exclusionBean = new LinkedList<>();
 
-    // 在初始化类的时候进行扫包
-    static {
+    // 需要在启动类手动执行
+    // 如果在启动类上有使用PackageScan注解
+    // 则将注解上标识的包名进行扫描
+    // 如果有自定义处理器需要在本方法执行之前加入到扫包的处理器列表中
+    public static void run(Class<? extends Application> clazz) {
+        try {
+            Application app = clazz.newInstance();
+            app.afterStartup();
+            PackageScan scan = clazz.getAnnotation(PackageScan.class);
+            if (scan != null) {
+                PackageScanner scanner = PackageScanner.getInstance();
+                for (String pack : scan.value()) {
+                    scanner.addPackage(pack);
+                }
+                scanner.scan();
+            }
+        } catch (InstantiationException e) {
+            throw new RuntimeException("启动类无法实例化", e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("启动类需要一个可访问的无参构造函数", e);
+        }
+    }
+
+    // 启动后 先扫包
+    public void afterStartup() {
         PackageScanner scanner = PackageScanner.getInstance();
         // 默认处理器
         // 查找具有Component注解注释的类 将具有ServiceMapping注解的方法加入服务列表
@@ -56,33 +79,6 @@ public abstract class Application {
             }
         });
     }
-
-    // 需要在启动类手动执行
-    // 如果在启动类上有使用PackageScan注解
-    // 则将注解上标识的包名进行扫描
-    // 如果有自定义处理器需要在本方法执行之前加入到扫包的处理器列表中
-    public static void run(Class<? extends Application> clazz) {
-        PackageScan scan = clazz.getAnnotation(PackageScan.class);
-        if (scan != null) {
-            PackageScanner scanner = PackageScanner.getInstance();
-            for (String pack : scan.value()) {
-                scanner.addPackage(pack);
-            }
-            scanner.scan();
-        }
-
-        try {
-            Application app = clazz.newInstance();
-            app.afterStartup();
-        } catch (InstantiationException e) {
-            throw new RuntimeException("启动类无法实例化", e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("启动类需要一个可访问的无参构造函数", e);
-        }
-    }
-
-    // 在扫包完成后将执行此方法
-    public abstract void afterStartup();
 
     // 根据服务名称获取服务方法
     public static Object execute(String name, Object... args) throws BeanException {
@@ -297,11 +293,10 @@ public abstract class Application {
                         advice.success(method, args, result);
                         return result;
                     } else {
-                        return null;
+                        return advice.cancel(method, args);
                     }
                 } catch (Throwable e) {
-                    advice.failed(method, args, e);
-                    throw e;
+                    return advice.failed(method, args, e);
                 } finally {
                     advice.finished(method, args);
                 }

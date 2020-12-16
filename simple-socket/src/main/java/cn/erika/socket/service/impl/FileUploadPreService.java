@@ -1,10 +1,10 @@
 package cn.erika.socket.service.impl;
 
-import cn.erika.aop.annotation.Component;
 import cn.erika.aop.exception.BeanException;
 import cn.erika.cli.App;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
+import cn.erika.socket.annotation.SocketServiceMapping;
 import cn.erika.socket.component.FileInfo;
 import cn.erika.socket.component.Message;
 import cn.erika.socket.core.BaseSocket;
@@ -45,7 +45,7 @@ import java.util.UUID;
 AOP搞起来也是为了这个
 
  */
-@Component(Constant.SRV_PRE_UPLOAD)
+@SocketServiceMapping(Constant.SRV_PRE_UPLOAD)
 public class FileUploadPreService implements ISocketService {
     private Logger log = LoggerFactory.getLogger(this.getClass());
     private final String BASE_DIR = GlobalSettings.baseDir;
@@ -126,7 +126,7 @@ public class FileUploadPreService implements ISocketService {
                 }
                 log.info("计算文件签名");
                 byte[] sign = MessageDigest.sum(file, fileSignAlgorithm);
-                log.info("文件签名: " + Base64.getEncoder().encodeToString(sign));
+                log.info("文件签名: " + MessageDigest.byteToHexString(sign));
 
                 Message request = new Message(Constant.SRV_PRE_UPLOAD);
                 FileInfo info = new FileInfo();

@@ -26,6 +26,7 @@ public class Constant {
     public static final String SECURITY_NAME = "securityName";
     public static final String SECURITY_CODE = "securityCode";
     public static final String RSA_ALGORITHM = "rsaAlgorithm";
+    public static final String SIGN = "sign";
 
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";

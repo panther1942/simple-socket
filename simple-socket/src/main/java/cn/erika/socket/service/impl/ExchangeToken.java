@@ -1,10 +1,10 @@
 package cn.erika.socket.service.impl;
 
-import cn.erika.aop.annotation.Component;
 import cn.erika.aop.exception.BeanException;
 import cn.erika.cli.App;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
+import cn.erika.socket.annotation.SocketServiceMapping;
 import cn.erika.socket.component.Message;
 import cn.erika.socket.core.BaseSocket;
 import cn.erika.socket.exception.TokenException;
@@ -18,7 +18,7 @@ import cn.erika.util.string.StringUtils;
 
 import java.io.IOException;
 
-@Component(Constant.SRV_EXCHANGE_TOKEN)
+@SocketServiceMapping(Constant.SRV_EXCHANGE_TOKEN)
 public class ExchangeToken implements ISocketService {
     @Override
     public void client(BaseSocket socket, Message message) {

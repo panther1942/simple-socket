@@ -34,7 +34,7 @@ public class NIOClient extends AbstractClientHandler implements Runnable {
 
     @Override
     public void run() {
-        while (!this.socket.isClosed()) {
+        while (!socket.isClosed()) {
             try {
                 int events = selector.select();
                 if (events > 0) {
@@ -45,8 +45,12 @@ public class NIOClient extends AbstractClientHandler implements Runnable {
                         if (key.isConnectable()) {
                             finishConnect(key);
                         } else if (key.isReadable()) {
-                            TcpChannel channel = (TcpChannel) this.socket;
-                            channel.read();
+                            try {
+                                TcpChannel channel = (TcpChannel) socket;
+                                channel.read();
+                            } catch (IOException e) {
+                                onClose(socket);
+                            }
                         }
                     }
                 }

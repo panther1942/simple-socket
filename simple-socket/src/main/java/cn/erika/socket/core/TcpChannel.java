@@ -68,7 +68,7 @@ public class TcpChannel extends BaseSocket {
                 reader.read(this, data, len);
             }
         } catch (SocketException e) {
-            handler.onError(e.getMessage(), e);
+            handler.onClose(this);
         }
     }
 

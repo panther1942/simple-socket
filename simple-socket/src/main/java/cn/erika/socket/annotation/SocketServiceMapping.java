@@ -1,4 +1,4 @@
-package cn.erika.aop.annotation;
+package cn.erika.socket.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,13 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-// 标记需要使用Application管理实例的组件
-public @interface Component {
+public @interface SocketServiceMapping {
     public String value() default "";
-    public Type type() default Type.ProtoType;
-
-    public enum Type{
-        SingleTon(),
-        ProtoType();
-    }
 }

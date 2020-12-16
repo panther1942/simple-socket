@@ -1,14 +1,14 @@
 package cn.erika.socket.service.impl;
 
-import cn.erika.aop.annotation.Component;
-import cn.erika.socket.service.ISocketService;
-import cn.erika.socket.core.BaseSocket;
-import cn.erika.socket.component.Message;
 import cn.erika.config.Constant;
+import cn.erika.socket.annotation.SocketServiceMapping;
+import cn.erika.socket.component.Message;
+import cn.erika.socket.core.BaseSocket;
+import cn.erika.socket.service.ISocketService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(Constant.SRV_EXCHANGE_RESULT)
+@SocketServiceMapping(Constant.SRV_EXCHANGE_RESULT)
 public class ExchangeResult implements ISocketService {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
@@ -22,8 +22,7 @@ public class ExchangeResult implements ISocketService {
             socket.set(Constant.ENCRYPT, true);
         } else {
             log.warn(msg);
-            socket.set(Constant.ENCRYPT, false);
-            socket.close();
+//            socket.set(Constant.ENCRYPT, false);
         }
     }
 

@@ -23,6 +23,7 @@ public class App extends SocketApplication implements Runnable {
 
     @Override
     public void afterStartup() {
+        super.afterStartup();
         excludeBean(IClient.class);
         excludeBean(IServer.class);
 

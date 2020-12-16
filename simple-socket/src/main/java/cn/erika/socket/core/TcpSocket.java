@@ -92,7 +92,7 @@ public class TcpSocket extends BaseSocket implements Runnable {
     }
 
     @Override
-    public synchronized void send(Message message) {
+    public void send(Message message) {
         try {
             DataInfo info = beforeSend(this, message);
             send(info.toString().getBytes(charset));
@@ -102,7 +102,7 @@ public class TcpSocket extends BaseSocket implements Runnable {
         }
     }
 
-    private void send(byte[] data) throws IOException {
+    private synchronized void send(byte[] data) throws IOException {
         int pos = 0;
         int len = data.length;
         // 这里用pos标记发送数据的长度 每次发送缓冲区大小个字节 直到pos等于数据长度len

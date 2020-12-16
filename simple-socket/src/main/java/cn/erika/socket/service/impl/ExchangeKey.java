@@ -1,16 +1,16 @@
 package cn.erika.socket.service.impl;
 
-import cn.erika.aop.annotation.Component;
-import cn.erika.socket.service.ISocketService;
-import cn.erika.socket.core.BaseSocket;
-import cn.erika.socket.component.Message;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
+import cn.erika.socket.annotation.SocketServiceMapping;
+import cn.erika.socket.component.Message;
+import cn.erika.socket.core.BaseSocket;
+import cn.erika.socket.service.ISocketService;
 import cn.erika.util.security.SecurityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(Constant.SRV_EXCHANGE_KEY)
+@SocketServiceMapping(Constant.SRV_EXCHANGE_KEY)
 public class ExchangeKey implements ISocketService {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
@@ -21,6 +21,7 @@ public class ExchangeKey implements ISocketService {
         Message request = new Message(Constant.SRV_EXCHANGE_KEY);
         request.add(Constant.PUBLIC_KEY, GlobalSettings.publicKey);
         request.add(Constant.RSA_ALGORITHM, GlobalSettings.rsaAlgorithm);
+        log.debug("向服务器请求加密 签名类型: " + GlobalSettings.rsaAlgorithm);
         socket.send(request);
     }
 
@@ -36,8 +37,8 @@ public class ExchangeKey implements ISocketService {
             socket.set(Constant.RSA_ALGORITHM, rsaAlgorithm);
             Message reply = new Message(Constant.SRV_EXCHANGE_PASSWORD);
             reply.add(Constant.PUBLIC_KEY, GlobalSettings.publicKey);
+            log.debug("客户端请求加密通信 签名类型: " + rsaAlgorithm);
             socket.send(reply);
-            log.debug("对端请求加密通信 签名类型: " + rsaAlgorithm);
         } catch (SecurityException e) {
             log.error(e.getMessage(), e);
         }

@@ -1,8 +1,8 @@
 package cn.erika.socket.service.impl;
 
-import cn.erika.aop.annotation.Component;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
+import cn.erika.socket.annotation.SocketServiceMapping;
 import cn.erika.socket.component.Message;
 import cn.erika.socket.core.BaseSocket;
 import cn.erika.socket.service.ISocketService;
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Base64;
 
-@Component(Constant.SRV_EXCHANGE_PASSWORD)
+@SocketServiceMapping(Constant.SRV_EXCHANGE_PASSWORD)
 public class ExchangePassword implements ISocketService {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
@@ -29,7 +29,7 @@ public class ExchangePassword implements ISocketService {
             if (serverPublicKey == null) {
                 throw new SecurityException("缺少公钥信息");
             }
-            log.debug("获取服务器公钥: " + Base64.getEncoder().encodeToString(serverPublicKey));
+//            log.debug("获取服务器公钥: " + Base64.getEncoder().encodeToString(serverPublicKey));
             socket.set(Constant.PUBLIC_KEY, serverPublicKey);
 
             Security.Type passwordType = GlobalSettings.passwordType;
@@ -43,8 +43,8 @@ public class ExchangePassword implements ISocketService {
                     RSA.encryptByPublicKey(SerialUtils.serialObject(
                             Base64.getEncoder().encodeToString(password.getBytes(GlobalSettings.charset))
                     ), serverPublicKey));
+            log.debug("发送会话密钥，类型:" + passwordType.getValue() + ", 密钥:" + password);
             socket.send(request);
-            log.debug("发送密钥，类型:" + passwordType.getValue() + ", 密钥:" + password);
         } catch (SecurityException e) {
             log.error(e.getMessage(), e);
         } catch (IOException e) {
@@ -65,7 +65,7 @@ public class ExchangePassword implements ISocketService {
                 throw new SecurityException("缺少加密信息");
             }
             encryptCode = new String(Base64.getDecoder().decode(encryptCode));
-//            log.debug("客户端发送密钥，类型:" + encryptType + ", 密钥:" + encryptCode);
+            log.debug("收到会话密钥，类型:" + encryptType + ", 密钥:" + encryptCode);
             log.debug("加密协商完成");
             Message reply = new Message(Constant.SRV_EXCHANGE_RESULT);
             reply.add(Constant.RESULT, true);
