@@ -22,6 +22,7 @@ public abstract class SocketApplication extends Application {
 
     @Override
     public void beforeStartup() {
+        super.beforeStartup();
         PackageScanner scanner = PackageScanner.getInstance();
         scanner.addHandler(new PackageScannerHandler() {
             @Override
