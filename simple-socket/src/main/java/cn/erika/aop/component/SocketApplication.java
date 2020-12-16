@@ -21,8 +21,7 @@ public abstract class SocketApplication extends Application {
     private static Logger log = LoggerFactory.getLogger(SocketApplication.class);
 
     @Override
-    public void afterStartup() {
-        super.afterStartup();
+    public void beforeStartup() {
         PackageScanner scanner = PackageScanner.getInstance();
         scanner.addHandler(new PackageScannerHandler() {
             @Override

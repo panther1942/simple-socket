@@ -22,11 +22,14 @@ public class App extends SocketApplication implements Runnable {
     }
 
     @Override
-    public void afterStartup() {
-        super.afterStartup();
+    public void beforeStartup() {
+        super.beforeStartup();
         excludeBean(IClient.class);
         excludeBean(IServer.class);
+    }
 
+    @Override
+    public void afterStartup() {
         new Thread(this).start();
     }
 

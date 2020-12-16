@@ -23,10 +23,15 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class Application {
 
     // 因为使用懒加载策略 所以需要使用ConcurrentHashMap保证线程安全
+    // 存储包含Component的组件
     private static Map<Class<?>, Object> beanList = new ConcurrentHashMap<>();
+    // 临时数据存放区
     private static Map<String, Object> storage = new ConcurrentHashMap<>();
+    // 服务别名记录 与beanList配合使用
     private static Map<String, Class<?>> aliasList = new HashMap<>();
+    // 存储包含ServiceMapping的组件
     private static Map<String, Method> serviceList = new HashMap<>();
+    // 排除的bean 将不会主动创建这些对象 但可以手动添加
     private static List<Class<?>> exclusionBean = new LinkedList<>();
 
     // 需要在启动类手动执行
@@ -36,7 +41,8 @@ public abstract class Application {
     public static void run(Class<? extends Application> clazz) {
         try {
             Application app = clazz.newInstance();
-            app.afterStartup();
+            app.beforeStartup();
+            // 启动前和启动后之间扫包
             PackageScan scan = clazz.getAnnotation(PackageScan.class);
             if (scan != null) {
                 PackageScanner scanner = PackageScanner.getInstance();
@@ -45,6 +51,7 @@ public abstract class Application {
                 }
                 scanner.scan();
             }
+            app.afterStartup();
         } catch (InstantiationException e) {
             throw new RuntimeException("启动类无法实例化", e);
         } catch (IllegalAccessException e) {
@@ -52,8 +59,8 @@ public abstract class Application {
         }
     }
 
-    // 启动后 先扫包
-    public void afterStartup() {
+    // 程序启动前动作 默认添加一个处理器扫描Component和ServiceMapping的注解
+    public void beforeStartup(){
         PackageScanner scanner = PackageScanner.getInstance();
         // 默认处理器
         // 查找具有Component注解注释的类 将具有ServiceMapping注解的方法加入服务列表
@@ -79,6 +86,8 @@ public abstract class Application {
             }
         });
     }
+
+    public abstract void afterStartup();
 
     // 根据服务名称获取服务方法
     public static Object execute(String name, Object... args) throws BeanException {
