@@ -19,7 +19,7 @@ public class Message implements Serializable {
     // 自由key值 随便放数据
     private Map<String, Object> payload = new LinkedHashMap<>();
     // 签名确保数据完整性和有效性 签名取决于全局设定中的rsaAlgorithm
-    // 目前仅支持RSAwith<签名算法> 具体哪些可用因平台而异 至少RSAwithSHA-X系列都能用
+    // 目前仅支持<签名算法>withRSA 具体哪些可用因平台而异 至SHA-XwithRSA系列都能用
     private byte[] sign;
 
     public Message() {
