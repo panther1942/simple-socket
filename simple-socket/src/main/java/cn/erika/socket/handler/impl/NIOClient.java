@@ -51,6 +51,10 @@ public class NIOClient extends AbstractClientHandler implements Runnable {
                     }
                 }
             } catch (IOException e) {
+                // 三个点
+                // 1. selector出错 则应该停止运行 因为程序出错而不是网络出错
+                // 2. finishConnect出错 则中断客户端运行 因为这块基本上都是服务没有开导致的
+                // 3. channel.read出错 则发送离线消息后中断客户端运行 这块大概率是网络出错
                 onError(e.getMessage(), e);
             }
         }
@@ -67,8 +71,10 @@ public class NIOClient extends AbstractClientHandler implements Runnable {
         } catch (ConnectException e) {
             log.warn(e.getMessage());
             onClose(this.socket);
+            // 说明服务器不在线
         } catch (BeanException e) {
             onError(e.getMessage(), e);
+            // 说明服务没有注册或者不存在
         }
     }
 

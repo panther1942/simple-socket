@@ -112,7 +112,7 @@ public class FileUploadPreService implements ISocketService {
 
     private void preUpload(BaseSocket socket) {
         try {
-            MessageDigest.Type algorithmSign = MessageDigest.Type.SHA384;
+            MessageDigest.Type fileSignAlgorithm = GlobalSettings.fileSignAlgorithm;
             String filename = App.pop(Constant.FILENAME);
             String filepath = App.pop(Constant.FILEPATH);
             try {
@@ -125,7 +125,7 @@ public class FileUploadPreService implements ISocketService {
                     log.info("文件完整路径: " + file.getAbsolutePath() + " 文件名: " + filename + " 文件长度: " + file.length());
                 }
                 log.info("计算文件签名");
-                byte[] sign = MessageDigest.sum(file, algorithmSign);
+                byte[] sign = MessageDigest.sum(file, fileSignAlgorithm);
                 log.info("文件签名: " + Base64.getEncoder().encodeToString(sign));
 
                 Message request = new Message(Constant.SRV_PRE_UPLOAD);
@@ -133,13 +133,13 @@ public class FileUploadPreService implements ISocketService {
                 info.setFilename(filename);
                 info.setFilepath(file.getAbsolutePath());
                 info.setFileLength(file.length());
-                info.setAlgorithmSign(algorithmSign);
+                info.setAlgorithmSign(fileSignAlgorithm);
                 info.setSign(sign);
                 request.add(Constant.FILE_INFO, info);
 
                 socket.send(request);
             } catch (SecurityException e) {
-                log.error("当前系统不支持这种签名算法: " + algorithmSign.getValue());
+                log.error("当前系统不支持这种签名算法: " + fileSignAlgorithm.getValue());
             } catch (FileException | IOException e) {
                 log.error("读取文件失败");
             }

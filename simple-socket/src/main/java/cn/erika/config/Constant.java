@@ -23,8 +23,9 @@ public class Constant {
     public static final String SESSION_TOKEN = "sessionToken";
     public static final String PARENT_SOCKET = "parentSocket";
 
-    public static final String ENCRYPT_TYPE = "encryptType";
-    public static final String ENCRYPT_CODE = "encryptCode";
+    public static final String SECURITY_NAME = "securityName";
+    public static final String SECURITY_CODE = "securityCode";
+    public static final String RSA_ALGORITHM = "rsaAlgorithm";
 
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";

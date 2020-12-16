@@ -1,12 +1,12 @@
 package cn.erika.socket.core;
 
 import cn.erika.config.Constant;
+import cn.erika.config.GlobalSettings;
 import cn.erika.socket.component.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
@@ -16,18 +16,15 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
-public class TcpChannel implements BaseSocket {
+public class TcpChannel extends BaseSocket {
     private Logger log = LoggerFactory.getLogger(this.getClass());
-
-    private SocketChannel channel;
     private Handler handler;
     private Charset charset;
     private TcpReader reader;
+
+    private SocketChannel channel;
     private Selector selector;
-    private Map<String, Object> attr = new HashMap<>();
 
     public TcpChannel(SocketChannel channel, Handler handler, Selector selector, Charset charset) throws IOException {
         set(Constant.TYPE, Constant.SERVER);
@@ -41,8 +38,9 @@ public class TcpChannel implements BaseSocket {
         onEstablished();
     }
 
-    public TcpChannel(InetSocketAddress address, Handler handler, Selector selector, Charset charset) throws IOException {
+    public TcpChannel(SocketAddress address, Handler handler, Selector selector, Charset charset) throws IOException {
         set(Constant.TYPE, Constant.CLIENT);
+        set(Constant.RSA_ALGORITHM, GlobalSettings.rsaAlgorithm);
         this.handler = handler;
         this.selector = selector;
         this.charset = charset;
@@ -75,9 +73,9 @@ public class TcpChannel implements BaseSocket {
     }
 
     @Override
-    public synchronized void send(Message message) {
+    public void send(Message message) {
         try {
-            DataInfo info = Processor.beforeSend(this, message);
+            DataInfo info = beforeSend(this, message);
             byte[] bInfo = info.toString().getBytes(charset);
             byte[] bData = info.getData();
             send(bInfo);
@@ -89,8 +87,7 @@ public class TcpChannel implements BaseSocket {
         }
     }
 
-    @Override
-    public void send(byte[] data) {
+    private synchronized void send(byte[] data) {
         try {
             channel.write(ByteBuffer.wrap(data));
             selector.wakeup();
@@ -103,9 +100,9 @@ public class TcpChannel implements BaseSocket {
     }
 
     @Override
-    public void receive(DataInfo info, byte[] data) {
+    public void receive(DataInfo info) {
         try {
-            Message message = Processor.beforeRead(this, info, data);
+            Message message = beforeRead(this, info);
             handler.onMessage(this, info, message);
         } catch (Exception e) {
             handler.onError(e.getMessage(), e);
@@ -138,26 +135,5 @@ public class TcpChannel implements BaseSocket {
         } catch (IOException e) {
             log.warn(e.getMessage());
         }
-    }
-
-    // 设置连接额外属性
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T set(String k, Object v) {
-        return (T) this.attr.put(k, v);
-    }
-
-    // 获取连接额外属性
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T get(String k) {
-        return (T) this.attr.get(k);
-    }
-
-    // 移除连接额外属性
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T remove(String k) {
-        return (T) this.attr.remove(k);
     }
 }

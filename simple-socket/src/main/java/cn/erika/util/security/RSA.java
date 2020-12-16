@@ -15,7 +15,6 @@ import java.util.Base64;
 public class RSA {
     //使用非对称加密算法
     private static final String KEY_ALGORITHM = "RSA";
-    private static final String SIGN_ALGORITHM = "SHA384WITHRSA";
 
     /**
      * 生成RSA密钥对
@@ -166,10 +165,10 @@ public class RSA {
         }
     }
 
-    public static byte[] sign(byte[] data, byte[] key) throws SecurityException {
+    public static byte[] sign(byte[] data, byte[] key, String algorithm) throws SecurityException {
         try {
             PrivateKey priKey = getPrivateKey(key);
-            Signature sign = Signature.getInstance(SIGN_ALGORITHM);
+            Signature sign = Signature.getInstance(algorithm);
             sign.initSign(priKey);
             sign.update(data);
             return sign.sign();
@@ -182,10 +181,10 @@ public class RSA {
         }
     }
 
-    public static boolean verify(byte[] data, byte[] key, byte[] signData) throws SecurityException {
+    public static boolean verify(byte[] data, byte[] key, byte[] signData, String algorithm) throws SecurityException {
         try {
             PublicKey pubKey = getPublicKey(key);
-            Signature sign = Signature.getInstance(SIGN_ALGORITHM);
+            Signature sign = Signature.getInstance(algorithm);
             sign.initVerify(pubKey);
             sign.update(data);
             return sign.verify(signData);

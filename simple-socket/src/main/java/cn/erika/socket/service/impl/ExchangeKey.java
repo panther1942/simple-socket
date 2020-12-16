@@ -20,6 +20,7 @@ public class ExchangeKey implements ISocketService {
         // 向客户端请求公钥的时候不需要请求体 message只需要放上order就能获取客户端的公钥
         Message request = new Message(Constant.SRV_EXCHANGE_KEY);
         request.add(Constant.PUBLIC_KEY, GlobalSettings.publicKey);
+        request.add(Constant.RSA_ALGORITHM, GlobalSettings.rsaAlgorithm);
         socket.send(request);
     }
 
@@ -27,14 +28,16 @@ public class ExchangeKey implements ISocketService {
     public void server(BaseSocket socket, Message message) {
         try {
             byte[] clientPublicKey = message.get(Constant.PUBLIC_KEY);
+            String rsaAlgorithm = message.get(Constant.RSA_ALGORITHM);
             if (clientPublicKey == null) {
                 throw new SecurityException("缺少公钥信息");
             }
             socket.set(Constant.PUBLIC_KEY, clientPublicKey);
+            socket.set(Constant.RSA_ALGORITHM, rsaAlgorithm);
             Message reply = new Message(Constant.SRV_EXCHANGE_PASSWORD);
             reply.add(Constant.PUBLIC_KEY, GlobalSettings.publicKey);
             socket.send(reply);
-            log.debug("对端请求加密通信");
+            log.debug("对端请求加密通信 签名类型: " + rsaAlgorithm);
         } catch (SecurityException e) {
             log.error(e.getMessage(), e);
         }

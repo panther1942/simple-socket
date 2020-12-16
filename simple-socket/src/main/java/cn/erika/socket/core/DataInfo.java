@@ -3,14 +3,24 @@ package cn.erika.socket.core;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 数据包 负责最底层的通信
+ * 数据完整性校验由Message去做了
+ */
 public class DataInfo implements Serializable {
     private static final long serialVersionUID = 1L;
+    // 数据头部长度
     public static final int LEN = 13 + 10 + 10 + 10;
 
+    // 时间戳13字节
     private Date timestamp;
+    // 是否压缩10字节
     private Compress compress = Compress.NONE; // 0: none 1: gzip
+    // 偏移量10字节
     private long pos;
+    // 长度10字节
     private int len;
+    // 数据和数据头分两次发送 因为数据体长度不固定
     private byte[] data;
 
     public Date getTimestamp() {
@@ -53,6 +63,7 @@ public class DataInfo implements Serializable {
         this.data = data;
     }
 
+    // 避免平台差异导致解析出错 故在此直接定死数据头格式 保证一致性
     @Override
     public String toString() {
         String timestamp = String.format("%13s", this.timestamp.getTime()).replaceAll("\\s", "0");
@@ -62,15 +73,7 @@ public class DataInfo implements Serializable {
         return timestamp + compress + pos + len;
     }
 
-    public String toJson() {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("{\"timestamp\":\"").append(this.getTimestamp().getTime()).append("\",");
-        buffer.append("\"compress\":\"").append(this.compress.value).append("\",");
-        buffer.append("\"pos\":\"").append(this.pos).append("\",");
-        buffer.append("\"len\":\"").append(this.len).append("\"}");
-        return buffer.toString();
-    }
-
+    // 数据压缩目前貌似就GZIP靠谱点
     public enum Compress {
         NONE(0),
         GZIP(1);

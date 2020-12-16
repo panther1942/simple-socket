@@ -2,7 +2,8 @@ package cn.erika.socket.core;
 
 import cn.erika.aop.exception.BeanException;
 import cn.erika.config.Constant;
-import cn.erika.socket.component.*;
+import cn.erika.config.GlobalSettings;
+import cn.erika.socket.component.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,14 +15,12 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.charset.Charset;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 作为Socket的包装类 用于增强Socket的功能
  * 需要一个TcpHandler提供功能支持
  */
-public class TcpSocket implements BaseSocket, Runnable {
+public class TcpSocket extends BaseSocket implements Runnable {
     private Logger log = LoggerFactory.getLogger(this.getClass());
     // 持有的Socket对象 用来响应请求
     private Socket socket;
@@ -30,8 +29,6 @@ public class TcpSocket implements BaseSocket, Runnable {
     // 持有的Handler对象 在连接建立后初始化连接属性和处理连接后的动作
     private Handler handler;
     private Charset charset;
-    // 记录连接的属性
-    private Map<String, Object> attr = new HashMap<>();
 
     private InputStream in;
     private OutputStream out;
@@ -47,6 +44,7 @@ public class TcpSocket implements BaseSocket, Runnable {
 
     public TcpSocket(SocketAddress address, Handler handler, Charset charset) throws IOException {
         set(Constant.TYPE, Constant.CLIENT);
+        set(Constant.RSA_ALGORITHM, GlobalSettings.rsaAlgorithm);
         this.handler = handler;
         this.charset = charset;
         this.reader = new TcpReader(charset);
@@ -96,7 +94,7 @@ public class TcpSocket implements BaseSocket, Runnable {
     @Override
     public synchronized void send(Message message) {
         try {
-            DataInfo info = Processor.beforeSend(this, message);
+            DataInfo info = beforeSend(this, message);
             send(info.toString().getBytes(charset));
             send(info.getData());
         } catch (Exception e) {
@@ -104,8 +102,7 @@ public class TcpSocket implements BaseSocket, Runnable {
         }
     }
 
-    @Override
-    public void send(byte[] data) throws IOException {
+    private void send(byte[] data) throws IOException {
         int pos = 0;
         int len = data.length;
         // 这里用pos标记发送数据的长度 每次发送缓冲区大小个字节 直到pos等于数据长度len
@@ -120,9 +117,9 @@ public class TcpSocket implements BaseSocket, Runnable {
     }
 
     @Override
-    public void receive(DataInfo info, byte[] data) {
+    public void receive(DataInfo info) {
         try {
-            Message message = Processor.beforeRead(this, info, data);
+            Message message = beforeRead(this, info);
             handler.onMessage(this, info, message);
         } catch (Exception e) {
             handler.onError(e.getMessage(), e);
@@ -149,32 +146,17 @@ public class TcpSocket implements BaseSocket, Runnable {
         try {
             if (!socket.isClosed()) {
                 SocketAddress address = socket.getRemoteSocketAddress();
+                if (in != null) {
+                    in.close();
+                }
+                if (out != null) {
+                    out.close();
+                }
                 socket.close();
                 log.info("关闭连接: [" + address + "]");
             }
         } catch (IOException e) {
             log.warn(e.getMessage());
         }
-    }
-
-    // 设置连接额外属性
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T set(String k, Object v) {
-        return (T) this.attr.put(k, v);
-    }
-
-    // 获取连接额外属性
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T get(String k) {
-        return (T) this.attr.get(k);
-    }
-
-    // 移除连接额外属性
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T remove(String k) {
-        return (T) this.attr.remove(k);
     }
 }

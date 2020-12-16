@@ -6,10 +6,12 @@ import cn.erika.aop.exception.BeanException;
 import cn.erika.socket.component.Message;
 import cn.erika.util.compress.CompressException;
 import cn.erika.util.compress.GZIP;
+import cn.erika.util.security.Security;
 import cn.erika.util.string.SerialUtils;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.security.Provider;
 import java.util.UUID;
 
 public class CoreTest {
@@ -32,23 +34,15 @@ public class CoreTest {
         System.out.println(msg.toString());
     }
 
+    @Test
+    public void testSecurity() {
+        for (Provider provider : java.security.Security.getProviders()) {
+            System.out.println(provider.getName());
+        }
+    }
+
     @PackageScan("cn.erika")
     public static class TestApp extends Application {
-
-        /*static {
-            PackageScanner scanner = PackageScanner.getInstance();
-            scanner.addHandler(new PackageScannerHandler() {
-                @Override
-                public boolean filter(Class<?> clazz) {
-                    return clazz.getAnnotation(Component.class) != null;
-                }
-
-                @Override
-                public void deal(Class<?> clazz) {
-                    Component component = clazz.getAnnotation(Component.class);
-                }
-            });
-        }*/
         IDemoService demoService;
 
         @Override

@@ -1,6 +1,7 @@
 package cn.erika.config;
 
 import cn.erika.socket.core.DataInfo;
+import cn.erika.util.security.MessageDigest;
 import cn.erika.util.security.Security;
 
 import java.nio.charset.Charset;
@@ -19,6 +20,8 @@ public class GlobalSettings {
     public static int passwordLength = 18;
     public static Security.Type passwordType = Security.Type.AES256ECB;
     public static int rsaLength = 2048;
+    public static String rsaAlgorithm = "SHA384WITHRSA";
+    public static MessageDigest.Type fileSignAlgorithm = MessageDigest.Type.SHA384;
 
     // 启用压缩
     public static boolean enableCompress = false;

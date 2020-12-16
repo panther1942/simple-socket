@@ -7,7 +7,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class LinkManager {
+// 客户端接入管理器
+// 负责维护这些连接
+// TODO 长时间空闲连接需要清理掉 无效连接也需要定时检测清理（心跳包ping什么的）
+class LinkManager {
     private Map<String, BaseSocket> linkList = new HashMap<>();
 
     BaseSocket addLink(BaseSocket socket) {

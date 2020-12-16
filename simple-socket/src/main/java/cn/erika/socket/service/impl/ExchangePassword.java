@@ -34,12 +34,12 @@ public class ExchangePassword implements ISocketService {
 
             Security.Type passwordType = GlobalSettings.passwordType;
             String password = StringUtils.randomString(GlobalSettings.passwordLength);
-            socket.set(Constant.ENCRYPT_TYPE, passwordType);
-            socket.set(Constant.ENCRYPT_CODE, password);
+            socket.set(Constant.SECURITY_NAME, passwordType);
+            socket.set(Constant.SECURITY_CODE, password);
             Message request = new Message(Constant.SRV_EXCHANGE_PASSWORD);
-            request.add(Constant.ENCRYPT_TYPE,
+            request.add(Constant.SECURITY_NAME,
                     RSA.encryptByPublicKey(SerialUtils.serialObject(passwordType), serverPublicKey));
-            request.add(Constant.ENCRYPT_CODE,
+            request.add(Constant.SECURITY_CODE,
                     RSA.encryptByPublicKey(SerialUtils.serialObject(
                             Base64.getEncoder().encodeToString(password.getBytes(GlobalSettings.charset))
                     ), serverPublicKey));
@@ -56,10 +56,10 @@ public class ExchangePassword implements ISocketService {
     public void server(BaseSocket socket, Message message) {
         try {
             Security.Type encryptType = SerialUtils.serialObject(RSA.decryptByPrivateKey(
-                    message.get(Constant.ENCRYPT_TYPE),GlobalSettings.privateKey
+                    message.get(Constant.SECURITY_NAME),GlobalSettings.privateKey
             ));
             String encryptCode = SerialUtils.serialObject(RSA.decryptByPrivateKey(
-                    message.get(Constant.ENCRYPT_CODE),GlobalSettings.privateKey
+                    message.get(Constant.SECURITY_CODE),GlobalSettings.privateKey
             ));
             if (encryptType == null || encryptCode == null) {
                 throw new SecurityException("缺少加密信息");
@@ -71,8 +71,8 @@ public class ExchangePassword implements ISocketService {
             reply.add(Constant.RESULT, true);
             reply.add(Constant.MESSAGE, "加密协商成功");
             socket.send(reply);
-            socket.set(Constant.ENCRYPT_CODE, encryptCode);
-            socket.set(Constant.ENCRYPT_TYPE, encryptType);
+            socket.set(Constant.SECURITY_CODE, encryptCode);
+            socket.set(Constant.SECURITY_NAME, encryptType);
             socket.set(Constant.ENCRYPT, true);
         } catch (SecurityException e) {
             log.error("加密协商失败");

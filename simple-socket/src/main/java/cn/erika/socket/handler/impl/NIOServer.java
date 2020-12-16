@@ -28,7 +28,7 @@ public class NIOServer extends AbstractServerHandler implements IServer, Runnabl
 
     @Override
     public void run() {
-        while (true) {
+        while (server.isOpen()) {
             try {
                 int events = selector.select();
                 if (events > 0) {
@@ -45,6 +45,7 @@ public class NIOServer extends AbstractServerHandler implements IServer, Runnabl
                                 channelMap.put(sc, channel);
                                 onOpen(channel);
                             } catch (IOException e) {
+                                // 如果这里出现异常 就是新连接接入的时候出现异常 应该要断开连接
                                 log.error(e.getMessage());
                             }
                         } else {
@@ -53,6 +54,8 @@ public class NIOServer extends AbstractServerHandler implements IServer, Runnabl
                             try {
                                 channel.read();
                             } catch (IOException e) {
+                                // 这里是读取数据的时候发生异常 需要更细致的处理
+                                // 比如判断是读取出错还是连接断开
                                 close(channel);
                             }
                         }

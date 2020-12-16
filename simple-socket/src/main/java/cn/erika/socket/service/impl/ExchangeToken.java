@@ -30,13 +30,13 @@ public class ExchangeToken implements ISocketService {
         } else {
             try {
                 Security.Type passwordType = SerialUtils.serialObject(RSA.decryptByPrivateKey(
-                        message.get(Constant.ENCRYPT_TYPE), GlobalSettings.privateKey
+                        message.get(Constant.SECURITY_NAME), GlobalSettings.privateKey
                 ));
                 String password = SerialUtils.serialObject(RSA.decryptByPrivateKey(
-                        message.get(Constant.ENCRYPT_CODE), GlobalSettings.privateKey
+                        message.get(Constant.SECURITY_CODE), GlobalSettings.privateKey
                 ));
-                socket.set(Constant.ENCRYPT_TYPE, passwordType);
-                socket.set(Constant.ENCRYPT_CODE, password);
+                socket.set(Constant.SECURITY_NAME, passwordType);
+                socket.set(Constant.SECURITY_CODE, password);
                 socket.set(Constant.ENCRYPT, true);
                 socket.ready();
             } catch (IOException e) {
@@ -55,18 +55,20 @@ public class ExchangeToken implements ISocketService {
                 String token = message.get(Constant.SESSION_TOKEN);
                 byte[] publicKey = message.get(Constant.PUBLIC_KEY);
                 try {
-                    socket.set(Constant.PARENT_SOCKET, server.checkToken(token, publicKey));
+                    BaseSocket parent = server.checkToken(token, publicKey);
+                    socket.set(Constant.PARENT_SOCKET, parent);
                     socket.set(Constant.PUBLIC_KEY, publicKey);
+                    socket.set(Constant.RSA_ALGORITHM, parent.get(Constant.RSA_ALGORITHM));
                     socket.set(Constant.SESSION_TOKEN, token);
                     Message reply = new Message(Constant.SRV_EXCHANGE_TOKEN);
                     Security.Type passwordType = GlobalSettings.passwordType;
                     String password = StringUtils.randomString(GlobalSettings.passwordLength);
-                    socket.set(Constant.ENCRYPT_TYPE, passwordType);
-                    socket.set(Constant.ENCRYPT_CODE, password);
-                    reply.add(Constant.ENCRYPT_CODE, RSA.encryptByPublicKey(
+                    socket.set(Constant.SECURITY_NAME, passwordType);
+                    socket.set(Constant.SECURITY_CODE, password);
+                    reply.add(Constant.SECURITY_CODE, RSA.encryptByPublicKey(
                             SerialUtils.serialObject(password), publicKey
                     ));
-                    reply.add(Constant.ENCRYPT_TYPE, RSA.encryptByPublicKey(
+                    reply.add(Constant.SECURITY_NAME, RSA.encryptByPublicKey(
                             SerialUtils.serialObject(passwordType), publicKey
                     ));
                     socket.send(reply);

@@ -30,6 +30,7 @@ public abstract class AbstractHandler implements Handler {
             GlobalSettings.privateKey = keyPair[1];
         } catch (NoSuchAlgorithmException e) {
             System.err.println(e.getMessage());
+            System.exit(1);
         }
     }
 
@@ -46,8 +47,8 @@ public abstract class AbstractHandler implements Handler {
 
     @Override
     public void onMessage(BaseSocket socket, DataInfo info, Message message) {
-        if (!Constant.EXIT.equalsIgnoreCase(message.getHead(Message.Head.Order))) {
-            String order = message.getHead(Message.Head.Order);
+        if (!Constant.EXIT.equalsIgnoreCase(message.getHead(Message.Head.ServerName))) {
+            String order = message.getHead(Message.Head.ServerName);
             servicePool.submit(new DoIt(socket, order, message));
         } else {
             onClose(socket);
