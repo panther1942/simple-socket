@@ -6,13 +6,14 @@ import cn.erika.aop.exception.BeanException;
 import cn.erika.socket.component.Message;
 import cn.erika.util.compress.CompressException;
 import cn.erika.util.compress.GZIP;
-import cn.erika.util.security.Security;
 import cn.erika.util.string.SerialUtils;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.security.Provider;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class CoreTest {
 
@@ -41,22 +42,69 @@ public class CoreTest {
         }
     }
 
+    @Test
+    public void testCpu(){
+        for (int i = 0; i < Integer.MAX_VALUE; i++) {
+            System.out.println("hello world");
+        }
+    }
+
     @PackageScan("cn.erika")
     public static class TestApp extends Application {
-        IDemoService demoService;
+        private ExecutorService service = Executors.newCachedThreadPool();
+        public static TestApp app;
+
+        public static void main(String[] args) {
+//            TestApp.run(TestApp.class);
+            try {
+                app = new TestApp();
+//                app.run();
+                app = null;
+                System.gc();
+                Thread.sleep(500);
+                if (app == null) {
+                    System.out.println("app is destroy1");
+                } else {
+                    System.out.println("app is alive1");
+                }
+                app = null;
+                System.gc();
+                Thread.sleep(500);
+                if (app == null) {
+                    System.out.println("app is destroy2");
+                } else {
+                    System.out.println("app is alive2");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         @Override
         public void afterStartup() {
             try {
-                demoService = getBean("demo");
-                new Thread(new Handler()).start();
-                new Thread(new Handler()).start();
+                service.submit(new Handler(getBean("demo")));
+                service.submit(new Handler(getBean("demo")));
+                service.shutdown();
             } catch (BeanException e) {
                 e.printStackTrace();
             }
         }
 
+        @Override
+        protected void finalize() throws Throwable {
+            super.finalize();
+            System.out.println("END");
+            app = this;
+        }
+
         private class Handler implements Runnable {
+            IDemoService demoService;
+
+            public Handler(IDemoService demoService) {
+                this.demoService = demoService;
+            }
+
             @Override
             public void run() {
                 try {
@@ -65,11 +113,7 @@ public class CoreTest {
                     e.printStackTrace();
                 }
             }
-        }
 
-
-        public static void main(String[] args) {
-            TestApp.run(TestApp.class);
         }
     }
 }

@@ -38,19 +38,12 @@ public abstract class Application {
     // 如果在启动类上有使用PackageScan注解
     // 则将注解上标识的包名进行扫描
     // 如果有自定义处理器需要在本方法执行之前加入到扫包的处理器列表中
-    public static void run(Class<? extends Application> clazz) {
+    public static void run(Class<? extends Application> clazz, String... args) {
         try {
             Application app = clazz.newInstance();
             app.beforeStartup();
             // 启动前和启动后之间扫包
-            PackageScan scan = clazz.getAnnotation(PackageScan.class);
-            if (scan != null) {
-                PackageScanner scanner = PackageScanner.getInstance();
-                for (String pack : scan.value()) {
-                    scanner.addPackage(pack);
-                }
-                scanner.scan();
-            }
+            app.scanPackage(clazz);
             app.afterStartup();
         } catch (InstantiationException e) {
             throw new RuntimeException("启动类无法实例化", e);
@@ -59,8 +52,16 @@ public abstract class Application {
         }
     }
 
+    public void run(String... args) {
+        Class<? extends Application> clazz = this.getClass();
+        beforeStartup();
+        // 启动前和启动后之间扫包
+        scanPackage(clazz);
+        afterStartup();
+    }
+
     // 程序启动前动作 默认添加一个处理器扫描Component和ServiceMapping的注解
-    public void beforeStartup(){
+    public void beforeStartup() {
         PackageScanner scanner = PackageScanner.getInstance();
         // 默认处理器
         // 查找具有Component注解注释的类 将具有ServiceMapping注解的方法加入服务列表
@@ -85,6 +86,17 @@ public abstract class Application {
                 }
             }
         });
+    }
+
+    private void scanPackage(Class<? extends Application> clazz){
+        PackageScan scan = clazz.getAnnotation(PackageScan.class);
+        if (scan != null) {
+            PackageScanner scanner = PackageScanner.getInstance();
+            for (String pack : scan.value()) {
+                scanner.addPackage(pack);
+            }
+            scanner.scan();
+        }
     }
 
     public abstract void afterStartup();
@@ -291,7 +303,7 @@ public abstract class Application {
                 Aspect aspect = targetMethod.getAnnotation(Aspect.class);
                 // 如果存在Aspect注解 则获取增强类的实例
                 if (aspect != null) {
-                    advice = Application.getBean(aspect.value());
+                    advice = getBean(aspect.value());
                 }
             }
             // 如果增强器不为空 则执行增强部分的方法 否则执行目标方法
