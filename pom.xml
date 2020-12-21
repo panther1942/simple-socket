@@ -10,7 +10,9 @@
 
     <modules>
         <module>simple-socket</module>
+        <module>socket-plugins</module>
         <module>socket-spring</module>
+        <module>aspectj-demo</module>
     </modules>
 
     <properties>
@@ -22,20 +24,6 @@
     </properties>
 
     <dependencies>
-
-        <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.2</version>
-        </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

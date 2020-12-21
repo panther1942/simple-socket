@@ -8,12 +8,14 @@ import org.aspectj.lang.annotation.Pointcut;
 @Aspect
 public class DemoAdvice {
 
-    @Pointcut("execution(* cn.erika.service.impl.*.*(..))")
+    @Pointcut(value = "execution(* cn.erika.service.IDemoService.sum(int,int))")
     public void aspect() {
     }
 
-    @Before("aspect()")
-    public void before(JoinPoint joinPoint) {
+    @Before(value = "aspect() && args(a,b)", argNames = "joinPoint,a,b")
+    public void before(JoinPoint joinPoint, int a, int b) {
         System.out.println("before run: " + joinPoint.getSignature().getName());
+        System.out.println("a: " + a);
+        System.out.println("b: " + b);
     }
 }

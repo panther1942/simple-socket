@@ -41,10 +41,16 @@ public class CoreTest {
         System.out.println(msg.toString());
     }
 
+    // 查看当前系统支持的算法 之后会设计一个自动读取和协商算法的东西
     @Test
     public void testSecurity() {
         for (Provider provider : java.security.Security.getProviders()) {
             System.out.println(provider.getName());
+
+            for (Provider.Service service : provider.getServices()) {
+                System.out.println(service.getAlgorithm());
+            }
+            System.out.println("============================================================");
         }
     }
 
@@ -81,10 +87,10 @@ public class CoreTest {
         public static TestApp app;
 
         public static void main(String[] args) {
-//            TestApp.run(TestApp.class);
-            try {
+            TestApp.run(TestApp.class);
+            /*try {
                 app = new TestApp();
-//                app.run();
+                app.run();
                 app = null;
                 System.gc();
                 Thread.sleep(500);
@@ -103,7 +109,7 @@ public class CoreTest {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-            }
+            }*/
         }
 
         @Override

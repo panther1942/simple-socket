@@ -1,7 +1,7 @@
-package cn.erika.socket.core;
+package cn.erika.socket.core.tcp;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import cn.erika.socket.core.Socket;
+import cn.erika.socket.core.component.DataInfo;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -9,7 +9,6 @@ import java.util.Date;
 
 // 根据自定协议实现的一个处理数据的类
 class TcpReader {
-    private Logger log = LoggerFactory.getLogger(this.getClass());
 
     private Charset charset;
 
@@ -23,7 +22,7 @@ class TcpReader {
 
     // 因为一个socket或者channel对应一个reader 所以没必要加锁
     // 下面负责的逻辑是处理粘包的 因为尝试次数太多 忘了当初是咋想的了 反正目前这个逻辑是正确的（大概吧） 反正没出错
-    synchronized void read(BaseSocket socket, byte[] data, int len) throws IOException {
+    public synchronized void read(Socket socket, byte[] data, int len) throws IOException {
         // 因为数组长度和有效数据的长度很有可能不一致 因此需要按照读取的长度拷贝一次数组
         byte[] tmp = new byte[len];
         System.arraycopy(data, 0, tmp, 0, len);
@@ -74,12 +73,12 @@ class TcpReader {
         info = new DataInfo();
         // 时间戳 13字节
         info.setTimestamp(new Date(Long.parseLong(strHead.substring(0, 13))));
-        // 压缩 1字节
-        info.setCompress(DataInfo.Compress.getByValue(Integer.parseInt(strHead.substring(13, 14))));
+        // 压缩 10字节
+        info.setCompress(DataInfo.Compress.getByValue(Integer.parseInt(strHead.substring(13, 23))));
         // 偏移量 10字节
-        info.setPos(Long.parseLong(strHead.substring(14, 23)));
+        info.setPos(Long.parseLong(strHead.substring(23, 33)));
         // 长度 10字节
-        info.setLen(Integer.parseInt(strHead.substring(24, 33)));
+        info.setLen(Integer.parseInt(strHead.substring(33, 43)));
         byte[] tmp = new byte[len - DataInfo.LEN];
         System.arraycopy(data, DataInfo.LEN, tmp, 0, len - DataInfo.LEN);
         return tmp;

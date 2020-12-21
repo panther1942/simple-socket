@@ -41,10 +41,7 @@ public abstract class Application {
     public static void run(Class<? extends Application> clazz, String... args) {
         try {
             Application app = clazz.newInstance();
-            app.beforeStartup();
-            // 启动前和启动后之间扫包
-            app.scanPackage(clazz);
-            app.afterStartup();
+            app.run(args);
         } catch (InstantiationException e) {
             throw new RuntimeException("启动类无法实例化", e);
         } catch (IllegalAccessException e) {
