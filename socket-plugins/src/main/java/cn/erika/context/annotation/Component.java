@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 // 标记需要使用Application管理实例的组件
 public @interface Component {
     public String value() default "";
-    public Type type() default Type.ProtoType;
+    public Type type() default Type.SingleTon;
 
     public enum Type{
         SingleTon(),

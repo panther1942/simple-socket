@@ -1,12 +1,12 @@
 package cn.erika.socket.core.tcp;
 
-import cn.erika.socket.config.Constant;
-import cn.erika.socket.config.GlobalSettings;
-import cn.erika.socket.core.Socket;
+import cn.erika.context.exception.BeanException;
+import cn.erika.config.Constant;
+import cn.erika.config.GlobalSettings;
+import cn.erika.socket.core.BaseSocket;
 import cn.erika.socket.core.Handler;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.core.component.DataInfo;
-import cn.erika.socket.exception.ServiceException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,10 +15,9 @@ import java.net.SocketAddress;
 import java.nio.charset.Charset;
 import java.util.Date;
 
-public class TcpSocket extends Socket implements Runnable {
+public class TcpSocket extends BaseSocket implements Runnable {
     private java.net.Socket socket;
     private TcpReader reader;
-    private Handler handler;
     private Charset charset;
 
     private InputStream in;
@@ -96,10 +95,20 @@ public class TcpSocket extends Socket implements Runnable {
     public void receive(Message message) {
         try {
             handler.onMessage(this, message);
-        } catch (ServiceException e) {
+        } catch (BeanException e) {
             System.err.println(e.getMessage());
             close();
         }
+    }
+
+    @Override
+    public SocketAddress getRemoteAddress() {
+        return socket.getRemoteSocketAddress();
+    }
+
+    @Override
+    public SocketAddress getLocalAddress(){
+        return socket.getLocalSocketAddress();
     }
 
     @Override
@@ -115,6 +124,8 @@ public class TcpSocket extends Socket implements Runnable {
             }
         } catch (IOException e) {
             System.err.println("关闭连接的过程中发生错误: " + e.getMessage());
+        }finally {
+            handler.onClose(this);
         }
     }
 }

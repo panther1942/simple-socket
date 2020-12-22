@@ -24,6 +24,11 @@ import java.util.concurrent.Executors;
 public class CoreTest {
 
     @Test
+    public void testIntegerMaxValue(){
+        System.out.println(Integer.MAX_VALUE);
+    }
+
+    @Test
     public void testInfo() throws CompressException {
         String msg = "hello world";
         byte[] encode = GZIP.compress(msg);

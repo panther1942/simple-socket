@@ -1,15 +1,25 @@
 package cn.erika.socket.core.component;
 
-import cn.erika.socket.config.Constant;
+import cn.erika.config.Constant;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Message {
+public class Message implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private Map<String, Object> payload = new HashMap<>();
 
-    public Message(String message) {
-        add(Constant.SERVICE_NAME, Constant.SRV_TEXT);
+    public Message() {
+    }
+
+    public Message(String serviceName) {
+        add(Constant.SERVICE_NAME, serviceName);
+    }
+
+    public Message(String serviceName, String message) {
+        add(Constant.SERVICE_NAME, serviceName);
         add(Constant.TEXT, message);
     }
 
@@ -24,5 +34,12 @@ public class Message {
 
     public void del(String key) {
         payload.remove(key);
+    }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "payload=" + payload +
+                '}';
     }
 }

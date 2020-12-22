@@ -1,6 +1,5 @@
 package cn.erika.util.security;
 
-import cn.erika.util.exception.SecurityException;
 import cn.erika.util.string.StringUtils;
 
 import javax.crypto.BadPaddingException;
@@ -166,10 +165,10 @@ public class RSA {
         }
     }
 
-    public static byte[] sign(byte[] data, byte[] key, String algorithm) throws SecurityException {
+    public static byte[] sign(byte[] data, byte[] key, RSADigestAlgorithm algorithm) throws SecurityException {
         try {
             PrivateKey priKey = getPrivateKey(key);
-            Signature sign = Signature.getInstance(algorithm);
+            Signature sign = Signature.getInstance(algorithm.getValue());
             sign.initSign(priKey);
             sign.update(data);
             return sign.sign();
@@ -182,10 +181,10 @@ public class RSA {
         }
     }
 
-    public static boolean verify(byte[] data, byte[] key, byte[] signData, String algorithm) throws SecurityException {
+    public static boolean verify(byte[] data, byte[] key, byte[] signData, RSADigestAlgorithm algorithm) throws SecurityException {
         try {
             PublicKey pubKey = getPublicKey(key);
-            Signature sign = Signature.getInstance(algorithm);
+            Signature sign = Signature.getInstance(algorithm.getValue());
             sign.initVerify(pubKey);
             sign.update(data);
             return sign.verify(signData);

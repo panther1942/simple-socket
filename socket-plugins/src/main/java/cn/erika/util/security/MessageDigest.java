@@ -1,7 +1,5 @@
 package cn.erika.util.security;
 
-import cn.erika.util.exception.SecurityException;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,17 +8,17 @@ import java.security.NoSuchAlgorithmException;
 
 public class MessageDigest {
 
-    public static byte[] sum(String data, Type algorithm) throws SecurityException {
+    public static byte[] sum(String data, MessageDigestAlgorithm algorithm) throws SecurityException {
         return sum(data, Charset.forName("UTF-8"), algorithm);
     }
 
-    public static byte[] sum(String data, Charset charset, Type algorithm) throws SecurityException {
+    public static byte[] sum(String data, Charset charset, MessageDigestAlgorithm algorithm) throws SecurityException {
         return sum(data.getBytes(charset), algorithm);
     }
 
-    public static byte[] sum(File file, Type algorithm) throws SecurityException, IOException {
+    public static byte[] sum(File file, MessageDigestAlgorithm algorithm) throws IOException {
         try {
-            java.security.MessageDigest digest = java.security.MessageDigest.getInstance(algorithm.value);
+            java.security.MessageDigest digest = java.security.MessageDigest.getInstance(algorithm.getValue());
             try (FileInputStream in = new FileInputStream(file)) {
                 int length = 0;
                 byte[] data = new byte[4096];
@@ -35,57 +33,16 @@ public class MessageDigest {
         }
     }
 
-    public static byte[] sum(byte[] data, Type algorithm) throws SecurityException {
+    public static byte[] sum(byte[] data, MessageDigestAlgorithm algorithm) throws SecurityException {
         if (data == null) {
             throw new IllegalArgumentException("不能对空值签名");
         }
         try {
-            java.security.MessageDigest digest = java.security.MessageDigest.getInstance(algorithm.value);
+            java.security.MessageDigest digest = java.security.MessageDigest.getInstance(algorithm.getValue());
             digest.update(data);
             return digest.digest();
         } catch (NoSuchAlgorithmException e) {
             throw new SecurityException("当前系统不支持该算法: " + algorithm, e);
-        }
-    }
-
-    public static String byteToHexString(byte[] data) {
-        StringBuilder buffer = new StringBuilder();
-        for (byte b : data) {
-            int i = b;
-            if (i < 0)
-                i += 256;
-            if (i < 16)
-                buffer.append(0);
-            buffer.append(Integer.toHexString(i));
-        }
-        return buffer.toString();
-    }
-
-    public enum Type {
-        MD5("MD5"),
-        SHA1("SHA-1"),
-        SHA224("SHA-224"),
-        SHA256("SHA-256"),
-        SHA384("SHA-384"),
-        SHA512("SHA-512");
-
-        private String value;
-
-        Type(String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public static Type getByName(String name) {
-            for (Type type : Type.values()) {
-                if (type.value.equals(name)) {
-                    return type;
-                }
-            }
-            return null;
         }
     }
 }

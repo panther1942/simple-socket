@@ -10,7 +10,7 @@ import java.util.Date;
 public class DataInfo implements Serializable {
     private static final long serialVersionUID = 1L;
     // 数据头部长度
-    public static final int LEN = 13 + 10 + 10 + 10;
+    public static final int LEN = 13 + 1 + 10 + 10;
 
     // 时间戳13字节
     private Date timestamp;
@@ -67,7 +67,7 @@ public class DataInfo implements Serializable {
     @Override
     public String toString() {
         String timestamp = String.format("%13s", this.timestamp.getTime()).replaceAll("\\s", "0");
-        String compress = String.format("%10s", this.compress.value).replaceAll("\\s", "0");
+        String compress = String.format("%1s", this.compress.value).replaceAll("\\s", "0");
         String pos = String.format("%10s", this.pos).replaceAll("\\s", "0");
         String len = String.format("%10s", this.len).replaceAll("\\s", "0");
         return timestamp + compress + pos + len;

@@ -1,23 +1,22 @@
-package cn.erika.context;
+package cn.erika.context.bean;
 
 import cn.erika.context.annotation.Component;
 import cn.erika.context.exception.BeanException;
 import cn.erika.context.exception.NoSuchBeanException;
+import jdk.internal.dynalink.support.ClassMap;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BeanFactory {
     private static BeanFactory factory = new BeanFactory();
     private Map<Class<?>, Object> beanList = new ConcurrentHashMap<>();
     private Map<String, Class<?>> aliasList = new HashMap<>();
+    private Map<String, Method> serviceList = new HashMap<>();
     private List<Class<?>> exclusionBean = new LinkedList<>();
 
     private BeanFactory() {
@@ -30,15 +29,19 @@ public class BeanFactory {
         return factory;
     }
 
-    public void addBean(Class<?> clazz, Object obj) {
-        beanList.put(clazz, obj);
+    public void addBean(Class<?> clazz, Object object) {
+        beanList.put(clazz, object);
     }
 
     public void addBean(String name, Class<?> clazz) {
         aliasList.put(name, clazz);
     }
 
-    // 获取Bean并做好类型转换
+    public void addBean(String name, Method method) {
+        serviceList.put(name, method);
+    }
+
+    // 通过类名获取单实例对象
     @SuppressWarnings("unchecked")
     public <T> T getBean(Class<?> clazz) throws BeanException {
         T bean = null;
@@ -52,7 +55,8 @@ public class BeanFactory {
             return bean;
         } else {
             if (exclusionBean.contains(clazz)) {
-                throw new NoSuchBeanException("不存在类型为: " + clazz.getName() + " 的bean");
+                return null;
+                //                throw new NoSuchBeanException("不存在类型为: " + clazz.getName() + " 的bean");
             } else {
                 bean = createBean(clazz);
                 Component component = clazz.getAnnotation(Component.class);
@@ -66,6 +70,7 @@ public class BeanFactory {
         }
     }
 
+    // 通过服务名称查找服务类对象
     public <T> T getBean(String name) throws BeanException {
         List<String> target = new LinkedList<>();
         for (String alia : aliasList.keySet()) {
@@ -90,7 +95,7 @@ public class BeanFactory {
 
     // 创建目标Bean
     @SuppressWarnings("unchecked")
-    private <T> T createBean(Class<?> clazz) throws BeanException {
+    public <T> T createBean(Class<?> clazz) throws BeanException {
         try {
             Object target = clazz.newInstance();
             InvocationProxy proxy = new InvocationProxy(target);
@@ -103,17 +108,28 @@ public class BeanFactory {
                     proxy
             );
         } catch (InstantiationException e) {
+            e.printStackTrace();
             throw new BeanException("缺少无参构造函数");
         } catch (IllegalAccessException e) {
             throw new BeanException("构造函数无法访问");
         }
     }
 
+    private List<Class<?>> getInterfaces(Class<?> clazz) {
+        List<Class<?>> interfaces = new LinkedList<>();
+        if (Object.class.equals(clazz)) {
+            return interfaces;
+        }
+        interfaces.addAll(Arrays.asList(clazz.getInterfaces()));
+        interfaces.addAll(getInterfaces(clazz.getSuperclass()));
+        return interfaces;
+    }
+
     public boolean existBean(Class<?> clazz) {
         return beanList.containsKey(clazz);
     }
 
-    // 排除列表中的bean不会被创建 只能手动创建并添加到列表中
+    // 排除列表中的bean不会自动创建 只能手动创建并添加到列表中
     public void excludeBean(Class<?> clazz) {
         exclusionBean.add(clazz);
     }
@@ -135,6 +151,34 @@ public class BeanFactory {
             } catch (InvocationTargetException e) {
                 throw e.getTargetException();
             }
+        }
+    }
+
+    public Object execute(BeanSelector handler, String name, Object... args) throws BeanException {
+        Class<?> clazz = aliasList.get(name);
+        Object object = getBean(clazz);
+        Method method = null;
+        try {
+            method = handler.getMethod(clazz);
+        } catch (NoSuchMethodException e) {
+            throw new BeanException("目标方法不存在: " + name);
+        }
+        try {
+            return Proxy.getInvocationHandler(object).invoke(object, method, args);
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            throw new BeanException("内部错误: " + throwable.getMessage());
+        }
+    }
+
+    public Object execute(String name, Object... args) throws BeanException {
+        Method method = serviceList.get(name);
+        Class<?> clazz = method.getDeclaringClass();
+        Object object = getBean(clazz);
+        try {
+            return Proxy.getInvocationHandler(object).invoke(object, method, args);
+        } catch (Throwable throwable) {
+            throw new BeanException("内部异常", throwable);
         }
     }
 }

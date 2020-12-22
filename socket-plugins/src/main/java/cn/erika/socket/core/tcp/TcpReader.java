@@ -74,11 +74,11 @@ class TcpReader {
         // 时间戳 13字节
         info.setTimestamp(new Date(Long.parseLong(strHead.substring(0, 13))));
         // 压缩 10字节
-        info.setCompress(DataInfo.Compress.getByValue(Integer.parseInt(strHead.substring(13, 23))));
+        info.setCompress(DataInfo.Compress.getByValue(Integer.parseInt(strHead.substring(13, 14))));
         // 偏移量 10字节
-        info.setPos(Long.parseLong(strHead.substring(23, 33)));
+        info.setPos(Long.parseLong(strHead.substring(14, 24)));
         // 长度 10字节
-        info.setLen(Integer.parseInt(strHead.substring(33, 43)));
+        info.setLen(Integer.parseInt(strHead.substring(24, 34)));
         byte[] tmp = new byte[len - DataInfo.LEN];
         System.arraycopy(data, DataInfo.LEN, tmp, 0, len - DataInfo.LEN);
         return tmp;
