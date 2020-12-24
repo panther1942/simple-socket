@@ -18,12 +18,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class Server extends BaseHandler {
     private LinkManager linkManager = new LinkManager();
     private Map<String, Socket> tokenList = new ConcurrentHashMap<>();
-    private Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Override
     public void init(Socket socket) {
         super.init(socket);
-        System.out.println("新连接接入");
+        log.info("新连接接入: " + socket.getRemoteAddress());
         linkManager.addLink(socket);
     }
 
@@ -61,11 +60,7 @@ public abstract class Server extends BaseHandler {
         StringBuffer buffer = new StringBuffer();
         for (String id : linkManager.getLinks().keySet()) {
             String address = null;
-            try {
-                address = linkManager.getLink(id).getRemoteAddress().toString();
-            } catch (IOException e) {
-                address = "unknown";
-            }
+            address = linkManager.getLink(id).getRemoteAddress().toString();
             buffer.append("id: ").append(id).append(" From: ").append(address);
         }
         System.out.println(buffer);
@@ -86,6 +81,6 @@ public abstract class Server extends BaseHandler {
 
     public abstract void listen();
 
-    public abstract void exit();
+    public abstract void close();
 
 }

@@ -1,19 +1,24 @@
-package cn.erika.test;
+package cn.erika.socket.advice;
 
-import cn.erika.aop.component.Advice;
+import cn.erika.aop.component.Advise;
 
 import java.lang.reflect.Method;
+import java.util.Date;
 
-public class DemoAdviceImpl implements Advice {
+public class FileAdvise implements Advise {
+
+    private Date start;
 
     @Override
     public boolean before(Method method, Object[] args) {
-        return false;
+        start = new Date();
+        return true;
     }
 
     @Override
     public void success(Method method, Object[] args, Object result) {
-
+        Date end = new Date();
+        System.out.println("传输用时: " + (end.getTime() - start.getTime()) / 1000 + "秒");
     }
 
     @Override

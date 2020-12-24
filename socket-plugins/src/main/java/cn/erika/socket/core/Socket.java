@@ -15,9 +15,9 @@ public interface Socket {
 
     public void close();
 
-    public SocketAddress getRemoteAddress() throws IOException;
+    public SocketAddress getRemoteAddress();
 
-    public SocketAddress getLocalAddress() throws IOException;
+    public SocketAddress getLocalAddress();
 
     public <T> T set(String k, Object v);
 

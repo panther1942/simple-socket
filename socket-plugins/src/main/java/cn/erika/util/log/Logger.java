@@ -2,18 +2,18 @@ package cn.erika.util.log;
 
 public abstract class Logger {
 
-    protected int level;
-    private String name;
+    protected LogLevel level;
+    private Class originClass;
 
-    public Logger(int level, String name) {
+    public Logger(LogLevel level, Class originClass) {
         this.level = level;
-        this.name = name;
+        this.originClass = originClass;
     }
 
-    protected abstract void print(int level, String prefix, String message);
+    protected abstract void print(LogLevel level, Class originClass, String message);
 
     public void debug(String message) {
-        print(LoggerFactory.DEBUG, name, message);
+        print(LogLevel.DEBUG, originClass, message);
     }
 
     public void debug(String message, Throwable throwable) {
@@ -22,7 +22,7 @@ public abstract class Logger {
     }
 
     public void info(String message) {
-        print(LoggerFactory.INFO, name, message);
+        print(LogLevel.INFO, originClass, message);
     }
 
     public void info(String message, Throwable throwable) {
@@ -31,7 +31,7 @@ public abstract class Logger {
     }
 
     public void warn(String message) {
-        print(LoggerFactory.WARN, name, message);
+        print(LogLevel.WARN, originClass, message);
     }
 
     public void warn(String message, Throwable throwable) {
@@ -40,7 +40,7 @@ public abstract class Logger {
     }
 
     public void error(String message) {
-        print(LoggerFactory.ERROR, name, message);
+        print(LogLevel.ERROR, originClass, message);
     }
 
     public void error(String message, Throwable throwable) {

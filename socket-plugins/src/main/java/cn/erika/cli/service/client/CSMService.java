@@ -18,7 +18,7 @@ public class CSMService extends BaseService implements CliService {
             }
             client.send(message.toString());
         } else {
-            throw new BeanException("客户端未启动");
+            throw new BeanException("客户端没有运行");
         }
     }
 }

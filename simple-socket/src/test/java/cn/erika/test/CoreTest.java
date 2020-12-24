@@ -7,12 +7,6 @@ import cn.erika.socket.component.Message;
 import cn.erika.util.compress.CompressException;
 import cn.erika.util.compress.GZIP;
 import cn.erika.util.string.SerialUtils;
-import org.jline.reader.Completer;
-import org.jline.reader.LineReader;
-import org.jline.reader.LineReaderBuilder;
-import org.jline.reader.impl.completer.StringsCompleter;
-import org.jline.terminal.Terminal;
-import org.jline.terminal.TerminalBuilder;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -24,7 +18,7 @@ import java.util.concurrent.Executors;
 public class CoreTest {
 
     @Test
-    public void testIntegerMaxValue(){
+    public void testIntegerMaxValue() {
         System.out.println(Integer.MAX_VALUE);
     }
 
@@ -66,27 +60,7 @@ public class CoreTest {
         System.out.printf("%18s\t%010d%3c", name, age, 'a');
     }
 
-    public static class CliApplication {
-        public static void main(String[] args) {
-            try {
-                Completer commandCompleter = new StringsCompleter("CREATE", "OPEN", "WRITE", "CLOSE");
-                Terminal terminal = TerminalBuilder.builder().system(true).build();
-                LineReader reader = LineReaderBuilder.builder()
-                        .terminal(terminal)
-                        .completer(commandCompleter)
-                        .build();
-                String prompt = "> ";
-                String line;
-                while (!"exit".equalsIgnoreCase(line = reader.readLine(prompt))) {
-                    System.out.println(line);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @PackageScan("cn.erika")
+    @PackageScan({"cn.erika", "com.mysql"})
     public static class TestApp extends Application {
         private ExecutorService service = Executors.newCachedThreadPool();
         public static TestApp app;

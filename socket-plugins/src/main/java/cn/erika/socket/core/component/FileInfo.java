@@ -1,7 +1,5 @@
 package cn.erika.socket.core.component;
 
-import cn.erika.util.security.MessageDigestAlgorithm;
-
 import java.io.Serializable;
 
 public class FileInfo implements Serializable {
@@ -13,10 +11,8 @@ public class FileInfo implements Serializable {
     private long fileLength;
     // 偏移量
     private long filePos;
-    // 签名算法
-    private MessageDigestAlgorithm digestAlgorithm;
-    // 文件签名
-    private byte[] sign;
+    // 文件签名(CRC)
+    private long checkCode;
 
     public String getFilename() {
         return filename;
@@ -42,19 +38,11 @@ public class FileInfo implements Serializable {
         this.filePos = filePos;
     }
 
-    public MessageDigestAlgorithm getDigestAlgorithm() {
-        return digestAlgorithm;
+    public long getCheckCode() {
+        return checkCode;
     }
 
-    public void setDigestAlgorithm(MessageDigestAlgorithm digestAlgorithm) {
-        this.digestAlgorithm = digestAlgorithm;
-    }
-
-    public byte[] getSign() {
-        return sign;
-    }
-
-    public void setSign(byte[] sign) {
-        this.sign = sign;
+    public void setCheckCode(long checkCode) {
+        this.checkCode = checkCode;
     }
 }

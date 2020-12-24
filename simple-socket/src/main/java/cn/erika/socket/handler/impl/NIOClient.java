@@ -24,7 +24,7 @@ public class NIOClient extends AbstractClientHandler implements Runnable {
         try {
             this.selector = Selector.open();
             this.socket = new TcpChannel(address, this, selector, CHARSET);
-            this.thread = new Thread(this);
+            this.thread = new Thread(this, this.getClass().getSimpleName());
             thread.setDaemon(true);
             thread.start();
         } catch (IOException e) {

@@ -8,6 +8,7 @@ import cn.erika.context.exception.BeanException;
 import cn.erika.socket.handler.BIOServer;
 import cn.erika.socket.handler.Server;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 
 @Component("listen")
@@ -27,12 +28,16 @@ public class ListenService extends BaseService implements CliService {
             host = args[1];
             port = Integer.parseInt(args[2]);
         } else {
-            host = GlobalSettings.DEFUALT_ADDRESS;
+            host = GlobalSettings.DEFAULT_ADDRESS;
             port = GlobalSettings.DEFAULT_PORT;
         }
-        server = new BIOServer(new InetSocketAddress(host, port));
-        addBean(Server.class, server);
-        server.listen();
-        log.info("服务器监听端口: " + server.getLocalAddress());
+        try {
+            server = new BIOServer(new InetSocketAddress(host, port));
+            addBean(Server.class, server);
+            server.listen();
+            log.info("服务器监听端口: " + server.getLocalAddress());
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
     }
 }

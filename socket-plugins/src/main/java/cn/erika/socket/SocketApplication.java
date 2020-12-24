@@ -13,12 +13,14 @@ import cn.erika.socket.services.SocketService;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * 适配Socket通信的Application的直接子类
+ * 注册了Socket相关服务的扫描处理器
+ */
 public abstract class SocketApplication extends Application {
     private static List<SocketPlugin> socketPlugins = new LinkedList<>();
 
     protected void beforeStartup() {
-        beanFactory.excludeBean(Server.class);
-        beanFactory.excludeBean(Client.class);
         super.beforeStartup();
         PackageScanner scanner = PackageScanner.getInstance();
         scanner.addHandler(new PackageScannerHandler() {

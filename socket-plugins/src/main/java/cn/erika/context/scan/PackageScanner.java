@@ -24,8 +24,8 @@ public class PackageScanner {
     private static final String JAR = "jar";
     private static final String CLASS_SUFFIX = ".class";
     private static final String JAVA_OS_NAME = "os.name";
+    private static final String CHARSET = System.getProperty("file.encoding");
 
-    private static final String CHARSET = "UTF-8";
     private static PackageScanner scanner;
     // 要扫描的包名
     private List<String> packageList = new LinkedList<>();
@@ -56,92 +56,88 @@ public class PackageScanner {
     }
 
     // 开始扫描
-    public void scan() {
+    public void scan() throws IOException {
         for (String packageName : packageList) {
             scan(packageName);
         }
     }
 
-    // 开始扫描
-    // 基本原理就是读取class文件 分析其路径名
-    private void scan(String packageName) {
+    /**
+     * 扫描类文件的方法 通过加载类加载器获取项目根目录
+     * 遍历该目录下的所有文件
+     * 如果路径匹配包名 则
+     *
+     * @param packageName
+     * @throws IOException
+     */
+    private void scan(String packageName) throws IOException {
+        // 需要判断操作系统类型 因为不同系统的分隔符不一样
         String systemName = System.getProperty(JAVA_OS_NAME);
         if (systemName == null) {
-            System.err.println("无法获取操作系统类型");
-            System.exit(1);
+            throw new RuntimeException("无法获取操作系统类型");
         }
-        System.out.println(systemName);
         String dirName = null;
         if (systemName.startsWith(LINUX)) {
+            // Linux下的分隔符是 / 无需处理
             dirName = packageName.replaceAll("\\.", File.separator);
         } else if (systemName.startsWith(WINDOWS)) {
+            // Windows下的分隔符是 \ 在Java中这是转义字符 因此需要处理
             dirName = packageName.replaceAll("\\.", Matcher.quoteReplacement(File.separator));
         } else {
-            System.err.println("不支持的操作系统");
-            System.exit(1);
+            // 其他类型的操作系统我也没用过
+            throw new RuntimeException("不支持的操作系统");
         }
-        Enumeration<URL> dirs = null;
-        try {
-            dirs = Thread.currentThread().getContextClassLoader().getResources(dirName);
-            while (dirs.hasMoreElements()) {
-                URL url = dirs.nextElement();
-                switch (url.getProtocol()) {
-                    case FILE:
-                        String filePath = URLDecoder.decode(url.getFile(), CHARSET);
-                        getClass(packageName, filePath);
-                        break;
-                    case JAR:
-                        URLConnection conn = url.openConnection();
-                        JarFile jar = ((JarURLConnection) conn).getJarFile();
-                        getClass(jar, packageName);
-                        break;
-                }
+        Enumeration<URL> dirs = Thread.currentThread().getContextClassLoader().getResources(dirName);
+        while (dirs.hasMoreElements()) {
+            URL url = dirs.nextElement();
+            switch (url.getProtocol()) {
+                case FILE:
+                    String filePath = URLDecoder.decode(url.getFile(), CHARSET);
+                    getClass(packageName, filePath);
+                    break;
+                case JAR:
+                    URLConnection conn = url.openConnection();
+                    JarFile jar = ((JarURLConnection) conn).getJarFile();
+                    getClass(jar, packageName);
+                    break;
+                default:
+                    continue;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
     // 使用处理器处理扫描到的类文件
-    private void onScan(Class<?> clazz) {
-        for (PackageScannerHandler handler : this.handlerList) {
-            if (handler.filter(clazz)) {
-                handler.deal(clazz);
-            }
-        }
-    }
-
     // 如果扫描到的是class文件
     private void getClass(String packageName, String packagePath) {
         File dir = new File(packagePath);
         if (!dir.exists() || !dir.isDirectory()) {
             System.err.println("在包名:" + packageName + "下未找到类文件");
-        } else {
-            File[] files = dir.listFiles(new FileFilter() {
-                @Override
-                public boolean accept(File file) {
-                    return (file.isDirectory() || file.getName().endsWith(CLASS_SUFFIX));
-                }
-            });
-            if (files != null) {
-                for (File file : files) {
-                    if (file.isDirectory()) {
-                        getClass(
-                                packageName + "." + file.getName(),
-                                file.getAbsolutePath());
-                    } else {
-                        String className = file.getName().substring(0, file.getName().length() - 6);
-                        try {
-                            Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(packageName + "." + className);
-                            onScan(clazz);
-                        } catch (ClassNotFoundException e) {
-                            System.err.println("找不到类: " + e.getException());
-                        }
+            return;
+        }
+        File[] files = dir.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                return (file.isDirectory() || file.getName().endsWith(CLASS_SUFFIX));
+            }
+        });
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    getClass(packageName + "." + file.getName(), file.getAbsolutePath());
+                } else {
+                    String className = file.getName().substring(0, file.getName().length() - 6);
+                    try {
+                        // 注意 这里加载了类文件 会执行静态部分的加载 提前执行静态代码块可能导致初始化异常 比如C3P0
+                        Class<?> clazz = Class.forName(packageName + "." + className);
+//                        Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(packageName + "." + className);
+                        onScan(clazz);
+                    } catch (ClassNotFoundException e) {
+                        System.err.println("找不到类: " + e.getException());
                     }
                 }
-            } else {
-                System.err.println("在包名:" + packageName + "下未找到类文件");
             }
+        } else {
+            System.err.println("在包名:" + packageName + "下未找到类文件");
         }
     }
 
@@ -168,11 +164,21 @@ public class PackageScanner {
                         entryName.length() - 6
                 );
                 try {
-                    Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(packageName + "." + className);
+                    Class<?> clazz = Class.forName(packageName + "." + className);
+//                    Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(packageName + "." + className);
                     onScan(clazz);
                 } catch (ClassNotFoundException e) {
                     System.err.println("找不到类: " + e.getException());
                 }
+            }
+        }
+    }
+
+    private void onScan(Class<?> clazz) {
+//        System.out.println("加载类: " + clazz.getName());
+        for (PackageScannerHandler handler : this.handlerList) {
+            if (handler.filter(clazz)) {
+                handler.deal(clazz);
             }
         }
     }

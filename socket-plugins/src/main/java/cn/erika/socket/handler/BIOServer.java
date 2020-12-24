@@ -7,19 +7,14 @@ import cn.erika.util.log.LoggerFactory;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.SocketAddress;
+import java.net.SocketException;
 
 public class BIOServer extends Server implements Runnable {
-    private Logger log = LoggerFactory.getLogger(this.getClass());
     private ServerSocket server;
 
-    public BIOServer(SocketAddress address) {
-        try {
-            this.server = new ServerSocket();
-            this.server.bind(address);
-            log.info("服务器监听: " + address.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public BIOServer(SocketAddress address) throws IOException {
+        this.server = new ServerSocket();
+        this.server.bind(address);
     }
 
     @Override
@@ -27,24 +22,27 @@ public class BIOServer extends Server implements Runnable {
         while (!server.isClosed()) {
             try {
                 new TcpSocket(server.accept(), this);
+            } catch (SocketException e) {
+                log.info("服务器停止运行");
             } catch (IOException e) {
+                e.printStackTrace();
                 log.error(e.getMessage());
             }
         }
-        log.warn("运行中断");
     }
 
     @Override
     public void listen() {
-        Thread t = new Thread(this);
+        Thread t = new Thread(this, this.getClass().getSimpleName());
+        t.setName(this.getClass().getSimpleName());
         t.setDaemon(true);
         t.start();
     }
 
     @Override
-    public void exit() {
+    public void close() {
         try {
-            if (!server.isClosed()) {
+            if (server != null && !server.isClosed()) {
                 server.close();
                 log.info("关闭服务器");
             }
@@ -53,17 +51,8 @@ public class BIOServer extends Server implements Runnable {
         }
     }
 
-    @Override
-    public void close() {
-        try {
-            this.server.close();
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
     public boolean isClosed() {
-        return this.server.isClosed();
+        return server != null && server.isClosed();
     }
 
     @Override

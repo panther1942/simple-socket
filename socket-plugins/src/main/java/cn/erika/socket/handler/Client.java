@@ -8,14 +8,15 @@ import cn.erika.socket.core.component.Message;
 import cn.erika.util.log.Logger;
 import cn.erika.util.log.LoggerFactory;
 
+import java.io.IOException;
+
 public abstract class Client extends BaseHandler {
-    private Logger log = LoggerFactory.getLogger(this.getClass());
     protected Socket socket;
 
     @Override
     public void init(Socket socket) {
         super.init(socket);
-        System.out.println("连接到服务器");
+        log.info("连接到服务器: " + socket.getRemoteAddress());
     }
 
     @Override
@@ -27,9 +28,7 @@ public abstract class Client extends BaseHandler {
         execute(socket, serviceName, message);
     }
 
-    public abstract void connect();
-
-    public abstract void disconnect();
+    public abstract void connect() throws IOException;
 
     public void send(String message) {
         socket.send(new Message(Constant.SRV_TEXT, message));

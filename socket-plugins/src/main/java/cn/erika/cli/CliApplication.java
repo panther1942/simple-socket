@@ -19,13 +19,12 @@ import cn.erika.util.string.StringUtils;
 import java.io.IOException;
 
 @PackageScan("cn.erika")
-public class CliApplication extends SocketApplication implements Runnable{
-    private BeanFactory beanFactory = BeanFactory.getInstance();
+public class CliApplication extends SocketApplication implements Runnable {
     private Logger log = LoggerFactory.getLogger(this.getClass());
     private KeyboardReader reader = KeyboardReader.getInstance();
 
     public static void main(String[] args) {
-        run(CliApplication.class, args);
+        run(CliApplication.class);
     }
 
     @Override
@@ -50,7 +49,8 @@ public class CliApplication extends SocketApplication implements Runnable{
 
     @Override
     protected void afterStartup() {
-        new Thread(this).start();
+        Thread thread = new Thread(this, this.getClass().getSimpleName());
+        thread.start();
     }
 
     @Override
@@ -69,6 +69,8 @@ public class CliApplication extends SocketApplication implements Runnable{
                     log.error("命令错误: " + e.getMessage());
                 } catch (ArrayIndexOutOfBoundsException | StringIndexOutOfBoundsException e) {
                     log.error("语法错误: " + line);
+                } catch (ClassCastException e) {
+                    log.warn("不是控制台服务");
                 } catch (BeanException e) {
                     log.error(e.getMessage());
                 }

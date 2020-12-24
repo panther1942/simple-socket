@@ -14,8 +14,6 @@ import cn.erika.socket.handler.FileSender;
 import cn.erika.socket.handler.Server;
 import cn.erika.socket.services.SocketService;
 import cn.erika.util.security.MessageDigest;
-import cn.erika.util.security.MessageDigestAlgorithm;
-import cn.erika.util.string.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -83,7 +81,6 @@ public class FileUploadPreService extends BaseService implements SocketService {
     }
 
     private void preUpload(Socket socket, Message message) {
-        MessageDigestAlgorithm digestAlgorithm = GlobalSettings.fileSignAlgorithm;
         String filename = message.get(Constant.FILENAME);
         String filepath = message.get(Constant.FILEPATH);
         try {
@@ -95,24 +92,21 @@ public class FileUploadPreService extends BaseService implements SocketService {
             } else {
                 log.info("文件完整路径: " + file.getAbsolutePath() + " 文件名: " + filename + " 文件长度: " + file.length());
             }
-            log.info("计算文件签名");
-            byte[] sign = MessageDigest.sum(file, digestAlgorithm);
-            log.info("文件签名: " + StringUtils.byteToHexString(sign));
+            log.info("计算文件校验码");
+            long checkCode = MessageDigest.crc32Sum(file);
+            log.info("文件校验码: " + checkCode);
 
             Message request = new Message(Constant.SRV_PRE_UPLOAD);
             FileInfo info = new FileInfo();
             info.setFilename(filename);
             info.setFileLength(file.length());
-            info.setDigestAlgorithm(digestAlgorithm);
-            info.setSign(sign);
+            info.setCheckCode(checkCode);
             String token = UUID.randomUUID().toString();
             request.add(Constant.FILE_INFO, info);
             request.add(Constant.TOKEN, token);
             Application.set(token, file.getAbsolutePath());
             log.debug("发送预请求");
             socket.send(request);
-        } catch (SecurityException e) {
-            log.error("当前系统不支持这种签名算法: " + digestAlgorithm.getValue());
         } catch (FileException e) {
             log.error("读取文件失败", e);
         } catch (IOException e) {

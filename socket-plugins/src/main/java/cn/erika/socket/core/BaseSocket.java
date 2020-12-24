@@ -6,10 +6,9 @@ import cn.erika.socket.core.component.DataInfo;
 import cn.erika.socket.core.component.Message;
 import cn.erika.util.compress.GZIP;
 import cn.erika.util.exception.CompressException;
-import cn.erika.util.security.RSA;
-import cn.erika.util.security.RSADigestAlgorithm;
-import cn.erika.util.security.Security;
-import cn.erika.util.security.SecurityAlgorithm;
+import cn.erika.util.log.Logger;
+import cn.erika.util.log.LoggerFactory;
+import cn.erika.util.security.*;
 import cn.erika.util.string.SerialUtils;
 
 import java.util.Date;
@@ -19,6 +18,8 @@ import java.util.Map;
 public abstract class BaseSocket implements Socket {
     // 记录连接的属性
     private Map<String, Object> attr = new HashMap<>();
+    private AsymmetricAlgorithm asymmetricAlgorithm = GlobalSettings.asymmetricAlgorithm;
+    protected Logger log = LoggerFactory.getLogger(this.getClass());
     protected Handler handler;
 
     // 1、计算签名 并将计算结果加到Message的payload属性里
@@ -32,11 +33,12 @@ public abstract class BaseSocket implements Socket {
             boolean isEncrypt = get(Constant.ENCRYPT);
             message.del(Constant.SIGN);
             if (isEncrypt) {
-                RSADigestAlgorithm rsaDigestAlgorithm = get(Constant.RSA_SIGN_ALGORITHM);
-                message.add(Constant.SIGN, RSA.sign(
+                DigitalSignatureAlgorithm digitalSignatureAlgorithm = get(Constant.DIGITAL_SIGNATURE_ALGORITHM);
+                message.add(Constant.SIGN, DigitalSignature.sign(
                         SerialUtils.serialObject(message),
                         GlobalSettings.privateKey,
-                        rsaDigestAlgorithm)
+                        digitalSignatureAlgorithm,
+                        asymmetricAlgorithm)
                 );
             }
             byte[] data = SerialUtils.serialObject(message);
@@ -98,10 +100,11 @@ public abstract class BaseSocket implements Socket {
             Message message = SerialUtils.serialObject(data);
             if (isEncrypt) {
                 byte[] publicKey = get(Constant.PUBLIC_KEY);
-                RSADigestAlgorithm rsaDigestAlgorithm = get(Constant.RSA_SIGN_ALGORITHM);
+                DigitalSignatureAlgorithm digitalSignatureAlgorithm = get(Constant.DIGITAL_SIGNATURE_ALGORITHM);
                 byte[] sign = message.get(Constant.SIGN);
                 message.del(Constant.SIGN);
-                if (!RSA.verify(SerialUtils.serialObject(message), publicKey, sign, rsaDigestAlgorithm)) {
+                if (!DigitalSignature.verify(SerialUtils.serialObject(message),
+                        publicKey, sign, digitalSignatureAlgorithm, asymmetricAlgorithm)) {
                     throw new SecurityException("验签失败");
                 }
                 message.add(Constant.SIGN, sign);

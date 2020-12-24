@@ -12,7 +12,7 @@ public class DisconnectService extends BaseService implements CliService {
     public void execute(String... args) throws BeanException {
         Client client = getBean(Client.class);
         if (client != null) {
-            client.disconnect();
+            client.close();
         }
     }
 }

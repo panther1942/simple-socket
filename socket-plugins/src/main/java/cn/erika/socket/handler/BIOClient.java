@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.net.SocketAddress;
 
 public class BIOClient extends Client {
-    private Logger log = LoggerFactory.getLogger(this.getClass());
     private SocketAddress address;
 
     public BIOClient(SocketAddress address) {
@@ -18,39 +17,25 @@ public class BIOClient extends Client {
     }
 
     @Override
-    public void connect() {
-        try {
-            this.socket = new TcpSocket(address, this);
-        } catch (IOException e) {
-            onError(socket, e);
-        }
-    }
-
-    @Override
-    public void disconnect() {
-        socket.send(new Message(Constant.SRV_TEXT, Constant.EXIT));
-        socket.close();
+    public void connect() throws IOException {
+        this.socket = new TcpSocket(address, this);
     }
 
     @Override
     public SocketAddress getLocalAddress() {
-        try {
-            return socket.getLocalAddress();
-        } catch (IOException e) {
-            log.error("无法获取本地地址");
-        }
-        return null;
+        return socket.getLocalAddress();
     }
 
     @Override
     public void close() {
         if (socket != null) {
+            socket.send(new Message(Constant.SRV_TEXT, Constant.EXIT));
             socket.close();
         }
     }
 
     @Override
     public boolean isClosed() {
-        return socket.isClosed();
+        return socket != null && socket.isClosed();
     }
 }

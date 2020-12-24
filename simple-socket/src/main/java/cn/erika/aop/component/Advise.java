@@ -3,7 +3,7 @@ package cn.erika.aop.component;
 import java.lang.reflect.Method;
 
 // 增强类的接口
-public interface Advice {
+public interface Advise {
     // 在执行前
     public boolean before(Method method, Object[] args);
 

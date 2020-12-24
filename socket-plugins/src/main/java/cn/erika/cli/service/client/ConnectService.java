@@ -8,6 +8,7 @@ import cn.erika.context.exception.BeanException;
 import cn.erika.socket.handler.BIOClient;
 import cn.erika.socket.handler.Client;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 
 @Component("connect")
@@ -15,8 +16,8 @@ public class ConnectService extends BaseService implements CliService {
     @Override
     public void execute(String... args) throws BeanException {
         Client client = getBean(Client.class);
-        if (client != null) {
-            client.disconnect();
+        if (client != null && !client.isClosed()) {
+            client.close();
         }
 
         String host;
@@ -26,11 +27,15 @@ public class ConnectService extends BaseService implements CliService {
             host = args[1];
             port = Integer.parseInt(args[2]);
         } else {
-            host = GlobalSettings.DEFUALT_ADDRESS;
+            host = GlobalSettings.DEFAULT_ADDRESS;
             port = GlobalSettings.DEFAULT_PORT;
         }
-        client = new BIOClient(new InetSocketAddress(host, port));
-        addBean(Client.class, client);
-        client.connect();
+        try {
+            client = new BIOClient(new InetSocketAddress(host, port));
+            addBean(Client.class, client);
+            client.connect();
+        } catch (IOException e) {
+            log.warn(e.getMessage());
+        }
     }
 }

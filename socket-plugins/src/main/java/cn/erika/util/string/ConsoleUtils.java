@@ -1,6 +1,11 @@
 package cn.erika.util.string;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class ConsoleUtils {
+    private static final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss:SSS";
+    private static SimpleDateFormat sdf = new SimpleDateFormat(TIME_FORMAT);
 
     /**
      * 终端上画分割线
@@ -43,5 +48,54 @@ public class ConsoleUtils {
             buffer.append(character);
         }
         System.out.println(buffer);
+    }
+
+    public static String consoleLog(String logLevel, Class originClass, String message) {
+        Date now = new Date();
+        Thread thread = Thread.currentThread();
+        StringBuffer line = new StringBuffer(sdf.format(now));
+        for (int i = 0; i < 6 - logLevel.length(); i++) {
+            line.append(" ");
+        }
+        line.append(logLevel).append(" ");
+        String threadName = thread.getName();
+        if (threadName.length() > 15) {
+            threadName = threadName.substring(0, 16);
+        }
+        line.append("--- [");
+        for (int i = 0; i < 15 - threadName.length(); i++) {
+            line.append(" ");
+        }
+        line.append(threadName);
+        line.append("] ");
+        String className = originClass.getName();
+        if (className.length() > 40) {
+            String[] target = checkLength(className.split("\\."), className.length(), 40, 0);
+            StringBuffer stringBuffer = new StringBuffer();
+            for (String str : target) {
+                stringBuffer.append(str).append(".");
+            }
+            stringBuffer.deleteCharAt(stringBuffer.length() - 1);
+            className = stringBuffer.toString();
+        }
+        int classNameLen = className.length();
+        StringBuffer stringBuffer = new StringBuffer(className);
+        for (int i = 0; i < 40 - classNameLen; i++) {
+            stringBuffer.append(" ");
+        }
+        line.append(stringBuffer);
+        line.append(" : ");
+        line.append(message);
+        return line.toString();
+    }
+
+    private static String[] checkLength(String[] packagePath, int srcLength, int destLength, int pos) {
+        int length = packagePath[pos].length();
+        packagePath[pos] = packagePath[pos].substring(0, 1);
+        srcLength = srcLength - length + 1;
+        if (srcLength > destLength) {
+            return checkLength(packagePath, srcLength, destLength, ++pos);
+        }
+        return packagePath;
     }
 }

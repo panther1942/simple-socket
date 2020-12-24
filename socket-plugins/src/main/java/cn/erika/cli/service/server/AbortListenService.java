@@ -7,12 +7,14 @@ import cn.erika.context.exception.BeanException;
 import cn.erika.socket.handler.Server;
 
 @Component("abort")
-public class AbortListenService extends BaseService implements CliService{
+public class AbortListenService extends BaseService implements CliService {
     @Override
     public void execute(String... args) throws BeanException {
         Server server = getBean(Server.class);
-        if (server != null) {
-            server.exit();
+        if (server != null && !server.isClosed()) {
+            server.close();
+        } else {
+            log.info("服务器没有运行");
         }
     }
 }

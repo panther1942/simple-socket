@@ -5,7 +5,7 @@ import cn.erika.aop.exception.BeanException;
 import cn.erika.cli.App;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
-import cn.erika.socket.advice.FileAdvice;
+import cn.erika.socket.advice.FileAdvise;
 import cn.erika.socket.annotation.SocketServiceMapping;
 import cn.erika.socket.component.FileInfo;
 import cn.erika.socket.component.Message;
@@ -24,7 +24,7 @@ public class FileUploadService implements ISocketService {
     private final String BASE_DIR = GlobalSettings.baseDir;
 
     @Override
-    @Aspect(FileAdvice.class)
+    @Aspect(FileAdvise.class)
     public void client(BaseSocket socket, Message message) {
         FileInfo info = message.get(Constant.FILE_INFO);
         String filepath = info.getFilepath();

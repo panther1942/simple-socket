@@ -35,7 +35,7 @@ public class FileSender extends BaseHandler {
             String token = message.get(Constant.TOKEN);
             socket.set(Constant.TOKEN, token);
             socket.set(Constant.PUBLIC_KEY, socket.get(Constant.PUBLIC_KEY));
-            socket.set(Constant.RSA_SIGN_ALGORITHM, socket.get(Constant.RSA_SIGN_ALGORITHM));
+            socket.set(Constant.DIGITAL_SIGNATURE_ALGORITHM, socket.get(Constant.DIGITAL_SIGNATURE_ALGORITHM));
             execute(socket, Constant.SRV_EXCHANGE_TOKEN, null);
         } catch (BeanException e) {
             e.printStackTrace();
@@ -72,11 +72,6 @@ public class FileSender extends BaseHandler {
 
     @Override
     public SocketAddress getLocalAddress() {
-        try {
-            return socket.getLocalAddress();
-        } catch (IOException e) {
-            log.error("无法获取本地地址");
-        }
-        return null;
+        return socket.getLocalAddress();
     }
 }

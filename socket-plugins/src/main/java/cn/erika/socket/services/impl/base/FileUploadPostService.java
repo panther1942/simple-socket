@@ -11,8 +11,6 @@ import cn.erika.socket.core.component.FileInfo;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.services.SocketService;
 import cn.erika.util.security.MessageDigest;
-import cn.erika.util.security.MessageDigestAlgorithm;
-import cn.erika.util.string.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,20 +33,15 @@ public class FileUploadPostService extends BaseService implements SocketService 
             String token = socket.get(Constant.TOKEN);
             FileInfo info = Application.get(token);
             String filename = info.getFilename();
-            MessageDigestAlgorithm digestAlgorithm = info.getDigestAlgorithm();
-            byte[] sign = info.getSign();
-            String targetSign = StringUtils.byteToHexString(sign);
+            long checkCode = info.getCheckCode();
             File file = new File(BASE_DIR + filename);
             log.info("文件位置: " + file.getAbsolutePath());
-            String currentSign = StringUtils.byteToHexString(
-                    MessageDigest.sum(file, digestAlgorithm)
-            );
             BaseSocket parent = socket.get(Constant.PARENT_SOCKET);
-            if (targetSign.equalsIgnoreCase(currentSign)) {
+            if (checkCode == MessageDigest.crc32Sum(file)) {
                 log.info("数据完整");
                 parent.send(new Message(Constant.SRV_POST_UPLOAD, "接收完成"));
             } else {
-                log.warn("数据不完整\n预期值: " + targetSign + "\n实际值: " + currentSign);
+                log.warn("数据不完整");
                 parent.send(new Message(Constant.SRV_POST_UPLOAD, "接收失败"));
             }
         } catch (SecurityException e) {

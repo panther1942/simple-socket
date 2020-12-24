@@ -1,3 +1,32 @@
 spring:
   resources:
     static-locations: classpath:templates/
+
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      driver-class-name: com.mysql.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/db_demo1
+      username: test
+      password: test
+
+      initial-size: 1
+      min-idle: 3
+      max-active: 10
+      max-wait: 30000
+      time-between-eviction-runs-millis: 60
+      min-evictable-idle-time-millis: 30000
+
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+
+logging:
+  level:
+    cn.erika: debug
+    org.springframework: warn
+    org.spring.springboot.dao: debug

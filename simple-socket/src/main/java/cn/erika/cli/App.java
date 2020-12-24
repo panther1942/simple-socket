@@ -30,7 +30,7 @@ public class App extends SocketApplication implements Runnable {
 
     @Override
     public void afterStartup() {
-        new Thread(this).start();
+        new Thread(this, this.getClass().getSimpleName()).start();
     }
 
 
@@ -56,7 +56,7 @@ public class App extends SocketApplication implements Runnable {
             }
         } finally {
             log.info("退出运行");
-            try{
+            try {
                 IServer server = getBean(IServer.class);
                 if (server != null) {
                     server.close();

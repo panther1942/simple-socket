@@ -279,9 +279,9 @@ public abstract class Application {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             Object result = null;
-            Advice advice = null;
+            Advise advise = null;
             // 检查被代理的目标是不是增强器的实现类 如果是的话 跳过AOP检测
-            if (!Advice.class.isInstance(target)) {
+            if (!Advise.class.isInstance(target)) {
                 // 获取所有型参的类型
                 Class<?>[] typeArray = null;
                 if (args != null) {
@@ -300,23 +300,23 @@ public abstract class Application {
                 Aspect aspect = targetMethod.getAnnotation(Aspect.class);
                 // 如果存在Aspect注解 则获取增强类的实例
                 if (aspect != null) {
-                    advice = getBean(aspect.value());
+                    advise = getBean(aspect.value());
                 }
             }
             // 如果增强器不为空 则执行增强部分的方法 否则执行目标方法
-            if (advice != null) {
+            if (advise != null) {
                 try {
-                    if (advice.before(method, args)) {
+                    if (advise.before(method, args)) {
                         result = method.invoke(target, args);
-                        advice.success(method, args, result);
+                        advise.success(method, args, result);
                         return result;
                     } else {
-                        return advice.cancel(method, args);
+                        return advise.cancel(method, args);
                     }
                 } catch (Throwable e) {
-                    return advice.failed(method, args, e);
+                    return advise.failed(method, args, e);
                 } finally {
-                    advice.finished(method, args);
+                    advise.finished(method, args);
                 }
             } else {
                 try {

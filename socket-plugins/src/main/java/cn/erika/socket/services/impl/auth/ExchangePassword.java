@@ -8,17 +8,13 @@ import cn.erika.socket.core.Socket;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.services.SocketService;
 import cn.erika.util.exception.SerialException;
-import cn.erika.util.log.Logger;
-import cn.erika.util.log.LoggerFactory;
-import cn.erika.util.security.RSA;
-import cn.erika.util.security.SecurityAlgorithm;
+import cn.erika.util.security.*;
 import cn.erika.util.string.SerialUtils;
 import cn.erika.util.string.StringUtils;
 
-import java.util.Base64;
-
 @Component(Constant.SRV_EXCHANGE_PASSWORD)
 public class ExchangePassword extends BaseService implements SocketService {
+    private AsymmetricAlgorithm asymmetricAlgorithm = GlobalSettings.asymmetricAlgorithm;
 
     @Override
     public void client(Socket socket, Message message) {
@@ -27,11 +23,13 @@ public class ExchangePassword extends BaseService implements SocketService {
             if (serverPublicKey == null) {
                 throw new SecurityException("缺少公钥信息");
             }
-            log.debug("获取服务器公钥: " + Base64.getEncoder().encodeToString(serverPublicKey));
+            byte[] serverPublicKeySign = MessageDigest.sum(serverPublicKey, MessageDigestAlgorithm.SHA1);
+//            log.debug("获取服务器公钥: " + Base64.getEncoder().encodeToString(serverPublicKey));
+            log.debug("获取服务器公钥: " + StringUtils.byteToHexString(serverPublicKeySign));
             socket.set(Constant.PUBLIC_KEY, serverPublicKey);
 
-            SecurityAlgorithm securityAlgorithm = GlobalSettings.passwordAlgorithm;
-            String securityKey = StringUtils.randomString(GlobalSettings.passwordLength);
+            SecurityAlgorithm securityAlgorithm = GlobalSettings.securityAlgorithm;
+            String securityKey = StringUtils.randomString(GlobalSettings.securityLength);
 
             socket.set(Constant.SECURITY_ALGORITHM, securityAlgorithm);
             socket.set(Constant.SECURITY_KEY, securityKey);
@@ -40,15 +38,17 @@ public class ExchangePassword extends BaseService implements SocketService {
             Message request = new Message(Constant.SRV_EXCHANGE_PASSWORD);
 
             request.add(Constant.SECURITY_ALGORITHM,
-                    RSA.encryptByPublicKey(SerialUtils.serialObject(securityAlgorithm), serverPublicKey));
+                    Security.encryptByPublicKey(SerialUtils.serialObject(securityAlgorithm),
+                            serverPublicKey, asymmetricAlgorithm));
             request.add(Constant.SECURITY_KEY,
-                    RSA.encryptByPublicKey(SerialUtils.serialObject(securityKey), serverPublicKey));
+                    Security.encryptByPublicKey(SerialUtils.serialObject(securityKey),
+                            serverPublicKey, asymmetricAlgorithm));
 
             if (securityAlgorithm.isNeedIv()) {
                 byte[] securityIv = StringUtils.randomByte(8);
                 socket.set(Constant.SECURITY_IV, securityIv);
                 request.add(Constant.SECURITY_IV,
-                        RSA.encryptByPublicKey(securityIv, serverPublicKey));
+                        Security.encryptByPublicKey(securityIv, serverPublicKey, asymmetricAlgorithm));
             }
             socket.send(request);
         } catch (SerialException e) {
@@ -66,12 +66,10 @@ public class ExchangePassword extends BaseService implements SocketService {
             if (bSecurityAlgorithm == null || bSecurityKey == null) {
                 throw new SecurityException("缺少加密信息");
             }
-            SecurityAlgorithm securityAlgorithm = SerialUtils.serialObject(RSA.decryptByPrivateKey(
-                    bSecurityAlgorithm, GlobalSettings.privateKey
-            ));
-            String securityKey = SerialUtils.serialObject(RSA.decryptByPrivateKey(
-                    bSecurityKey, GlobalSettings.privateKey
-            ));
+            SecurityAlgorithm securityAlgorithm = SerialUtils.serialObject(Security.decryptByPrivateKey(
+                    bSecurityAlgorithm, GlobalSettings.privateKey, asymmetricAlgorithm));
+            String securityKey = SerialUtils.serialObject(Security.decryptByPrivateKey(
+                    bSecurityKey, GlobalSettings.privateKey, asymmetricAlgorithm));
 
             socket.set(Constant.SECURITY_ALGORITHM, securityAlgorithm);
             socket.set(Constant.SECURITY_KEY, securityKey);
@@ -80,8 +78,8 @@ public class ExchangePassword extends BaseService implements SocketService {
                 if (bSecurityIv == null) {
                     throw new SecurityException("加密方式缺少向量");
                 }
-                byte[] securityIv = RSA.decryptByPrivateKey(
-                        bSecurityIv, GlobalSettings.privateKey
+                byte[] securityIv = Security.decryptByPrivateKey(
+                        bSecurityIv, GlobalSettings.privateKey, asymmetricAlgorithm
                 );
                 socket.set(Constant.SECURITY_IV, securityIv);
             }

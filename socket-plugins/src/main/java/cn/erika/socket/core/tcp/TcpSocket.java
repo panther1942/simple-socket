@@ -11,6 +11,7 @@ import cn.erika.socket.core.component.DataInfo;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.SocketAddress;
 import java.nio.charset.Charset;
 import java.util.Date;
@@ -31,12 +32,16 @@ public class TcpSocket extends BaseSocket implements Runnable {
     }
 
     public TcpSocket(SocketAddress address, Handler handler) throws IOException {
-        set(Constant.TYPE, Constant.CLIENT);
-        this.socket = new java.net.Socket();
-        this.handler = handler;
-        this.socket.setReuseAddress(true);
-        this.socket.connect(address);
-        init();
+        try {
+            set(Constant.TYPE, Constant.CLIENT);
+            this.socket = new java.net.Socket();
+            this.handler = handler;
+            this.socket.setReuseAddress(true);
+            this.socket.connect(address);
+            init();
+        } catch (ConnectException e) {
+            throw new IOException("无法连接到服务器");
+        }
     }
 
     private void init() throws IOException {
@@ -45,7 +50,7 @@ public class TcpSocket extends BaseSocket implements Runnable {
         this.reader = new TcpReader(charset);
         this.in = socket.getInputStream();
         this.out = socket.getOutputStream();
-        Thread thread = new Thread(this);
+        Thread thread = new Thread(this, this.getClass().getSimpleName());
         thread.setDaemon(true);
         thread.start();
         handler.init(this);
@@ -107,7 +112,7 @@ public class TcpSocket extends BaseSocket implements Runnable {
     }
 
     @Override
-    public SocketAddress getLocalAddress(){
+    public SocketAddress getLocalAddress() {
         return socket.getLocalSocketAddress();
     }
 
@@ -123,8 +128,8 @@ public class TcpSocket extends BaseSocket implements Runnable {
                 socket.close();
             }
         } catch (IOException e) {
-            System.err.println("关闭连接的过程中发生错误: " + e.getMessage());
-        }finally {
+            log.error("关闭连接的过程中发生错误: " + e.getMessage());
+        } finally {
             handler.onClose(this);
         }
     }

@@ -20,7 +20,7 @@ public class FileUploadAspect {
     public void afterReturning(JoinPoint joinPoint, Socket socket, Message message) {
         if (Constant.SRV_EXCHANGE_TOKEN.equals(message.get(Constant.SERVICE_NAME))) {
             FileSender fileSender = (FileSender) joinPoint.getTarget();
-            System.err.println("开始发送");
+//            System.err.println("开始发送");
 //            socket.send(new Message(Constant.SRV_TEXT, "测试"));
             fileSender.upload();
         }

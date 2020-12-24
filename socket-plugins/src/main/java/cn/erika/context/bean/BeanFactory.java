@@ -1,23 +1,29 @@
 package cn.erika.context.bean;
 
 import cn.erika.context.annotation.Component;
+import cn.erika.context.annotation.Enhance;
 import cn.erika.context.exception.BeanException;
-import cn.erika.context.exception.NoSuchBeanException;
-import jdk.internal.dynalink.support.ClassMap;
+import cn.erika.context.exception.UndeclaredMethodException;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BeanFactory {
+    // 单例工厂
     private static BeanFactory factory = new BeanFactory();
+    // 存储单例对象
     private Map<Class<?>, Object> beanList = new ConcurrentHashMap<>();
+    // 存储服务别名 粒度为Class
     private Map<String, Class<?>> aliasList = new HashMap<>();
+    // 存储服务别名 粒度为Method
     private Map<String, Method> serviceList = new HashMap<>();
-    private List<Class<?>> exclusionBean = new LinkedList<>();
 
     private BeanFactory() {
     }
@@ -45,28 +51,28 @@ public class BeanFactory {
     @SuppressWarnings("unchecked")
     public <T> T getBean(Class<?> clazz) throws BeanException {
         T bean = null;
+        // 如果已经缓存对象 则直接返回
         if (beanList.containsKey(clazz)) {
             Object obj = beanList.get(clazz);
             try {
+                // 必须要检查转换异常 否则就算这里不报错 运行时也会报错
                 bean = (T) obj;
             } catch (ClassCastException e) {
                 throw new BeanException("类型: " + obj.getClass().getName() + "与预期" + clazz.getName() + "不匹配", e);
             }
             return bean;
         } else {
-            if (exclusionBean.contains(clazz)) {
-                return null;
-                //                throw new NoSuchBeanException("不存在类型为: " + clazz.getName() + " 的bean");
-            } else {
+            // 如果没有缓存对象 则尝试创建对象 这需要一个无参可访问的构造函数
+            Component component = clazz.getAnnotation(Component.class);
+            if (component != null && !component.ignore()) {
+                // 如果clazz具有Component注解 而且不被忽略 则创建对象 否则忽略返回NULL
                 bean = createBean(clazz);
-                Component component = clazz.getAnnotation(Component.class);
-                if (component != null) {
-                    if (Component.Type.SingleTon.equals(component.type())) {
-                        beanList.put(clazz, bean);
-                    }
+                // 如果是单例 则缓存对象
+                if (Component.Type.SingleTon.equals(component.type())) {
+                    beanList.put(clazz, bean);
                 }
-                return bean;
             }
+            return bean;
         }
     }
 
@@ -78,13 +84,13 @@ public class BeanFactory {
                 target.add(alia);
             }
         }
+        // 这里需要检查匹配的条目数量 实现模糊匹配 首字母开始
         if (target.size() == 0) {
-            throw new NoSuchBeanException("未找到名称为: " + name + " 的bean");
+            throw new BeanException("未找到名称为: " + name + " 的bean");
         } else if (target.size() > 1) {
             StringBuffer buffer = new StringBuffer("不明确的服务: ");
             for (String srvName : target) {
-                buffer.append(srvName);
-                buffer.append(",");
+                buffer.append(srvName).append(",");
             }
             buffer.deleteCharAt(buffer.length() - 1);
             throw new BeanException(buffer.toString());
@@ -115,25 +121,6 @@ public class BeanFactory {
         }
     }
 
-    private List<Class<?>> getInterfaces(Class<?> clazz) {
-        List<Class<?>> interfaces = new LinkedList<>();
-        if (Object.class.equals(clazz)) {
-            return interfaces;
-        }
-        interfaces.addAll(Arrays.asList(clazz.getInterfaces()));
-        interfaces.addAll(getInterfaces(clazz.getSuperclass()));
-        return interfaces;
-    }
-
-    public boolean existBean(Class<?> clazz) {
-        return beanList.containsKey(clazz);
-    }
-
-    // 排除列表中的bean不会自动创建 只能手动创建并添加到列表中
-    public void excludeBean(Class<?> clazz) {
-        exclusionBean.add(clazz);
-    }
-
     // 反射处理器 在这里做了增强Advice
     // 搞成静态内部类是因为只有创建Bean的时候用 而且不想让外部访问
     private class InvocationProxy implements InvocationHandler {
@@ -146,10 +133,99 @@ public class BeanFactory {
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            try {
-                return method.invoke(target, args);
-            } catch (InvocationTargetException e) {
-                throw e.getTargetException();
+            Object result = null;
+            Advise advise = null;
+            // 检查被代理的目标是不是增强器的实现类 如果是的话 跳过AOP检测
+            if (!Advise.class.isInstance(target)) {
+                // 获取所有型参的类型
+                Class<?>[] typeArray = null;
+                if (args != null) {
+                    typeArray = new Class<?>[args.length];
+                    for (int i = 0; i < args.length; i++) {
+                        if (args[i] != null) {
+                            typeArray[i] = args[i].getClass();
+                        } else {
+                            typeArray[i] = null;
+                        }
+                    }
+                }
+                // 获取目标方法
+                Method targetMethod = getMethod(method.getName(), typeArray);
+                // 检查方法上的注解
+                Enhance aspect = targetMethod.getAnnotation(Enhance.class);
+                // 如果存在Aspect注解 则获取增强类的实例
+                if (aspect != null) {
+                    advise = getBean(aspect.value());
+                }
+            }
+            // 如果增强器不为空 则执行增强部分的方法 否则执行目标方法
+            if (advise != null) {
+                try {
+                    advise.before(method, args);
+                    result = method.invoke(target, args);
+                    advise.afterReturning(method, args, result);
+                    return result;
+                } catch (Throwable t) {
+                    advise.afterThrowing(method, args, t);
+                    throw t;
+                }
+            } else {
+                try {
+                    return method.invoke(target, args);
+                } catch (InvocationTargetException e) {
+                    throw e.getTargetException();
+                }
+            }
+        }
+
+        private Method getMethod(String name, Class... argTypes) throws NoSuchMethodException {
+            List<Method> targetMethod = new LinkedList<>();
+            Method[] methods = target.getClass().getMethods();
+            boolean flag = false;
+            for (Method method : methods) {
+                if (!method.getName().equals(name)) {
+                    // 首先 名字不同的直接忽略
+                    continue;
+                }
+                Class<?>[] types = method.getParameterTypes();
+                if (argTypes != null && types.length == argTypes.length) {
+                    for (int i = 0; i < types.length; i++) {
+                        if (argTypes[i] == null) {
+                            // 如果传入的参数部分为空 则匹配这个位置任意类型的参数
+                            flag = true;
+                        } else if (types[i].isAssignableFrom(argTypes[i])) {
+                            // 如果参数类型匹配 或为其子类
+                            flag = true;
+                        } else if (types[i].isPrimitive() && types[i].getName().equals(types[i].getCanonicalName())) {
+                            flag = true;
+                        } else {
+                            // 如果既不为空 且参数类型又不匹配
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if (flag) {
+                        targetMethod.add(method);
+                        flag = false;
+                    }
+                } else if (argTypes == null) {
+                    // 如果传入的参数个数为0 就是没有传入参数
+                    // 那么匹配所有同名方法
+                    targetMethod.add(method);
+                }
+            }
+            if (targetMethod.size() == 0) {
+                throw new NoSuchMethodException();
+            } else if (targetMethod.size() > 1) {
+                StringBuffer buffer = new StringBuffer("不明确的方法: ");
+                for (Method method : targetMethod) {
+                    buffer.append(method.getName());
+                    buffer.append(",");
+                }
+                buffer.deleteCharAt(buffer.length() - 1);
+                throw new UndeclaredMethodException(buffer.toString());
+            } else {
+                return targetMethod.get(0);
             }
         }
     }

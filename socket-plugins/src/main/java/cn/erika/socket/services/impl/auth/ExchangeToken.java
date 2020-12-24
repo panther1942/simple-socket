@@ -11,9 +11,7 @@ import cn.erika.socket.exception.TokenException;
 import cn.erika.socket.handler.Server;
 import cn.erika.socket.services.SocketService;
 import cn.erika.util.exception.SerialException;
-import cn.erika.util.security.RSA;
 import cn.erika.util.security.SecurityAlgorithm;
-import cn.erika.util.string.SerialUtils;
 import cn.erika.util.string.StringUtils;
 
 @Component(Constant.SRV_EXCHANGE_TOKEN)
@@ -87,11 +85,11 @@ public class ExchangeToken extends BaseService implements SocketService {
                     log.debug("认证通过");
                     socket.set(Constant.PARENT_SOCKET, parent);
                     socket.set(Constant.PUBLIC_KEY, publicKey);
-                    socket.set(Constant.RSA_SIGN_ALGORITHM, parent.get(Constant.RSA_SIGN_ALGORITHM));
+                    socket.set(Constant.DIGITAL_SIGNATURE_ALGORITHM, parent.get(Constant.DIGITAL_SIGNATURE_ALGORITHM));
                     socket.set(Constant.TOKEN, token);
 
-                    SecurityAlgorithm securityAlgorithm = GlobalSettings.passwordAlgorithm;
-                    String securityKey = StringUtils.randomString(GlobalSettings.passwordLength);
+                    SecurityAlgorithm securityAlgorithm = GlobalSettings.securityAlgorithm;
+                    String securityKey = StringUtils.randomString(GlobalSettings.securityLength);
                     byte[] securityIv = null;
 
                     socket.set(Constant.SECURITY_ALGORITHM, securityAlgorithm);

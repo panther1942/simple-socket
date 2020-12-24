@@ -24,7 +24,7 @@ public class TcpChannel extends BaseSocket {
     }
 
     @Override
-    public SocketAddress getLocalAddress() throws IOException {
+    public SocketAddress getLocalAddress() {
         return null;
     }
 

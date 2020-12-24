@@ -6,17 +6,21 @@ import cn.erika.context.bean.BeanFactory;
 import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.services.ServiceSelector;
-import cn.erika.util.security.RSA;
+import cn.erika.util.log.Logger;
+import cn.erika.util.log.LoggerFactory;
+import cn.erika.util.security.DigitalSignature;
 
 import java.net.SocketAddress;
 
 public abstract class BaseHandler implements Handler {
+    protected Logger log = LoggerFactory.getLogger(this.getClass());
     private BeanFactory beanFactory = BeanFactory.getInstance();
 
     static {
         try {
             if (GlobalSettings.privateKey == null || GlobalSettings.publicKey == null) {
-                byte[][] keyPair = RSA.initKey(GlobalSettings.rsaLength);
+                byte[][] keyPair = DigitalSignature.initKey(GlobalSettings.asymmetricAlgorithm,
+                        GlobalSettings.asymmetricKeyLength);
                 GlobalSettings.publicKey = keyPair[0];
                 GlobalSettings.privateKey = keyPair[1];
             }
@@ -30,7 +34,7 @@ public abstract class BaseHandler implements Handler {
     public void init(Socket socket) {
         socket.set(Constant.ENCRYPT, false);
         socket.set(Constant.AUTHENTICATED, false);
-        socket.set(Constant.RSA_SIGN_ALGORITHM, GlobalSettings.rsaDigestAlgorithm);
+        socket.set(Constant.DIGITAL_SIGNATURE_ALGORITHM, GlobalSettings.digitalSignatureAlgorithm);
     }
 
     @Override
@@ -41,8 +45,10 @@ public abstract class BaseHandler implements Handler {
 
     @Override
     public void onError(Socket socket, Throwable throwable) {
-        System.err.println(throwable.getMessage());
-        socket.close();
+        log.error(throwable.getMessage());
+        if (socket != null && !socket.isClosed()) {
+            socket.close();
+        }
     }
 
     public abstract SocketAddress getLocalAddress();
