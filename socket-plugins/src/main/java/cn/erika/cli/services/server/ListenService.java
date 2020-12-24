@@ -1,11 +1,13 @@
 package cn.erika.cli.services.server;
 
+import cn.erika.config.Constant;
 import cn.erika.context.BaseService;
 import cn.erika.cli.services.CliService;
 import cn.erika.config.GlobalSettings;
 import cn.erika.context.annotation.Component;
 import cn.erika.context.exception.BeanException;
 import cn.erika.socket.handler.BIOServer;
+import cn.erika.socket.handler.NIOServer;
 import cn.erika.socket.handler.Server;
 
 import java.io.IOException;
@@ -32,10 +34,21 @@ public class ListenService extends BaseService implements CliService {
             port = GlobalSettings.DEFAULT_PORT;
         }
         try {
-            server = new BIOServer(new InetSocketAddress(host, port));
+            switch (GlobalSettings.type) {
+                case Constant.AIO:
+                    log.warn("暂未实现");
+                    return;
+                case Constant.NIO:
+                    server = new NIOServer(new InetSocketAddress(host, port));
+                    break;
+                case Constant.BIO:
+                    server = new BIOServer(new InetSocketAddress(host, port));
+                    break;
+                default:
+                    throw new BeanException("不支持的模式: " + GlobalSettings.type);
+            }
             addBean(Server.class, server);
             server.listen();
-            log.info("服务器监听端口: " + server.getLocalAddress());
         } catch (IOException e) {
             log.error(e.getMessage());
         }

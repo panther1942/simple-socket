@@ -2,6 +2,7 @@ package cn.erika.socket.core;
 
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
+import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.component.DataInfo;
 import cn.erika.socket.core.component.Message;
 import cn.erika.util.compress.GZIP;
@@ -11,6 +12,8 @@ import cn.erika.util.log.LoggerFactory;
 import cn.erika.util.security.*;
 import cn.erika.util.string.SerialUtils;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +24,7 @@ public abstract class BaseSocket implements Socket {
     private AsymmetricAlgorithm asymmetricAlgorithm = GlobalSettings.asymmetricAlgorithm;
     protected Logger log = LoggerFactory.getLogger(this.getClass());
     protected Handler handler;
+    protected Charset charset;
 
     // 1、计算签名 并将计算结果加到Message的payload属性里
     // 2、序列化 Message -> byte[]
@@ -116,9 +120,24 @@ public abstract class BaseSocket implements Socket {
         }
     }
 
-    public abstract void send(DataInfo info);
+    public void send(DataInfo info) {
+        try {
+            send(info.toString().getBytes(charset));
+            send(info.getData());
+        } catch (IOException e) {
+            handler.onError(this, e);
+        }
+    }
 
-    public abstract void receive(Message message);
+    public void receive(Message message) {
+        try {
+            handler.onMessage(this, message);
+        } catch (BeanException e) {
+            handler.onError(this, e);
+        }
+    }
+
+    public abstract void send(byte[] data) throws IOException;
 
     // 设置连接额外属性
     @SuppressWarnings("unchecked")

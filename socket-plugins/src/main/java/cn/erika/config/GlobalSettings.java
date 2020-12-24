@@ -12,7 +12,7 @@ public class GlobalSettings {
     public static final String DEFAULT_ADDRESS = "localhost";
     public static final int DEFAULT_PORT = 43037;
     public static Charset charset = Charset.forName(Constant.UTF8);
-    public static String type = Constant.BIO;
+    public static String type = Constant.NIO;
     public static boolean devMode = true;
 
     public static boolean logEnable = true;

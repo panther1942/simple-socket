@@ -15,6 +15,7 @@ public class BIOServer extends Server implements Runnable {
     public BIOServer(SocketAddress address) throws IOException {
         this.server = new ServerSocket();
         this.server.bind(address);
+        log.info("服务器监听端口: " + server.getLocalSocketAddress());
     }
 
     @Override
@@ -29,14 +30,6 @@ public class BIOServer extends Server implements Runnable {
                 log.error(e.getMessage());
             }
         }
-    }
-
-    @Override
-    public void listen() {
-        Thread t = new Thread(this, this.getClass().getSimpleName());
-        t.setName(this.getClass().getSimpleName());
-        t.setDaemon(true);
-        t.start();
     }
 
     @Override
@@ -57,6 +50,6 @@ public class BIOServer extends Server implements Runnable {
 
     @Override
     public SocketAddress getLocalAddress() {
-        return this.server.getLocalSocketAddress();
+        return server.getLocalSocketAddress();
     }
 }

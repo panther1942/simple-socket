@@ -1,25 +1,20 @@
 package cn.erika.socket.core.tcp;
 
-import cn.erika.context.exception.BeanException;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
 import cn.erika.socket.core.BaseSocket;
 import cn.erika.socket.core.Handler;
-import cn.erika.socket.core.component.Message;
-import cn.erika.socket.core.component.DataInfo;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.SocketAddress;
-import java.nio.charset.Charset;
 import java.util.Date;
 
 public class TcpSocket extends BaseSocket implements Runnable {
     private java.net.Socket socket;
     private TcpReader reader;
-    private Charset charset;
 
     private InputStream in;
     private OutputStream out;
@@ -72,7 +67,8 @@ public class TcpSocket extends BaseSocket implements Runnable {
         }
     }
 
-    private synchronized void send(byte[] data) throws IOException {
+    @Override
+    public synchronized void send(byte[] data) throws IOException {
         int pos = 0;
         int len = data.length;
         // 这里用pos标记发送数据的长度 每次发送缓冲区大小个字节 直到pos等于数据长度len
@@ -84,25 +80,6 @@ public class TcpSocket extends BaseSocket implements Runnable {
         }
         out.write(data, pos, len - pos);
         out.flush();
-    }
-
-    @Override
-    public void send(DataInfo info) {
-        try {
-            send(info.toString().getBytes(charset));
-            send(info.getData());
-        } catch (IOException e) {
-            handler.onError(this, e);
-        }
-    }
-
-    @Override
-    public void receive(Message message) {
-        try {
-            handler.onMessage(this, message);
-        } catch (BeanException e) {
-            handler.onError(this, e);
-        }
     }
 
     @Override

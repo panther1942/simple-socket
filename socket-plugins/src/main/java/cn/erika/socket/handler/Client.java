@@ -9,6 +9,7 @@ import cn.erika.util.log.Logger;
 import cn.erika.util.log.LoggerFactory;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 
 public abstract class Client extends BaseHandler {
     protected Socket socket;
@@ -32,5 +33,26 @@ public abstract class Client extends BaseHandler {
 
     public void send(String message) {
         socket.send(new Message(Constant.SRV_TEXT, message));
+    }
+
+    @Override
+    public SocketAddress getLocalAddress() {
+        if (socket != null) {
+            return socket.getLocalAddress();
+        }
+        return null;
+    }
+
+    @Override
+    public void close() {
+        if (socket != null) {
+            socket.send(new Message(Constant.SRV_TEXT, Constant.EXIT));
+            socket.close();
+        }
+    }
+
+    @Override
+    public boolean isClosed() {
+        return socket != null && socket.isClosed();
     }
 }

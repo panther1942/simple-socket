@@ -12,7 +12,7 @@ import java.net.SocketException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class Server extends BaseHandler {
+public abstract class Server extends BaseHandler implements Runnable {
     private LinkManager linkManager = new LinkManager();
     private Map<String, Socket> tokenList = new ConcurrentHashMap<>();
 
@@ -77,7 +77,12 @@ public abstract class Server extends BaseHandler {
         }
     }
 
-    public abstract void listen();
+    public void listen() {
+        Thread t = new Thread(this, this.getClass().getSimpleName());
+        t.setName(this.getClass().getSimpleName());
+        t.setDaemon(true);
+        t.start();
+    }
 
     public abstract void close();
 
