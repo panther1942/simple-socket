@@ -11,7 +11,8 @@ public class GlobalSettings {
     public static final int DEFAULT_PORT = 43037;
     public static Charset charset = Charset.forName(Constant.UTF8);
     public static String type = Constant.BIO;
-    public static LogLevel logLevel = LogLevel.DEBUG;
+    public static boolean logEnable = true;
+    public static LogLevel logLevel = LogLevel.INFO;
 
     public static byte[] privateKey;
     public static byte[] publicKey;

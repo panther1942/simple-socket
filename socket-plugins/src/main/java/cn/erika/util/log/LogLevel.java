@@ -21,4 +21,22 @@ public enum LogLevel {
     public int getValue() {
         return value;
     }
+
+    public static LogLevel getByValue(int value) {
+        for (LogLevel level : LogLevel.values()) {
+            if (level.value == value) {
+                return level;
+            }
+        }
+        return null;
+    }
+
+    public static LogLevel getByName(String name) {
+        for (LogLevel level : LogLevel.values()) {
+            if (level.getName().equalsIgnoreCase(name)) {
+                return level;
+            }
+        }
+        return null;
+    }
 }

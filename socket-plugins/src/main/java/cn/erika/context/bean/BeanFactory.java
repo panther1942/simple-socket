@@ -232,6 +232,9 @@ public class BeanFactory {
 
     public Object execute(BeanSelector handler, String name, Object... args) throws BeanException {
         Class<?> clazz = aliasList.get(name);
+        if (clazz == null) {
+            throw new BeanException("未知服务: " + name);
+        }
         Object object = getBean(clazz);
         Method method = null;
         try {

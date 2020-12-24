@@ -68,7 +68,7 @@ public abstract class Server extends BaseHandler {
         try {
             Socket socket = linkManager.getLink(uid);
             if (socket != null) {
-                socket.send(new Message(message));
+                socket.send(new Message(Constant.SRV_TEXT, message));
             } else {
                 throw new SocketException("不存在UID: " + uid);
             }

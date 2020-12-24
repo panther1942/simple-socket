@@ -1,5 +1,6 @@
 package cn.erika.util.log;
 
+import cn.erika.config.GlobalSettings;
 import cn.erika.util.string.ConsoleUtils;
 
 public class ConsoleLogger extends Logger {
@@ -10,6 +11,9 @@ public class ConsoleLogger extends Logger {
 
     @Override
     protected synchronized void print(LogLevel level, Class originClass, String message) {
+        if (!GlobalSettings.logEnable) {
+            return;
+        }
         if (level.getValue() >= this.level.getValue()) {
             String line = ConsoleUtils.consoleLog(level.getName(), originClass, message);
             if (level.getValue() >= LogLevel.WARN.getValue()) {
