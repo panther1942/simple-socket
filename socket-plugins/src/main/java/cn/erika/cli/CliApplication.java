@@ -29,7 +29,7 @@ public class CliApplication extends SocketApplication implements Runnable {
         run(CliApplication.class);
     }
 
-    static{
+    static {
         LoggerFactory.register(new ConsoleLogger());
         LoggerFactory.register(new FileLogger(GlobalSettings.logDir, GlobalSettings.logName));
     }
@@ -83,7 +83,8 @@ public class CliApplication extends SocketApplication implements Runnable {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
+            System.exit(1);
         } finally {
             log.info("退出运行");
             try {

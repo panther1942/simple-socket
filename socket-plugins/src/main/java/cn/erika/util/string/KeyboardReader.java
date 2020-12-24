@@ -27,6 +27,12 @@ public class KeyboardReader {
         return readerKB;
     }
 
+    /**
+     * 从键盘读取一行
+     *
+     * @return 读取到的文字
+     * @throws IOException 如果输入流读取失败
+     */
     public String read() throws IOException {
         if (reader != null) {
             String line;
@@ -37,6 +43,13 @@ public class KeyboardReader {
         return null;
     }
 
+    /**
+     * 从键盘读取一行 带提示符
+     *
+     * @param prompt 提示符
+     * @return 读取到的文字
+     * @throws IOException 如果输入流读取失败
+     */
     public String read(String prompt) throws IOException {
         System.out.printf("%s", prompt);
         return read();

@@ -45,9 +45,12 @@ public abstract class Client extends BaseHandler {
 
     @Override
     public void close() {
-        if (socket != null) {
-            socket.send(new Message(Constant.SRV_TEXT, Constant.EXIT));
-            socket.close();
+        super.close();
+        if (socket != null && !socket.isClosed()) {
+            socket.send(new Message(Constant.SRV_EXIT, Constant.EXIT));
+            if (!socket.isClosed()) {
+                socket.close();
+            }
         }
     }
 

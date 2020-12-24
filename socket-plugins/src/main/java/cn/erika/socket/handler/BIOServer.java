@@ -34,6 +34,7 @@ public class BIOServer extends Server implements Runnable {
 
     @Override
     public void close() {
+        super.close();
         try {
             if (server != null && !server.isClosed()) {
                 server.close();

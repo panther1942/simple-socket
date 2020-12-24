@@ -72,6 +72,7 @@ public class NIOServer extends Server implements Runnable {
 
     @Override
     public void close() {
+        super.close();
         try {
             if (server.isOpen()) {
                 server.close();

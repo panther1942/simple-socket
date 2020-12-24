@@ -61,15 +61,19 @@ public class TcpChannel extends BaseSocket {
                 reader.read(this, data, len);
             }
         } catch (SocketException e) {
-            handler.onClose(this);
+            handler.onError(this, e);
         }
     }
 
     @Override
-    public synchronized void send(byte[] data) throws IOException{
-        channel.write(ByteBuffer.wrap(data));
-        selector.wakeup();
-        channel.register(selector, SelectionKey.OP_READ);
+    public synchronized void send(byte[] data) throws IOException {
+        if (!isClosed()) {
+            channel.write(ByteBuffer.wrap(data));
+            selector.wakeup();
+            channel.register(selector, SelectionKey.OP_READ);
+        } else {
+            throw new IOException("没有连接到服务器");
+        }
     }
 
     @Override

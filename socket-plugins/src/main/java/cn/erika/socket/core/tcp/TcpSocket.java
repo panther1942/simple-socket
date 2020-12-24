@@ -100,7 +100,7 @@ public class TcpSocket extends BaseSocket implements Runnable {
     @Override
     public void close() {
         try {
-            if (socket != null) {
+            if (socket != null && !socket.isClosed()) {
                 socket.close();
             }
         } catch (IOException e) {

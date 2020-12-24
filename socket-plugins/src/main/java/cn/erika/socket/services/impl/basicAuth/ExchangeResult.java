@@ -1,4 +1,4 @@
-package cn.erika.socket.services.impl.auth;
+package cn.erika.socket.services.impl.basicAuth;
 
 import cn.erika.config.Constant;
 import cn.erika.context.BaseService;
@@ -6,8 +6,6 @@ import cn.erika.context.annotation.Component;
 import cn.erika.socket.core.Socket;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.services.SocketService;
-import cn.erika.util.log.Logger;
-import cn.erika.util.log.LoggerFactory;
 
 @Component(Constant.SRV_EXCHANGE_RESULT)
 public class ExchangeResult extends BaseService implements SocketService {

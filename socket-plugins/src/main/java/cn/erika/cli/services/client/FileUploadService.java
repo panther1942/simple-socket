@@ -1,5 +1,6 @@
 package cn.erika.cli.services.client;
 
+import cn.erika.cli.exception.ClosedClientException;
 import cn.erika.context.BaseService;
 import cn.erika.cli.services.CliService;
 import cn.erika.config.Constant;
@@ -21,7 +22,7 @@ public class FileUploadService extends BaseService implements CliService {
             message.add(Constant.FILENAME, filename);
             client.execute(Constant.SRV_PRE_UPLOAD, message);
         } else {
-            throw new BeanException("客户端未启动");
+            throw new ClosedClientException();
         }
     }
 }

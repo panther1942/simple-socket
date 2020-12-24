@@ -11,11 +11,15 @@ import org.aspectj.lang.annotation.Pointcut;
 @Aspect
 public class ClientAspect {
 
-    @Pointcut("execution(* cn.erika.socket.handler.Client.connect(..))")
-    public void pointcut() {
+    @Pointcut("execution(* cn.erika.socket.handler.BIOClient.connect(..))")
+    public void bioClient() {
     }
 
-    @AfterReturning(value = "pointcut()")
+    @Pointcut("execution(* cn.erika.socket.handler.NIOClient.finishConnect(..))")
+    public void nioClient(){
+    }
+
+    @AfterReturning(value = "bioClient() || nioClient()")
     public void afterReturning(JoinPoint joinPoint) {
         Client client = (Client) joinPoint.getTarget();
         try {

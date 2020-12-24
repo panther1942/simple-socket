@@ -72,8 +72,7 @@ public abstract class BaseSocket implements Socket {
             info.setData(data);
             send(info);
         } catch (Exception e) {
-            e.printStackTrace();
-            handler.onError(this, e);
+            log.error(e.getMessage());
         }
     }
 
@@ -115,8 +114,7 @@ public abstract class BaseSocket implements Socket {
             }
             receive(message);
         } catch (Exception e) {
-            e.printStackTrace();
-            handler.onError(this, e);
+            log.error(e.getMessage());
         }
     }
 

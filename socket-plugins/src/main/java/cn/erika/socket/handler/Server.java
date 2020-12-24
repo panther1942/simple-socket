@@ -8,6 +8,7 @@ import cn.erika.socket.core.component.Message;
 import cn.erika.socket.exception.TokenException;
 import cn.erika.util.security.MessageDigest;
 
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,9 +58,8 @@ public abstract class Server extends BaseHandler implements Runnable {
     public void status() {
         StringBuffer buffer = new StringBuffer();
         for (String id : linkManager.getLinks().keySet()) {
-            String address = null;
-            address = linkManager.getLink(id).getRemoteAddress().toString();
-            buffer.append("id: ").append(id).append(" From: ").append(address);
+            SocketAddress address = linkManager.getLink(id).getRemoteAddress();
+            buffer.append("id: ").append(id).append(" From: ").append(address).append(System.lineSeparator());
         }
         log.info(buffer.toString());
     }
@@ -83,7 +83,5 @@ public abstract class Server extends BaseHandler implements Runnable {
         t.setDaemon(true);
         t.start();
     }
-
-    public abstract void close();
 
 }

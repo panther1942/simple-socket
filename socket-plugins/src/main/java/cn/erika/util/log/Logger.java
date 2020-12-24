@@ -16,7 +16,7 @@ public class Logger {
     }
 
     private void prints(LogLevel level, Class originClass, String message) {
-        if (level.getValue() >= this.level.getValue()) {
+        if (this.level.getValue() <= level.getValue()) {
             String line = ConsoleUtils.consoleLog(level.getName(), originClass, message);
             for (LogPrinter printer : logPrinterList) {
                 printer.print(level, line);

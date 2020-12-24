@@ -45,6 +45,8 @@ public class Constant {
     public static final String RECEIVE_STATUS = "receiveStatus";
 
     public static final String SRV_TEXT = "srv_text";
+    public static final String SRV_EXIT = "srv_exit";
+
     public static final String SRV_PRE_UPLOAD = "srv_pre_upload";
     public static final String SRV_POST_UPLOAD = "srv_post_upload";
     public static final String SRV_UPLOAD = "srv_upload";

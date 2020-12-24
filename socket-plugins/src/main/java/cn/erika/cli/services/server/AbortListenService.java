@@ -1,5 +1,6 @@
 package cn.erika.cli.services.server;
 
+import cn.erika.cli.exception.ClosedServerException;
 import cn.erika.context.BaseService;
 import cn.erika.cli.services.CliService;
 import cn.erika.context.annotation.Component;
@@ -14,7 +15,7 @@ public class AbortListenService extends BaseService implements CliService {
         if (server != null && !server.isClosed()) {
             server.close();
         } else {
-            log.info("服务器没有运行");
+            throw new ClosedServerException();
         }
     }
 }

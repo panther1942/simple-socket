@@ -20,14 +20,18 @@ public class FileLogger implements LogPrinter {
     @Override
     public void print(LogLevel level, String line) {
         try {
+            int targetLevel = level.getValue();
             createDirectory(new File(logDir));
-            for (int i = level.getValue(); i <= LogLevel.ERROR.getValue(); i++) {
-                File file = new File(logDir + logName + "-" + level.getName().toLowerCase() + ".log");
-                createFile(file);
-                try (FileOutputStream out = new FileOutputStream(file, true)) {
-                    out.write(line.getBytes(charset));
-                    out.write(System.lineSeparator().getBytes(charset));
-                    out.flush();
+            for (int i = 0; i <= targetLevel; i++) {
+                level = LogLevel.getByValue(i);
+                if (level != null) {
+                    File file = new File(logDir + logName + "-" + level.getName().toLowerCase() + ".log");
+                    createFile(file);
+                    try (FileOutputStream out = new FileOutputStream(file, true)) {
+                        out.write(line.getBytes(charset));
+                        out.write(System.lineSeparator().getBytes(charset));
+                        out.flush();
+                    }
                 }
             }
         } catch (IOException e) {

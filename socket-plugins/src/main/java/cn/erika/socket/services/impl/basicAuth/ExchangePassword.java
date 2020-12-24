@@ -1,4 +1,4 @@
-package cn.erika.socket.services.impl.auth;
+package cn.erika.socket.services.impl.basicAuth;
 
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;

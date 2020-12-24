@@ -23,12 +23,12 @@ public class SocketAspect {
 
     @Before(value = "receive() && args(message)", argNames = "joinPoint,message")
     public void beforeReceive(JoinPoint joinPoint, Message message) {
-        log.debug("BeforeReceive: " + message.get(Constant.SERVICE_NAME));
+//        log.debug("BeforeReceive: " + message.get(Constant.SERVICE_NAME));
     }
 
     @Before(value = "sender() && args(message)", argNames = "joinPoint,message")
     public void beforeSend(JoinPoint joinPoint, Message message) {
-        log.debug("BeforeSend: " + message.get(Constant.SERVICE_NAME));
+//        log.debug("BeforeSend: " + message.get(Constant.SERVICE_NAME));
     }
 
 }

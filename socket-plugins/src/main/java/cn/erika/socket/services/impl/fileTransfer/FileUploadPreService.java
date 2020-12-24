@@ -1,4 +1,4 @@
-package cn.erika.socket.services.impl.base;
+package cn.erika.socket.services.impl.fileTransfer;
 
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;

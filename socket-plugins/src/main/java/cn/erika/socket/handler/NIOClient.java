@@ -6,15 +6,12 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.*;
 import java.util.Iterator;
 
 public class NIOClient extends Client implements Runnable {
     private SocketAddress address;
     private Selector selector;
-    private Thread thread;
 
     public NIOClient(InetSocketAddress address) {
         this.address = address;
@@ -24,7 +21,7 @@ public class NIOClient extends Client implements Runnable {
     public void connect() throws IOException {
         this.selector = Selector.open();
         this.socket = new TcpChannel(address, this, selector);
-        this.thread = new Thread(this, this.getClass().getSimpleName());
+        Thread thread = new Thread(this, this.getClass().getSimpleName());
         thread.setDaemon(true);
         thread.start();
     }
@@ -45,17 +42,13 @@ public class NIOClient extends Client implements Runnable {
                             try {
                                 TcpChannel channel = (TcpChannel) socket;
                                 channel.read();
-                            } catch (IOException e) {
-                                onError(socket, e);
+                            } catch (ClosedChannelException | CancelledKeyException e) {
+                                log.warn("连接被重置");
                             }
                         }
                     }
                 }
             } catch (IOException e) {
-                // 三个点
-                // 1. selector出错 则应该停止运行 因为程序出错而不是网络出错
-                // 2. finishConnect出错 则中断客户端运行 因为这块基本上都是服务没有开导致的
-                // 3. channel.read出错 则发送离线消息后中断客户端运行 这块大概率是网络出错
                 onError(socket, e);
             }
         }
@@ -69,9 +62,8 @@ public class NIOClient extends Client implements Runnable {
             }
             channel.register(this.selector, SelectionKey.OP_READ);
         } catch (ConnectException e) {
-            log.warn(e.getMessage());
-            close();
             // 说明服务器不在线
+            log.warn(e.getMessage());
         }
     }
 }

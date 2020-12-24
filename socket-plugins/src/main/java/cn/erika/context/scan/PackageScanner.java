@@ -1,5 +1,8 @@
 package cn.erika.context.scan;
 
+import cn.erika.util.log.Logger;
+import cn.erika.util.log.LoggerFactory;
+
 import java.io.*;
 import java.net.JarURLConnection;
 import java.net.URL;
@@ -25,6 +28,7 @@ public class PackageScanner {
     private static final String CHARSET = System.getProperty("file.encoding");
 
     private static PackageScanner scanner;
+    private Logger log = LoggerFactory.getLogger(this.getClass());
     // 要扫描的包名
     private List<String> packageList = new LinkedList<>();
     // 处理器列表
@@ -95,7 +99,7 @@ public class PackageScanner {
     private void getClass(String packageName, String packagePath) {
         File dir = new File(packagePath);
         if (!dir.exists() || !dir.isDirectory()) {
-            System.err.println("在包名:" + packageName + "下未找到类文件");
+            log.warn("在包名:" + packageName + "下未找到类文件");
             return;
         }
         File[] files = dir.listFiles(new FileFilter() {

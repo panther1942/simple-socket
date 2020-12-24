@@ -152,10 +152,10 @@ public class BeanFactory {
                 // 获取目标方法
                 Method targetMethod = getMethod(method.getName(), typeArray);
                 // 检查方法上的注解
-                Enhance aspect = targetMethod.getAnnotation(Enhance.class);
+                Enhance enhance = targetMethod.getAnnotation(Enhance.class);
                 // 如果存在Aspect注解 则获取增强类的实例
-                if (aspect != null) {
-                    advise = getBean(aspect.value());
+                if (enhance != null) {
+                    advise = getBean(enhance.value());
                 }
             }
             // 如果增强器不为空 则执行增强部分的方法 否则执行目标方法

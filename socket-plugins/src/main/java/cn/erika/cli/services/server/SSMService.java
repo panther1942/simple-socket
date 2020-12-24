@@ -1,5 +1,6 @@
 package cn.erika.cli.services.server;
 
+import cn.erika.cli.exception.ClosedServerException;
 import cn.erika.context.BaseService;
 import cn.erika.cli.services.CliService;
 import cn.erika.context.annotation.Component;
@@ -19,7 +20,7 @@ public class SSMService extends BaseService implements CliService {
             }
             server.send(uid, message.toString());
         } else {
-            throw new BeanException("服务器未启动");
+            throw new ClosedServerException();
         }
     }
 }

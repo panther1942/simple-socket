@@ -11,10 +11,13 @@ import cn.erika.util.log.LoggerFactory;
 import cn.erika.util.security.DigitalSignature;
 
 import java.net.SocketAddress;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public abstract class BaseHandler implements Handler {
     protected Logger log = LoggerFactory.getLogger(this.getClass());
     private BeanFactory beanFactory = BeanFactory.getInstance();
+    private ExecutorService servicePool = Executors.newFixedThreadPool(20);
 
     static {
         try {
@@ -50,6 +53,7 @@ public abstract class BaseHandler implements Handler {
 
     @Override
     public void onError(Socket socket, Throwable throwable) {
+//        throwable.printStackTrace();
         log.error(throwable.getMessage());
         if (socket != null && !socket.isClosed()) {
             socket.close();
@@ -60,6 +64,19 @@ public abstract class BaseHandler implements Handler {
 
     protected void execute(Socket socket, String serviceName, Message message) throws BeanException {
         String type = socket.get(Constant.TYPE);
-        beanFactory.execute(new ServiceSelector(type), serviceName, socket, message);
+        servicePool.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    beanFactory.execute(new ServiceSelector(type), serviceName, socket, message);
+                } catch (BeanException e) {
+                    onError(socket, e);
+                }
+            }
+        });
+    }
+
+    public void close(){
+        servicePool.shutdown();
     }
 }
