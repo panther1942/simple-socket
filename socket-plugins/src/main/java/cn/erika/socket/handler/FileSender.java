@@ -23,8 +23,7 @@ public class FileSender extends BaseHandler {
 
     public FileSender(Socket socket, Message message) throws IOException {
         this.message = message;
-        SocketAddress address = socket.getRemoteAddress();
-        this.socket = new TcpSocket(address, this);
+        this.socket = new TcpSocket(socket.getRemoteAddress(), this);
         this.socket.set(Constant.PARENT_SOCKET, socket);
     }
 
@@ -38,16 +37,17 @@ public class FileSender extends BaseHandler {
             socket.set(Constant.DIGITAL_SIGNATURE_ALGORITHM, socket.get(Constant.DIGITAL_SIGNATURE_ALGORITHM));
             execute(socket, Constant.SRV_EXCHANGE_TOKEN, null);
         } catch (BeanException e) {
-            e.printStackTrace();
+            onError(socket, e);
         }
     }
 
+    // 必须要这样写 不然AOP切不进来 Aspectj是静态AOP 编译时插入增强部分
     @Override
     public void onMessage(Socket socket, Message message) throws BeanException {
         super.onMessage(socket, message);
     }
 
-    public void upload(){
+    public void upload() {
         try {
             execute(socket, Constant.SRV_UPLOAD, message);
         } catch (BeanException e) {

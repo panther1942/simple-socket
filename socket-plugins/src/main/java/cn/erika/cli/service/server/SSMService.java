@@ -7,7 +7,7 @@ import cn.erika.context.exception.BeanException;
 import cn.erika.socket.handler.Server;
 
 @Component("s_send")
-public class SSMService extends BaseService  implements CliService {
+public class SSMService extends BaseService implements CliService {
     @Override
     public void execute(String... args) throws BeanException {
         Server server = getBean(Server.class);
@@ -15,7 +15,7 @@ public class SSMService extends BaseService  implements CliService {
             String uid = args[1];
             StringBuffer message = new StringBuffer();
             for (int i = 2; i < args.length; i++) {
-                message.append(args[i]);
+                message.append(args[i]).append(" ");
             }
             server.send(uid, message.toString());
         } else {

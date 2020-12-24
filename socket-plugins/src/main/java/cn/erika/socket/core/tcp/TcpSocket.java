@@ -101,8 +101,7 @@ public class TcpSocket extends BaseSocket implements Runnable {
         try {
             handler.onMessage(this, message);
         } catch (BeanException e) {
-            System.err.println(e.getMessage());
-            close();
+            handler.onError(this, e);
         }
     }
 

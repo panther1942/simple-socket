@@ -59,7 +59,6 @@ public class FileUploadService extends BaseService implements SocketService {
     public void server(Socket socket, Message message) {
         String token = socket.get(Constant.TOKEN);
         FileInfo info = Application.get(token);
-        System.out.println("Info: " + info.getFilename());
         String filename = info.getFilename();
         long fileLength = info.getFileLength();
         long filePos = message.get(Constant.FILE_POS);

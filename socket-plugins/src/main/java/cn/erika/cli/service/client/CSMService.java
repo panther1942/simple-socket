@@ -14,7 +14,7 @@ public class CSMService extends BaseService implements CliService {
         if (client != null && !client.isClosed()) {
             StringBuffer message = new StringBuffer();
             for (int i = 1; i < args.length; i++) {
-                message.append(args[i]);
+                message.append(args[i]).append(" ");
             }
             client.send(message.toString());
         } else {

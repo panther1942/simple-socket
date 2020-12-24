@@ -31,10 +31,10 @@ public abstract class BaseSocket implements Socket {
     public void send(Message message) {
         try {
             boolean isEncrypt = get(Constant.ENCRYPT);
-            message.del(Constant.SIGN);
+            message.del(Constant.DIGITAL_SIGNATURE);
             if (isEncrypt) {
                 DigitalSignatureAlgorithm digitalSignatureAlgorithm = get(Constant.DIGITAL_SIGNATURE_ALGORITHM);
-                message.add(Constant.SIGN, DigitalSignature.sign(
+                message.add(Constant.DIGITAL_SIGNATURE, DigitalSignature.sign(
                         SerialUtils.serialObject(message),
                         GlobalSettings.privateKey,
                         digitalSignatureAlgorithm,
@@ -101,13 +101,13 @@ public abstract class BaseSocket implements Socket {
             if (isEncrypt) {
                 byte[] publicKey = get(Constant.PUBLIC_KEY);
                 DigitalSignatureAlgorithm digitalSignatureAlgorithm = get(Constant.DIGITAL_SIGNATURE_ALGORITHM);
-                byte[] sign = message.get(Constant.SIGN);
-                message.del(Constant.SIGN);
+                byte[] sign = message.get(Constant.DIGITAL_SIGNATURE);
+                message.del(Constant.DIGITAL_SIGNATURE);
                 if (!DigitalSignature.verify(SerialUtils.serialObject(message),
                         publicKey, sign, digitalSignatureAlgorithm, asymmetricAlgorithm)) {
                     throw new SecurityException("验签失败");
                 }
-                message.add(Constant.SIGN, sign);
+                message.add(Constant.DIGITAL_SIGNATURE, sign);
             }
             receive(message);
         } catch (Exception e) {

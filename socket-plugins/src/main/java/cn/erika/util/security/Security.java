@@ -1,7 +1,5 @@
 package cn.erika.util.security;
 
-import cn.erika.util.string.StringUtils;
-
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -147,7 +145,6 @@ public class Security {
     public static byte[] encryptByPublicKey(byte[] data, byte[] key, AsymmetricAlgorithm algorithm) throws SecurityException {
         try {
             PublicKey publicKey = getPublicKey(key, algorithm);
-            System.out.println(publicKey.getAlgorithm());
             Cipher cipher = Cipher.getInstance(publicKey.getAlgorithm());
             cipher.init(Cipher.ENCRYPT_MODE, publicKey);
             return cipher.doFinal(data);

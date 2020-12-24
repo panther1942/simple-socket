@@ -16,9 +16,8 @@ public class Constant {
     public static final String PRIVATE_KEY = "privateKey";
 
     public static final String ENCRYPT = "encrypt";
-    public static final String SIGN = "sign";
-    public static final String SIGN_ALGORITHM = "signAlgorithm";
     public static final String DIGITAL_SIGNATURE_ALGORITHM = "digitalSignatureAlgorithm";
+    public static final String DIGITAL_SIGNATURE = "digitalSignature";
     public static final String SECURITY_ALGORITHM = "securityAlgorithm";
     public static final String SECURITY_KEY = "securityKey";
     public static final String SECURITY_IV = "securityIv";

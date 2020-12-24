@@ -6,12 +6,9 @@ import cn.erika.socket.core.Socket;
 import cn.erika.socket.core.component.LinkManager;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.exception.TokenException;
-import cn.erika.util.log.Logger;
-import cn.erika.util.log.LoggerFactory;
+import cn.erika.util.security.MessageDigest;
 
-import java.io.IOException;
 import java.net.SocketException;
-import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -45,8 +42,9 @@ public abstract class Server extends BaseHandler {
             throw new TokenException("token无效");
         } else {
             byte[] pubKey = socket.get(Constant.PUBLIC_KEY);
-            Base64.Encoder encoder = Base64.getEncoder();
-            if (encoder.encodeToString(pubKey).equalsIgnoreCase(encoder.encodeToString(publicKey))) {
+            long srcToken = MessageDigest.crc32Sum(pubKey);
+            long targetToken = MessageDigest.crc32Sum(publicKey);
+            if (srcToken == targetToken) {
                 socket.set(Constant.TOKEN, token);
                 tokenList.remove(token);
                 return socket;
@@ -63,7 +61,7 @@ public abstract class Server extends BaseHandler {
             address = linkManager.getLink(id).getRemoteAddress().toString();
             buffer.append("id: ").append(id).append(" From: ").append(address);
         }
-        System.out.println(buffer);
+        log.info(buffer.toString());
     }
 
     public void send(String uid, String message) {

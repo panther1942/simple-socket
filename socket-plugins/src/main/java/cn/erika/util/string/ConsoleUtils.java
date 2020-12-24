@@ -1,10 +1,12 @@
 package cn.erika.util.string;
 
+import java.lang.management.ManagementFactory;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class ConsoleUtils {
     private static final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss:SSS";
+    private static final String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
     private static SimpleDateFormat sdf = new SimpleDateFormat(TIME_FORMAT);
 
     /**
@@ -13,12 +15,12 @@ public class ConsoleUtils {
      * @param character 分割线的字符
      * @param length    分割线的总长度
      */
-    public static void drawLine(CharSequence character, int length) {
-        drawLineWithTitle(null, character, length);
+    public static String drawLine(CharSequence character, int length) {
+        return drawLineWithTitle(null, character, length);
     }
 
-    public static void drawTitle(String title, int length) {
-        drawLineWithTitle(title, null, length);
+    public static String drawTitle(String title, int length) {
+        return drawLineWithTitle(title, null, length);
     }
 
     /**
@@ -30,12 +32,12 @@ public class ConsoleUtils {
      * @param character 分割线的字符
      * @param length    分割线的总长度（含标题）
      */
-    public static void drawLineWithTitle(String title, CharSequence character, int length) {
+    public static String drawLineWithTitle(String title, CharSequence character, int length) {
         if (title == null) {
             title = "";
         }
         if (length < title.length()) {
-            return;
+            return title;
         }
 
         int i = 0;
@@ -47,27 +49,19 @@ public class ConsoleUtils {
         for (; i < length - title.length(); i++) {
             buffer.append(character);
         }
-        System.out.println(buffer);
+        return buffer.toString();
     }
 
     public static String consoleLog(String logLevel, Class originClass, String message) {
+        // 处理时间日期
         Date now = new Date();
         Thread thread = Thread.currentThread();
-        StringBuffer line = new StringBuffer(sdf.format(now));
-        for (int i = 0; i < 6 - logLevel.length(); i++) {
-            line.append(" ");
-        }
-        line.append(logLevel).append(" ");
+        // 处理线程名称
         String threadName = thread.getName();
         if (threadName.length() > 15) {
             threadName = threadName.substring(0, 16);
         }
-        line.append("--- [");
-        for (int i = 0; i < 15 - threadName.length(); i++) {
-            line.append(" ");
-        }
-        line.append(threadName);
-        line.append("] ");
+        // 处理类名
         String className = originClass.getName();
         if (className.length() > 40) {
             String[] target = checkLength(className.split("\\."), className.length(), 40, 0);
@@ -78,15 +72,13 @@ public class ConsoleUtils {
             stringBuffer.deleteCharAt(stringBuffer.length() - 1);
             className = stringBuffer.toString();
         }
-        int classNameLen = className.length();
-        StringBuffer stringBuffer = new StringBuffer(className);
-        for (int i = 0; i < 40 - classNameLen; i++) {
-            stringBuffer.append(" ");
-        }
-        line.append(stringBuffer);
-        line.append(" : ");
-        line.append(message);
-        return line.toString();
+        return String.format("%s %5s %5s --- [%15s] %-40s : %s",
+                sdf.format(now),
+                logLevel,
+                pid,
+                threadName,
+                className,
+                message);
     }
 
     private static String[] checkLength(String[] packagePath, int srcLength, int destLength, int pos) {

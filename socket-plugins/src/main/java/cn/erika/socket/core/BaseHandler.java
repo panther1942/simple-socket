@@ -18,6 +18,7 @@ public abstract class BaseHandler implements Handler {
 
     static {
         try {
+            // 初始化的时候生成RSA密钥对 以后可以把密钥对存起来 这玩意一直变也不是个事
             if (GlobalSettings.privateKey == null || GlobalSettings.publicKey == null) {
                 byte[][] keyPair = DigitalSignature.initKey(GlobalSettings.asymmetricAlgorithm,
                         GlobalSettings.asymmetricKeyLength);
@@ -32,8 +33,12 @@ public abstract class BaseHandler implements Handler {
 
     @Override
     public void init(Socket socket) {
+        // 创建连接或者接入连接的时候初始化参数
+        // 刚开始肯定是没有加密的明文传输
         socket.set(Constant.ENCRYPT, false);
+        // 认证标识
         socket.set(Constant.AUTHENTICATED, false);
+        // 数字签名算法 加密通信后要对每次发送的消息进行签名
         socket.set(Constant.DIGITAL_SIGNATURE_ALGORITHM, GlobalSettings.digitalSignatureAlgorithm);
     }
 
