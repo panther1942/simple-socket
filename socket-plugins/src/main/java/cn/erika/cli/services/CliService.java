@@ -1,4 +1,4 @@
-package cn.erika.cli.service;
+package cn.erika.cli.services;
 
 import cn.erika.context.exception.BeanException;
 

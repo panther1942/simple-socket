@@ -1,8 +1,6 @@
 package cn.erika.context.scan;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
+import java.io.*;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -71,22 +69,8 @@ public class PackageScanner {
      * @throws IOException
      */
     private void scan(String packageName) throws IOException {
-        // 需要判断操作系统类型 因为不同系统的分隔符不一样
-        String systemName = System.getProperty(JAVA_OS_NAME);
-        if (systemName == null) {
-            throw new RuntimeException("无法获取操作系统类型");
-        }
-        String dirName = null;
-        if (systemName.startsWith(LINUX)) {
-            // Linux下的分隔符是 / 无需处理
-            dirName = packageName.replaceAll("\\.", File.separator);
-        } else if (systemName.startsWith(WINDOWS)) {
-            // Windows下的分隔符是 \ 在Java中这是转义字符 因此需要处理
-            dirName = packageName.replaceAll("\\.", Matcher.quoteReplacement(File.separator));
-        } else {
-            // 其他类型的操作系统我也没用过
-            throw new RuntimeException("不支持的操作系统");
-        }
+        String dirName = convertClassName2Path(packageName);
+
         Enumeration<URL> dirs = Thread.currentThread().getContextClassLoader().getResources(dirName);
         while (dirs.hasMoreElements()) {
             URL url = dirs.nextElement();
@@ -127,12 +111,10 @@ public class PackageScanner {
                 } else {
                     String className = file.getName().substring(0, file.getName().length() - 6);
                     try {
-                        // 注意 这里加载了类文件 会执行静态部分的加载 提前执行静态代码块可能导致初始化异常 比如C3P0
                         Class<?> clazz = Class.forName(packageName + "." + className);
-//                        Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(packageName + "." + className);
                         onScan(clazz);
                     } catch (ClassNotFoundException e) {
-                        System.err.println("找不到类: " + e.getException());
+                        System.err.println("找不到类: " + e.getMessage());
                     }
                 }
             }
@@ -165,7 +147,6 @@ public class PackageScanner {
                 );
                 try {
                     Class<?> clazz = Class.forName(packageName + "." + className);
-//                    Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(packageName + "." + className);
                     onScan(clazz);
                 } catch (ClassNotFoundException e) {
                     System.err.println("找不到类: " + e.getException());
@@ -180,6 +161,42 @@ public class PackageScanner {
             if (handler.filter(clazz)) {
                 handler.deal(clazz);
             }
+        }
+    }
+
+    public static String convertClassName2Path(String packageName) {
+        // 需要判断操作系统类型 因为不同系统的分隔符不一样
+        String systemName = System.getProperty(JAVA_OS_NAME);
+        if (systemName == null) {
+            throw new RuntimeException("无法获取操作系统类型");
+        }
+        if (systemName.startsWith(LINUX)) {
+            // Linux下的分隔符是 / 无需处理
+            return packageName.replaceAll("\\.", File.separator);
+        } else if (systemName.startsWith(WINDOWS)) {
+            // Windows下的分隔符是 \ 在Java中这是转义字符 因此需要处理
+            return packageName.replaceAll("\\.", Matcher.quoteReplacement(File.separator));
+        } else {
+            // 其他类型的操作系统我也没用过
+            throw new RuntimeException("不支持的操作系统");
+        }
+    }
+
+    public static String convertPath2ClassName(String path) {
+        // 需要判断操作系统类型 因为不同系统的分隔符不一样
+        String systemName = System.getProperty(JAVA_OS_NAME);
+        if (systemName == null) {
+            throw new RuntimeException("无法获取操作系统类型");
+        }
+        if (systemName.startsWith(LINUX)) {
+            // Linux下的分隔符是 / 无需处理
+            return path.replaceAll(File.separator, "\\.");
+        } else if (systemName.startsWith(WINDOWS)) {
+            // Windows下的分隔符是 \ 在Java中这是转义字符 因此需要处理
+            return path.replaceAll(Matcher.quoteReplacement(File.separator), "\\.");
+        } else {
+            // 其他类型的操作系统我也没用过
+            throw new RuntimeException("不支持的操作系统");
         }
     }
 }

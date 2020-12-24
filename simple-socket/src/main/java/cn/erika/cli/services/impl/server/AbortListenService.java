@@ -1,9 +1,9 @@
-package cn.erika.cli.service.impl.server;
+package cn.erika.cli.services.impl.server;
 
 import cn.erika.aop.annotation.Component;
 import cn.erika.aop.exception.BeanException;
 import cn.erika.cli.App;
-import cn.erika.cli.service.CliService;
+import cn.erika.cli.services.CliService;
 import cn.erika.socket.handler.IServer;
 
 @Component("quit")

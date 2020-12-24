@@ -1,6 +1,6 @@
 package cn.erika.cli;
 
-import cn.erika.cli.service.CliService;
+import cn.erika.cli.services.CliService;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
 import cn.erika.context.annotation.Component;

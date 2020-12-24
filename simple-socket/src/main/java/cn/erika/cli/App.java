@@ -3,7 +3,7 @@ package cn.erika.cli;
 import cn.erika.aop.annotation.PackageScan;
 import cn.erika.aop.component.SocketApplication;
 import cn.erika.aop.exception.BeanException;
-import cn.erika.cli.service.CliService;
+import cn.erika.cli.services.CliService;
 import cn.erika.config.Constant;
 import cn.erika.socket.handler.IClient;
 import cn.erika.socket.handler.IServer;
