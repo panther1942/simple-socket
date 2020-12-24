@@ -2,7 +2,9 @@ package cn.erika.config;
 
 import cn.erika.socket.core.component.DataInfo;
 import cn.erika.util.log.LogLevel;
-import cn.erika.util.security.*;
+import cn.erika.util.security.AsymmetricAlgorithm;
+import cn.erika.util.security.DigitalSignatureAlgorithm;
+import cn.erika.util.security.SecurityAlgorithm;
 
 import java.nio.charset.Charset;
 
@@ -11,8 +13,11 @@ public class GlobalSettings {
     public static final int DEFAULT_PORT = 43037;
     public static Charset charset = Charset.forName(Constant.UTF8);
     public static String type = Constant.BIO;
+
     public static boolean logEnable = true;
-    public static LogLevel logLevel = LogLevel.INFO;
+    public static String logDir = "log/";
+    public static String logName = "simple-socket";
+    public static LogLevel logLevel = LogLevel.DEBUG;
 
     public static byte[] privateKey;
     public static byte[] publicKey;

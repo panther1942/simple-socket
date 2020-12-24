@@ -1,19 +1,31 @@
 package cn.erika.util.log;
 
-public abstract class Logger {
+import cn.erika.util.string.ConsoleUtils;
 
-    protected LogLevel level;
+import java.util.List;
+
+public class Logger {
+    private LogLevel level;
     private Class originClass;
+    private List<LogPrinter> logPrinterList;
 
-    public Logger(LogLevel level, Class originClass) {
+    public Logger(LogLevel level, Class originClass, List<LogPrinter> logPrinterList) {
         this.level = level;
         this.originClass = originClass;
+        this.logPrinterList = logPrinterList;
     }
 
-    protected abstract void print(LogLevel level, Class originClass, String message);
+    private void prints(LogLevel level, Class originClass, String message) {
+        if (level.getValue() >= this.level.getValue()) {
+            String line = ConsoleUtils.consoleLog(level.getName(), originClass, message);
+            for (LogPrinter printer : logPrinterList) {
+                printer.print(level, line);
+            }
+        }
+    }
 
     public void debug(String message) {
-        print(LogLevel.DEBUG, originClass, message);
+        prints(LogLevel.DEBUG, originClass, message);
     }
 
     public void debug(String message, Throwable throwable) {
@@ -22,7 +34,7 @@ public abstract class Logger {
     }
 
     public void info(String message) {
-        print(LogLevel.INFO, originClass, message);
+        prints(LogLevel.INFO, originClass, message);
     }
 
     public void info(String message, Throwable throwable) {
@@ -31,7 +43,7 @@ public abstract class Logger {
     }
 
     public void warn(String message) {
-        print(LogLevel.WARN, originClass, message);
+        prints(LogLevel.WARN, originClass, message);
     }
 
     public void warn(String message, Throwable throwable) {
@@ -40,7 +52,7 @@ public abstract class Logger {
     }
 
     public void error(String message) {
-        print(LogLevel.ERROR, originClass, message);
+        prints(LogLevel.ERROR, originClass, message);
     }
 
     public void error(String message, Throwable throwable) {

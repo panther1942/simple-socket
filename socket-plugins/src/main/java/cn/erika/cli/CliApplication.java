@@ -2,15 +2,17 @@ package cn.erika.cli;
 
 import cn.erika.cli.service.CliService;
 import cn.erika.config.Constant;
+import cn.erika.config.GlobalSettings;
+import cn.erika.context.annotation.Component;
 import cn.erika.context.annotation.PackageScan;
 import cn.erika.context.exception.BeanException;
-import cn.erika.socket.SocketApplication;
-import cn.erika.context.bean.BeanFactory;
-import cn.erika.context.annotation.Component;
 import cn.erika.context.scan.PackageScanner;
 import cn.erika.context.scan.PackageScannerHandler;
+import cn.erika.socket.SocketApplication;
 import cn.erika.socket.handler.Client;
 import cn.erika.socket.handler.Server;
+import cn.erika.util.log.ConsoleLogger;
+import cn.erika.util.log.FileLogger;
 import cn.erika.util.log.Logger;
 import cn.erika.util.log.LoggerFactory;
 import cn.erika.util.string.KeyboardReader;
@@ -25,6 +27,11 @@ public class CliApplication extends SocketApplication implements Runnable {
 
     public static void main(String[] args) {
         run(CliApplication.class);
+    }
+
+    static{
+        LoggerFactory.register(new ConsoleLogger());
+        LoggerFactory.register(new FileLogger(GlobalSettings.logDir, GlobalSettings.logName));
     }
 
     @Override

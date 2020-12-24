@@ -3,5 +3,8 @@ target/
 
 *.class
 *.iml
+*.log
 
 download/
+log/
+logs/
