@@ -10,6 +10,12 @@ import java.io.IOException;
 @Component("scan")
 public class ScanPackageService extends BaseService implements CliService {
     @Override
+    public String info() {
+        return "[!失败!] 用于重新扫描类路径下新增的类文件\n" +
+                "\t目前只能重新加载新增的类 对于修改的类无法重新装载";
+    }
+
+    @Override
     public void execute(String... args) throws BeanException {
         try {
             log.debug("重新扫描");

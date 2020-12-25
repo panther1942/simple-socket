@@ -17,6 +17,14 @@ import java.net.SocketAddress;
 @Component("connect")
 public class ConnectService extends BaseService implements CliService {
     @Override
+    public String info() {
+        return "连接到服务器\n" +
+                "\t例如 connect localhost 12345\n" +
+                "\t如果当前已经连接到服务器 将断开之前的连接\n" +
+                "\t如果不指定地址 将连接localhost:43037";
+    }
+
+    @Override
     public void execute(String... args) throws BeanException {
         IClient client = getBean(IClient.class);
         if (client != null && !client.isClosed()) {

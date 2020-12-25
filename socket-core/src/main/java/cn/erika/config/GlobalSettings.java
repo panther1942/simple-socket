@@ -33,6 +33,6 @@ public class GlobalSettings {
     public static boolean enableCompress = true;
     public static DataInfo.Compress compressType = DataInfo.Compress.GZIP;
 
-    public static String baseDir = "download/";
+    public static String baseDir = "downloads/";
 
 }

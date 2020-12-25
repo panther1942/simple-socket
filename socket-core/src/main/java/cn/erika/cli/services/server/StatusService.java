@@ -10,6 +10,11 @@ import cn.erika.socket.handler.IServer;
 @Component("status")
 public class StatusService extends BaseService implements CliService {
     @Override
+    public String info() {
+        return "查看连接到服务器的客户端信息 能看到UID和远端地址";
+    }
+
+    @Override
     public void execute(String... args) throws BeanException {
         IServer server = getBean(IServer.class);
         if (server != null && !server.isClosed()) {

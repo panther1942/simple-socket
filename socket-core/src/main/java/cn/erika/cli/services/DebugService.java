@@ -10,6 +10,13 @@ import cn.erika.util.log.LogLevel;
 public class DebugService extends BaseService implements CliService {
 
     @Override
+    public String info() {
+        return "启用/禁用日志和设置日志等级\n" +
+                "\t如果不加参数将切换启用或者禁用日志\n" +
+                "\t日志等级包括DEBUG INFO WARN ERROR";
+    }
+
+    @Override
     public void execute(String... args) throws BeanException {
         try {
             LogLevel level = LogLevel.getByName(args[1]);

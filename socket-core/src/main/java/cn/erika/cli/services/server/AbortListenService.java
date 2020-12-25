@@ -10,6 +10,11 @@ import cn.erika.socket.handler.IServer;
 @Component("abort")
 public class AbortListenService extends BaseService implements CliService {
     @Override
+    public String info() {
+        return "中断服务器监听并释放所有与客户端的连接";
+    }
+
+    @Override
     public void execute(String... args) throws BeanException {
         IServer server = getBean(IServer.class);
         if (server != null && !server.isClosed()) {

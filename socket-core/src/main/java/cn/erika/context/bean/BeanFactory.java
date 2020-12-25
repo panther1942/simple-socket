@@ -3,6 +3,8 @@ package cn.erika.context.bean;
 import cn.erika.context.annotation.Component;
 import cn.erika.context.annotation.Enhance;
 import cn.erika.context.exception.BeanException;
+import cn.erika.context.exception.NoSuchBeanException;
+import cn.erika.context.exception.UndeclaredBeanException;
 import cn.erika.context.exception.UndeclaredMethodException;
 
 import java.lang.reflect.*;
@@ -44,6 +46,16 @@ public class BeanFactory {
         serviceList.put(name, method);
     }
 
+    public <T> Map<String, T> getBeans(Class<T> clazz) throws BeanException {
+        Map<String, T> beanList = new HashMap<>();
+        for (String name : aliasList.keySet()) {
+            if (clazz.isAssignableFrom(aliasList.get(name))) {
+                beanList.put(name, getBean(aliasList.get(name)));
+            }
+        }
+        return beanList;
+    }
+
     // 通过类名获取单实例对象
     @SuppressWarnings("unchecked")
     public <T> T getBean(Class<?> clazz) throws BeanException {
@@ -83,14 +95,14 @@ public class BeanFactory {
         }
         // 这里需要检查匹配的条目数量 实现模糊匹配 首字母开始
         if (target.size() == 0) {
-            throw new BeanException("未找到名称为: " + name + " 的bean");
+            throw new NoSuchBeanException("未找到名称为: " + name + " 的bean");
         } else if (target.size() > 1) {
             StringBuffer buffer = new StringBuffer("不明确的服务: ");
             for (String srvName : target) {
                 buffer.append(srvName).append(",");
             }
             buffer.deleteCharAt(buffer.length() - 1);
-            throw new BeanException(buffer.toString());
+            throw new UndeclaredBeanException(buffer.toString());
         } else {
             return getBean(aliasList.get(target.get(0)));
         }
@@ -107,7 +119,7 @@ public class BeanFactory {
                 Constructor con = checkConstructor(clazz, paramTypes);
                 if (con != null) {
                     obj = con.newInstance(args);
-                }else{
+                } else {
                     throw new NoSuchMethodException();
                 }
             } else {

@@ -10,6 +10,13 @@ import cn.erika.socket.handler.IServer;
 @Component("s_send")
 public class SSMService extends BaseService implements CliService {
     @Override
+    public String info() {
+        return "向客户端发送消息\n" +
+                "\t例如 send 2f431f9e-ca3e-4c40-bfd9-f88f63840dcb 你好 这里是服务器\n" +
+                "\t第二个参数为连接的UID 通过status命令可以查询";
+    }
+
+    @Override
     public void execute(String... args) throws BeanException {
         IServer server = getBean(IServer.class);
         if (server != null && !server.isClosed()) {

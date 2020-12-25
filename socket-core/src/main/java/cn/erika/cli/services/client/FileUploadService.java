@@ -12,6 +12,13 @@ import cn.erika.socket.handler.IClient;
 @Component("upload")
 public class FileUploadService extends BaseService implements CliService {
     @Override
+    public String info() {
+        return "上传文件到服务器\n" +
+                "\t例如 upload /var/log/message.log message_20201225.log\n" +
+                "\t将上传文件至服务器程序工作目录的downloads目录下";
+    }
+
+    @Override
     public void execute(String... args) throws BeanException {
         IClient client = getBean(IClient.class);
         if (client != null && !client.isClosed()) {

@@ -17,6 +17,13 @@ import java.net.SocketAddress;
 public class ListenService extends BaseService implements CliService {
 
     @Override
+    public String info() {
+        return "开始监听指定的地址\n" +
+                "\t例如: listen localhost 12345\n" +
+                "\t如果不指定地址 将监听localhost:43037";
+    }
+
+    @Override
     public void execute(String... args) throws BeanException {
         IServer server = getBean(IServer.class);
         if (server != null && !server.isClosed()) {

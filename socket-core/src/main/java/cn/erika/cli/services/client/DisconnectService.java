@@ -10,6 +10,11 @@ import cn.erika.socket.handler.IClient;
 @Component("disconnect")
 public class DisconnectService extends BaseService implements CliService {
     @Override
+    public String info() {
+        return "断开与服务器的连接";
+    }
+
+    @Override
     public void execute(String... args) throws BeanException {
         IClient client = getBean(IClient.class);
         if (client != null && !client.isClosed()) {

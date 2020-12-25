@@ -10,6 +10,12 @@ import cn.erika.socket.handler.IClient;
 @Component("c_send")
 public class CSMService extends BaseService implements CliService {
     @Override
+    public String info() {
+        return "向服务器发送消息\n" +
+                "\t例如 c_send 你好 我是客户端";
+    }
+
+    @Override
     public void execute(String... args) throws BeanException {
         IClient client = getBean(IClient.class);
         if (client != null && !client.isClosed()) {
