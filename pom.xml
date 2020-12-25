@@ -9,10 +9,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>simple-socket</module>
-        <module>socket-plugins</module>
+        <module>socket-core</module>
         <module>socket-spring</module>
-        <module>aspectj-demo</module>
     </modules>
 
     <properties>
@@ -20,6 +18,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
 
+        <spring.version>2.2.6.RELEASE</spring.version>
         <logback.version>1.2.3</logback.version>
     </properties>
 
@@ -31,6 +30,22 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-parent</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
