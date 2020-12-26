@@ -6,5 +6,5 @@ target/
 *.log
 
 download/
-log/
-logs/
+/log
+/logs
