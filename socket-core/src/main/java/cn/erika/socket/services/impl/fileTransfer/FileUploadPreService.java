@@ -45,12 +45,10 @@ public class FileUploadPreService extends BaseService implements ISocketService 
             if (!baseDir.exists()) {
                 baseDir.mkdirs();
             }
-            if (!file.exists()) {
-                file.createNewFile();
-            } else {
+            if (file.exists()) {
                 file.delete();
-                file.createNewFile();
             }
+            file.createNewFile();
             if (!file.canWrite()) {
                 throw new IOException("文件没有写权限");
             }

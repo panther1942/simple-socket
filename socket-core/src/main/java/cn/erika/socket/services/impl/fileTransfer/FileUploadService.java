@@ -5,13 +5,16 @@ import cn.erika.config.GlobalSettings;
 import cn.erika.context.Application;
 import cn.erika.context.BaseService;
 import cn.erika.context.annotation.Component;
+import cn.erika.socket.core.BaseSocket;
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.core.component.FileInfo;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.services.ISocketService;
+import cn.erika.util.security.MessageDigest;
 
 import java.io.*;
 import java.text.DecimalFormat;
+import java.util.Base64;
 
 @Component(Constant.SRV_UPLOAD)
 public class FileUploadService extends BaseService implements ISocketService {
@@ -25,8 +28,8 @@ public class FileUploadService extends BaseService implements ISocketService {
         long skip = info.getFilePos();
         File file = new File(filepath);
 
-        try (FileInputStream in = new FileInputStream(file)) {
-            in.skip(skip);
+        try (RandomAccessFile in = new RandomAccessFile(file, "r")) {
+            in.seek(skip);
             long pos = skip;
             int len;
             byte[] data = new byte[4 * 1024 * 1024];
@@ -37,7 +40,8 @@ public class FileUploadService extends BaseService implements ISocketService {
                 System.arraycopy(data, 0, tmp, 0, len);
                 Message msg = new Message(Constant.SRV_UPLOAD);
                 msg.add(Constant.FILE_POS, pos);
-                msg.add(Constant.BIN, tmp);
+                msg.add(Constant.BIN, Base64.getEncoder().encodeToString(tmp));
+                msg.add(Constant.LEN, tmp.length);
                 pos += len;
 //                log.debug("本次发送长度: " + len);
                 log.info("进度: " + df.format(pos / (double) file.length()));
@@ -61,17 +65,41 @@ public class FileUploadService extends BaseService implements ISocketService {
         String filename = info.getFilename();
         long fileLength = info.getFileLength();
         long filePos = message.get(Constant.FILE_POS);
-        byte[] data = message.get(Constant.BIN);
+        int len = message.get(Constant.LEN);
+        String data = message.get(Constant.BIN);
+
         File file = new File(BASE_DIR + filename);
 
-        try (RandomAccessFile out = new RandomAccessFile(file, "rw")) {
-            log.info("当前进度: " + df.format((filePos + data.length) / (double) fileLength));
+        try (RandomAccessFile out = new RandomAccessFile(file, "rwd")) {
+            log.info("当前进度: " + df.format((filePos + len) / (double) fileLength));
             out.seek(filePos);
-            out.write(data, 0, data.length);
+            out.write(Base64.getDecoder().decode(data), 0, len);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        if (filePos + len >= fileLength) {
+            log.info("传输完成 正在进行数据校验");
+            try {
+                long checkCode = info.getCheckCode();
+                log.info("文件位置: " + file.getAbsolutePath());
+                BaseSocket parent = socket.get(Constant.PARENT_SOCKET);
+                long targetCode = MessageDigest.crc32Sum(file);
+                System.out.println("文件校验码: " + targetCode);
+                if (checkCode == targetCode) {
+                    log.info("数据完整");
+                    parent.send(new Message(Constant.SRV_POST_UPLOAD, "接收完成"));
+                } else {
+                    log.warn("数据不完整");
+                    parent.send(new Message(Constant.SRV_POST_UPLOAD, "接收失败"));
+                }
+            } catch (SecurityException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

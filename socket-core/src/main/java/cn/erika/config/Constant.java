@@ -33,6 +33,7 @@ public class Constant {
     public static final String TEXT = "text";
     public static final String BIN = "bin";
     public static final String RESULT = "result";
+    public static final String LEN = "len";
     public static final String EXIT = "exit";
 
     public static final String FILENAME = "filename";

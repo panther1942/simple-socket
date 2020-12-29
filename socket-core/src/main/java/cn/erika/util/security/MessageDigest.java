@@ -3,6 +3,7 @@ package cn.erika.util.security;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import java.util.zip.CRC32;
@@ -54,7 +55,7 @@ public class MessageDigest {
     }
 
     public static long crc32Sum(File file) throws IOException {
-        try (FileInputStream in = new FileInputStream(file)) {
+        try (RandomAccessFile in = new RandomAccessFile(file,"r")) {
             int length = 0;
             byte[] data = new byte[4096];
             CRC32 crc = new CRC32();

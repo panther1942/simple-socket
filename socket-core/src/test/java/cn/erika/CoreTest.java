@@ -8,7 +8,10 @@ import cn.erika.util.security.MessageDigest;
 import cn.erika.util.string.Base64Utils;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -34,94 +37,12 @@ public class CoreTest {
     }
 
     @Test
-    public void testDatagramChannel() {
-        InetSocketAddress address = new InetSocketAddress("localhost", 12345);
-
-        Thread receiver = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    datagramReceive(address);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        Thread sender = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    datagramSend(address);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        receiver.start();
-        sender.start();
-
-        try {
-            receiver.join();
-            sender.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private void datagramSend(InetSocketAddress address) throws IOException {
-        DatagramChannel channel = DatagramChannel.open();
-        channel.bind(new InetSocketAddress("localhost", 1234));
-        ByteBuffer byteBuffer = ByteBuffer.allocate(channel.socket().getSendBufferSize());
-        byteBuffer.clear();
-        byteBuffer.put("Hello Server".getBytes());
-        byteBuffer.flip();
-        channel.send(byteBuffer, address);
-
-        byteBuffer.clear();
-        channel.receive(byteBuffer);
-        byteBuffer.flip();
-
-        byte[] arr = byteBuffer.array();
-        int len = byteBuffer.limit();
-        byte[] data = new byte[len];
-        System.arraycopy(arr, 0, data, 0, len);
-        System.out.println(new String(data));
-    }
-
-    private void datagramReceive(InetSocketAddress address) throws IOException {
-        DatagramChannel channel = DatagramChannel.open();
-        channel.socket().bind(address);
-        System.out.println("监听端口: " + address);
-        ByteBuffer byteBuffer = ByteBuffer.allocate(channel.socket().getReceiveBufferSize());
-        byteBuffer.clear();
-        channel.receive(byteBuffer);
-        byteBuffer.flip();
-
-        byte[] arr = byteBuffer.array();
-        int len = byteBuffer.limit();
-        byte[] data = new byte[len];
-        System.arraycopy(arr, 0, data, 0, len);
-        System.out.println(new String(data));
-
-        try {
-            SocketAddress remoteAddress = channel.socket().getRemoteSocketAddress();
-            if (remoteAddress != null) {
-                byteBuffer.clear();
-                byteBuffer.put("Hello Client".getBytes());
-                byteBuffer.flip();
-                channel.send(byteBuffer, remoteAddress);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Test
-    public void testCrc() {
-        System.out.println(MessageDigest.crc32Sum("admin".getBytes()));
+    public void testCrc() throws IOException {
+//        System.out.println(MessageDigest.crc32Sum("admin".getBytes()));
+        File file = new File("/home/erika/Downloads/phpMyAdmin-5.0.4-all-languages.zip");
+//        File file = new File("/home/erika/IdeaProjects/simple-socket/downloads/phpMyAdmin.zip");
+        long checkCode = MessageDigest.crc32Sum(file);
+        System.out.println(checkCode);
     }
 
     @Test
@@ -141,11 +62,11 @@ public class CoreTest {
     }
 
     @Test
-    public void testHex(){
+    public void testHex() {
         String sign = "b15328fe3971ffac07b4ea92a9119f5c";
         for (int i = 0; i < sign.length(); i++) {
             char c = sign.charAt(i);
-            System.out.println(Integer.parseInt(String.valueOf(c),16));
+            System.out.println(Integer.parseInt(String.valueOf(c), 16));
         }
     }
 }

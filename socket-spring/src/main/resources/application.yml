@@ -6,7 +6,7 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
       driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/db_demo1
+      url: jdbc:mysql://localhost:3306/db_common
       username: test
       password: test
 

@@ -43,10 +43,15 @@ public class FileSenderAspect {
 
 //    upload /home/erika/Downloads/config.json config.json
 //    upload /home/erika/Downloads/aspectj-1.9.6.jar aspectj.jar
-//    upload /home/erika/Downloads/apipost_3.2.3-linux-x64.tar.xz apipost.tar.xz
+//    upload /home/erika/Downloads/config.json config.json
+
+    //    upload /home/erika/Downloads/phpMyAdmin-5.0.4-all-languages.zip phpMyAdmin.zip
+    //    upload /home/erika/Downloads/linux_history.png linux_history.png
+    //    upload /home/erika/Downloads/install-release.sh install-release.sh
 
     @Around(value = "sendFile() && args(socket,message)", argNames = "joinPoint,socket,message")
     public Object beforeSendFile(ProceedingJoinPoint joinPoint, ISocket socket, Message message) throws Throwable {
+
         Object[] params = new Object[2];
         params[0] = socket;
         params[1] = message;
@@ -57,4 +62,6 @@ public class FileSenderAspect {
         log.info(String.format("传输用时: %d 秒", (end.getTime() - start.getTime()) / 1000));
         return result;
     }
+
+//    upload /home/erika/Downloads/apipost_3.2.3-linux-x64.tar.xz apipost.tar.xz
 }

@@ -45,4 +45,14 @@ public class FileInfo implements Serializable {
     public void setCheckCode(long checkCode) {
         this.checkCode = checkCode;
     }
+
+    @Override
+    public String toString() {
+        return "FileInfo{" +
+                "filename='" + filename + '\'' +
+                ", fileLength=" + fileLength +
+                ", filePos=" + filePos +
+                ", checkCode=" + checkCode +
+                '}';
+    }
 }

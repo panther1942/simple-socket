@@ -46,11 +46,11 @@ public abstract class BaseSocket implements ISocket {
             message.del(Constant.DIGITAL_SIGNATURE);
             if (isEncrypt) {
                 DigitalSignatureAlgorithm digitalSignatureAlgorithm = get(Constant.DIGITAL_SIGNATURE_ALGORITHM);
-                message.add(Constant.DIGITAL_SIGNATURE, SecurityUtils.sign(
-                        SerialUtils.serialObject(message),
+                byte[] rsaSign = SecurityUtils.sign(
+                        message.toString().getBytes(charset),
                         GlobalSettings.privateKey,
-                        digitalSignatureAlgorithm)
-                );
+                        digitalSignatureAlgorithm);
+                message.add(Constant.DIGITAL_SIGNATURE, rsaSign);
             }
             byte[] data = SerialUtils.serialObject(message);
             if (isEncrypt) {
@@ -135,7 +135,7 @@ public abstract class BaseSocket implements ISocket {
                 DigitalSignatureAlgorithm digitalSignatureAlgorithm = get(Constant.DIGITAL_SIGNATURE_ALGORITHM);
                 byte[] rsaSign = message.get(Constant.DIGITAL_SIGNATURE);
                 message.del(Constant.DIGITAL_SIGNATURE);
-                if (!SecurityUtils.verify(SerialUtils.serialObject(message),
+                if (!SecurityUtils.verify(message.toString().getBytes(charset),
                         rsaSign, publicKey, digitalSignatureAlgorithm)) {
                     throw new SecurityException("验签失败");
                 }

@@ -83,10 +83,10 @@ public class ExchangeToken extends BaseService implements ISocketService {
                 byte[] publicKey = message.get(Constant.PUBLIC_KEY);
                 try {
                     ISocket parent = server.checkToken(token, publicKey);
-                    boolean isAuthenticated = parent.get(Constant.AUTHENTICATED);
-                    if (!isAuthenticated) {
-                        throw new AuthenticateException("未经认证的连接");
-                    }
+//                    boolean isAuthenticated = parent.get(Constant.AUTHENTICATED);
+//                    if (!isAuthenticated) {
+//                        throw new AuthenticateException("未经认证的连接");
+//                    }
                     log.debug("认证通过");
                     socket.set(Constant.PARENT_SOCKET, parent);
                     socket.set(Constant.PUBLIC_KEY, publicKey);
