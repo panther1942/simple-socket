@@ -5,6 +5,7 @@ import cn.erika.socket.core.BaseHandler;
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.core.component.LinkManager;
 import cn.erika.socket.core.component.Message;
+import cn.erika.socket.exception.AuthenticateException;
 import cn.erika.socket.exception.TokenException;
 import cn.erika.util.security.MessageDigest;
 
@@ -30,7 +31,7 @@ public abstract class BaseServer extends BaseHandler implements Runnable, IServe
     }
 
     @Override
-    public void addToken(ISocket socket, String token) {
+    public void addToken(ISocket socket, String token) throws AuthenticateException{
         if (!tokenList.containsKey(token)) {
             tokenList.put(token, socket);
         } else {
@@ -39,7 +40,7 @@ public abstract class BaseServer extends BaseHandler implements Runnable, IServe
     }
 
     @Override
-    public ISocket checkToken(String token, byte[] publicKey) {
+    public ISocket checkToken(String token, byte[] publicKey) throws AuthenticateException{
         ISocket socket = tokenList.get(token);
         if (socket == null) {
             throw new TokenException("token无效");
@@ -48,7 +49,6 @@ public abstract class BaseServer extends BaseHandler implements Runnable, IServe
             long srcToken = MessageDigest.crc32Sum(pubKey);
             long targetToken = MessageDigest.crc32Sum(publicKey);
             if (srcToken == targetToken) {
-                socket.set(Constant.TOKEN, token);
                 tokenList.remove(token);
                 return socket;
             } else {

@@ -1,14 +1,15 @@
 package cn.erika.socket.handler;
 
 import cn.erika.socket.core.ISocket;
+import cn.erika.socket.exception.AuthenticateException;
 
 import java.net.SocketAddress;
 
 public interface IServer {
 
-    public void addToken(ISocket socket, String token);
+    public void addToken(ISocket socket, String token) throws AuthenticateException;
 
-    public ISocket checkToken(String token, byte[] publicKey);
+    public ISocket checkToken(String token, byte[] publicKey) throws AuthenticateException;
 
     public void status();
 

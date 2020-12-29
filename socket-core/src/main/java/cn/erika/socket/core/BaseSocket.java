@@ -3,7 +3,6 @@ package cn.erika.socket.core;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
 import cn.erika.context.exception.BeanException;
-import cn.erika.socket.aop.SocketReceiveAspect;
 import cn.erika.socket.core.component.DataInfo;
 import cn.erika.socket.core.component.Message;
 import cn.erika.util.compress.GZIP;
@@ -11,10 +10,13 @@ import cn.erika.util.exception.CompressException;
 import cn.erika.util.exception.SerialException;
 import cn.erika.util.log.Logger;
 import cn.erika.util.log.LoggerFactory;
-import cn.erika.util.security.*;
+import cn.erika.util.security.DigitalSignatureAlgorithm;
+import cn.erika.util.security.SecurityAlgorithm;
+import cn.erika.util.security.SecurityUtils;
 import cn.erika.util.string.SerialUtils;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.HashMap;
@@ -147,6 +149,9 @@ public abstract class BaseSocket implements ISocket {
         try {
             send(info.toString().getBytes(charset));
             send(info.getData());
+        } catch (SocketException e) {
+            log.warn("连接断开");
+            close();
         } catch (IOException e) {
             handler.onError(this, e);
         }
@@ -195,7 +200,7 @@ public abstract class BaseSocket implements ISocket {
     }
 
     @Override
-    public Handler getHandler(){
+    public Handler getHandler() {
         return this.handler;
     }
 }

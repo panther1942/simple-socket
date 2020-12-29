@@ -1,6 +1,6 @@
 package cn.erika.cli;
 
-import cn.erika.cli.services.CliService;
+import cn.erika.cli.services.ICliService;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
 import cn.erika.context.annotation.Component;
@@ -51,7 +51,7 @@ public class CliApplication extends SocketApplication implements Runnable {
 
             @Override
             public void deal(Class<?> clazz) {
-                if (CliService.class.isAssignableFrom(clazz)) {
+                if (ICliService.class.isAssignableFrom(clazz)) {
                     Component component = clazz.getAnnotation(Component.class);
                     beanFactory.addBean(component.value(), clazz);
                 }
@@ -74,7 +74,7 @@ public class CliApplication extends SocketApplication implements Runnable {
                 String[] command = StringUtils.getParam(line);
                 try {
                     if (command.length > 0) {
-                        CliService service = beanFactory.getBean(command[0]);
+                        ICliService service = beanFactory.getBean(command[0]);
                         service.execute(command);
                     }
                 } catch (NumberFormatException e) {
@@ -115,7 +115,7 @@ public class CliApplication extends SocketApplication implements Runnable {
 
     private void displayHelp() {
         try {
-            Map<String, CliService> beanList = beanFactory.getBeans(CliService.class);
+            Map<String, ICliService> beanList = beanFactory.getBeans(ICliService.class);
             StringBuffer buffer = new StringBuffer("功能说明\n");
             Set<String> names = beanList.keySet();
             LinkedList<String> sortNames = new LinkedList<>();

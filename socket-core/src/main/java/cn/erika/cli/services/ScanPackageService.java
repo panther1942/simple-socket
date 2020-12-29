@@ -8,7 +8,7 @@ import cn.erika.context.exception.BeanException;
 import java.io.IOException;
 
 @Component("scan")
-public class ScanPackageService extends BaseService implements CliService {
+public class ScanPackageService extends BaseService implements ICliService {
     @Override
     public String info() {
         return "[!失败!] 用于重新扫描类路径下新增的类文件\n" +

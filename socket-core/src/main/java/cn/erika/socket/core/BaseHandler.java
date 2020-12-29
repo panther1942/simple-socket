@@ -2,10 +2,8 @@ package cn.erika.socket.core;
 
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
-import cn.erika.context.annotation.Enhance;
 import cn.erika.context.bean.BeanFactory;
 import cn.erika.context.exception.BeanException;
-import cn.erika.socket.aop.SocketReceiveAspect;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.services.ServiceSelector;
 import cn.erika.util.log.Logger;
@@ -41,8 +39,6 @@ public abstract class BaseHandler implements Handler {
         socket.set(Constant.ENCRYPT, false);
         // 认证标识
         socket.set(Constant.AUTHENTICATED, false);
-        // 数字签名算法 加密通信后要对每次发送的消息进行签名
-        socket.set(Constant.DIGITAL_SIGNATURE_ALGORITHM, GlobalSettings.signAlgorithm);
     }
 
     @Override
@@ -53,21 +49,25 @@ public abstract class BaseHandler implements Handler {
 
     @Override
     public void onError(ISocket socket, Throwable throwable) {
-        log.error(throwable.getMessage());
+        log.error(throwable.getMessage(), throwable);
     }
 
     protected void execute(ISocket socket, String serviceName, Message message) throws BeanException {
         String type = socket.get(Constant.TYPE);
-        servicePool.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    beanFactory.execute(new ServiceSelector(type), serviceName, socket, message);
-                } catch (BeanException e) {
-                    onError(socket, e);
+        if (type != null) {
+            servicePool.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        beanFactory.execute(new ServiceSelector(type), serviceName, socket, message);
+                    } catch (BeanException e) {
+                        onError(socket, e);
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            throw new BeanException("没有指定服务类型 client或者server");
+        }
     }
 
     public void close() {

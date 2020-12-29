@@ -10,13 +10,13 @@ import cn.erika.socket.aop.CountFileTransTimeAspect;
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.core.component.FileInfo;
 import cn.erika.socket.core.component.Message;
-import cn.erika.socket.services.SocketService;
+import cn.erika.socket.services.ISocketService;
 
 import java.io.*;
 import java.text.DecimalFormat;
 
 @Component(Constant.SRV_UPLOAD)
-public class FileUploadService extends BaseService implements SocketService {
+public class FileUploadService extends BaseService implements ISocketService {
     private static DecimalFormat df = new DecimalFormat("0.00%");
     private final String BASE_DIR = GlobalSettings.baseDir;
 

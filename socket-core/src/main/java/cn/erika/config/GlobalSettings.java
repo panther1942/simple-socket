@@ -24,7 +24,7 @@ public class GlobalSettings {
     public static byte[] publicKey;
 
     // 对称加密算法
-    public static SecurityAlgorithm securityAlgorithm = SecurityAlgorithm.AES256ECB;
+    public static SecurityAlgorithm securityAlgorithm = SecurityAlgorithm.AES256CTR;
     // 对称加密长度
     public static int securityLength = 18;
     // 签名算法

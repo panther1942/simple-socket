@@ -223,23 +223,23 @@ public class BeanFactory {
                     advise = getBean(enhance.value());
                 }
             }
-            // 如果增强器不为空 则执行增强部分的方法 否则执行目标方法
-            if (advise != null) {
-                try {
-                    advise.before(method, args);
-                    result = method.invoke(target, args);
-                    advise.afterReturning(method, args, result);
-                    return result;
-                } catch (Throwable t) {
-                    advise.afterThrowing(method, args, t);
-                    throw t;
-                }
-            } else {
-                try {
+            try {
+                // 如果增强器不为空 则执行增强部分的方法 否则执行目标方法
+                if (advise != null) {
+                    try {
+                        advise.before(method, args);
+                        result = method.invoke(target, args);
+                        advise.afterReturning(method, args, result);
+                        return result;
+                    } catch (Throwable t) {
+                        advise.afterThrowing(method, args, t);
+                        throw t;
+                    }
+                } else {
                     return method.invoke(target, args);
-                } catch (InvocationTargetException e) {
-                    throw e.getTargetException();
                 }
+            } catch (InvocationTargetException e) {
+                throw e.getTargetException();
             }
         }
 

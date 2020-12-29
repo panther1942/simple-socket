@@ -7,7 +7,7 @@ import cn.erika.context.exception.BeanException;
 import cn.erika.util.log.LogLevel;
 
 @Component("log")
-public class DebugService extends BaseService implements CliService {
+public class DebugService extends BaseService implements ICliService {
 
     @Override
     public String info() {

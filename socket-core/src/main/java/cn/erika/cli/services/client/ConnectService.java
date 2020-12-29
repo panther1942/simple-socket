@@ -1,6 +1,6 @@
 package cn.erika.cli.services.client;
 
-import cn.erika.cli.services.CliService;
+import cn.erika.cli.services.ICliService;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
 import cn.erika.context.BaseService;
@@ -15,7 +15,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 @Component("connect")
-public class ConnectService extends BaseService implements CliService {
+public class ConnectService extends BaseService implements ICliService {
     @Override
     public String info() {
         return "连接到服务器\n" +
@@ -48,10 +48,10 @@ public class ConnectService extends BaseService implements CliService {
                     log.warn("暂未实现");
                     return;
                 case Constant.NIO:
-                    client = createBean(NIOClient.class, address);
+                    client = new NIOClient(address);
                     break;
                 case Constant.BIO:
-                    client = createBean(BIOClient.class, address);
+                    client = new BIOClient(address);
                     break;
                 default:
                     throw new BeanException("不支持的模式: " + GlobalSettings.type);

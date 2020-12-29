@@ -12,7 +12,7 @@ import org.aspectj.lang.annotation.Pointcut;
 public class SocketServiceAspect {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
-    @Pointcut("execution(* cn.erika.socket.services.SocketService.*(..))")
+    @Pointcut("execution(* cn.erika.socket.services.ISocketService.*(..))")
     public void pointcut() {
     }
 

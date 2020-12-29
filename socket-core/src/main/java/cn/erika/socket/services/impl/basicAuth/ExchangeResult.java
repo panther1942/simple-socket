@@ -5,10 +5,10 @@ import cn.erika.context.BaseService;
 import cn.erika.context.annotation.Component;
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.core.component.Message;
-import cn.erika.socket.services.SocketService;
+import cn.erika.socket.services.ISocketService;
 
 @Component(Constant.SRV_EXCHANGE_RESULT)
-public class ExchangeResult extends BaseService implements SocketService {
+public class ExchangeResult extends BaseService implements ISocketService {
 
     @Override
     public void client(ISocket socket, Message message) {

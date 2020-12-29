@@ -6,7 +6,7 @@ import cn.erika.context.exception.BeanException;
 import cn.erika.context.scan.PackageScanner;
 import cn.erika.context.scan.PackageScannerHandler;
 import cn.erika.socket.plugins.SocketPlugin;
-import cn.erika.socket.services.SocketService;
+import cn.erika.socket.services.ISocketService;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -33,7 +33,7 @@ public abstract class SocketApplication extends Application {
                     if (SocketPlugin.class.isAssignableFrom(clazz)) {
                         socketPlugins.add(beanFactory.createBean(clazz));
                     }
-                    if (SocketService.class.isAssignableFrom(clazz)) {
+                    if (ISocketService.class.isAssignableFrom(clazz)) {
                         Component component = clazz.getAnnotation(Component.class);
                         beanFactory.addBean(component.value(), clazz);
                     }

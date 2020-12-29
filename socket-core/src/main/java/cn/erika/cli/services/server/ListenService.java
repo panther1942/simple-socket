@@ -1,6 +1,6 @@
 package cn.erika.cli.services.server;
 
-import cn.erika.cli.services.CliService;
+import cn.erika.cli.services.ICliService;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
 import cn.erika.context.BaseService;
@@ -10,11 +10,13 @@ import cn.erika.socket.handler.IServer;
 import cn.erika.socket.handler.bio.BIOServer;
 import cn.erika.socket.handler.nio.NIOServer;
 
+import java.io.IOException;
+import java.net.BindException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 @Component("listen")
-public class ListenService extends BaseService implements CliService {
+public class ListenService extends BaseService implements ICliService {
 
     @Override
     public String info() {
@@ -41,21 +43,27 @@ public class ListenService extends BaseService implements CliService {
             port = GlobalSettings.DEFAULT_PORT;
         }
         SocketAddress address = new InetSocketAddress(host, port);
-        switch (GlobalSettings.type) {
-            case Constant.AIO:
-                log.warn("暂未实现");
-                return;
-            case Constant.NIO:
-                server = createBean(NIOServer.class, address);
-                break;
-            case Constant.BIO:
-                Object object = createBean(BIOServer.class, address);
-                server = (IServer) object;
-                break;
-            default:
-                throw new BeanException("不支持的模式: " + GlobalSettings.type);
+        try {
+            switch (GlobalSettings.type) {
+                case Constant.AIO:
+                    log.warn("暂未实现");
+                    return;
+                case Constant.NIO:
+                    server = new NIOServer(address);
+                    break;
+                case Constant.BIO:
+                    server = new BIOServer(address);
+                    break;
+                default:
+                    throw new BeanException("不支持的模式: " + GlobalSettings.type);
+            }
+
+            addBean(IServer.class, server);
+            server.listen();
+        } catch (BindException e) {
+            log.error(e.getMessage());
+        } catch (IOException e) {
+            throw new BeanException(e);
         }
-        addBean(IServer.class, server);
-        server.listen();
     }
 }

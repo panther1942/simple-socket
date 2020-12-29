@@ -9,14 +9,14 @@ import cn.erika.socket.core.BaseSocket;
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.core.component.FileInfo;
 import cn.erika.socket.core.component.Message;
-import cn.erika.socket.services.SocketService;
+import cn.erika.socket.services.ISocketService;
 import cn.erika.util.security.MessageDigest;
 
 import java.io.File;
 import java.io.IOException;
 
 @Component(Constant.SRV_POST_UPLOAD)
-public class FileUploadPostService extends BaseService implements SocketService {
+public class FileUploadPostService extends BaseService implements ISocketService {
     private final String BASE_DIR = GlobalSettings.baseDir;
 
     @Override

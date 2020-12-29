@@ -18,9 +18,9 @@ public class ServiceSelector implements BeanSelector {
     public Method getMethod(Class<?> clazz) throws NoSuchMethodException {
         switch (type) {
             case Constant.CLIENT:
-                return SocketService.class.getMethod(Constant.CLIENT, ISocket.class, Message.class);
+                return ISocketService.class.getMethod(Constant.CLIENT, ISocket.class, Message.class);
             case Constant.SERVER:
-                return SocketService.class.getMethod(Constant.SERVER, ISocket.class, Message.class);
+                return ISocketService.class.getMethod(Constant.SERVER, ISocket.class, Message.class);
             default:
                 throw new NoSuchMethodException("找不到指定的方法: " + type);
         }

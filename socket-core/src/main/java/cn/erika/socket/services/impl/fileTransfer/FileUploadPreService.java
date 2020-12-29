@@ -9,10 +9,11 @@ import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.core.component.FileInfo;
 import cn.erika.socket.core.component.Message;
+import cn.erika.socket.exception.AuthenticateException;
 import cn.erika.socket.exception.FileException;
 import cn.erika.socket.handler.IServer;
 import cn.erika.socket.handler.bio.FileSender;
-import cn.erika.socket.services.SocketService;
+import cn.erika.socket.services.ISocketService;
 import cn.erika.util.security.MessageDigest;
 
 import java.io.File;
@@ -20,7 +21,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 @Component(Constant.SRV_PRE_UPLOAD)
-public class FileUploadPreService extends BaseService implements SocketService {
+public class FileUploadPreService extends BaseService implements ISocketService {
     private final String BASE_DIR = GlobalSettings.baseDir;
 
     @Override
@@ -73,10 +74,12 @@ public class FileUploadPreService extends BaseService implements SocketService {
                 }
                 socket.send(message);
             } catch (BeanException e) {
-                e.printStackTrace();
+                log.error("内部错误: "+e.getMessage());
+            } catch (AuthenticateException e) {
+                log.error("无法添加认证信息: " + e.getMessage());
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("本地文件读写错误: "+e.getMessage());
         }
     }
 
@@ -120,6 +123,7 @@ public class FileUploadPreService extends BaseService implements SocketService {
             try {
                 new FileSender(socket, message);
             } catch (Exception e) {
+                e.printStackTrace();
                 log.error(e.getMessage());
             }
         }

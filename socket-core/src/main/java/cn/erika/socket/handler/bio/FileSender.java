@@ -22,18 +22,18 @@ public class FileSender extends BaseHandler {
 
     public FileSender(ISocket socket, Message message) throws IOException, BeanException {
         this.message = message;
-        this.socket = beanFactory.createBean(TcpSocket.class, socket.getRemoteAddress(), this);
-        this.socket.set(Constant.PARENT_SOCKET, socket);
+        this.socket = new TcpSocket(socket, this);
     }
 
     @Override
     public void init(ISocket socket) {
         super.init(socket);
         try {
+            ISocket parent = socket.get(Constant.PARENT_SOCKET);
             String token = message.get(Constant.TOKEN);
             socket.set(Constant.TOKEN, token);
-            socket.set(Constant.PUBLIC_KEY, socket.get(Constant.PUBLIC_KEY));
-            socket.set(Constant.DIGITAL_SIGNATURE_ALGORITHM, socket.get(Constant.DIGITAL_SIGNATURE_ALGORITHM));
+            socket.set(Constant.PUBLIC_KEY, parent.get(Constant.PUBLIC_KEY));
+            socket.set(Constant.DIGITAL_SIGNATURE_ALGORITHM, parent.get(Constant.DIGITAL_SIGNATURE_ALGORITHM));
             execute(socket, Constant.SRV_EXCHANGE_TOKEN, null);
         } catch (BeanException e) {
             onError(socket, e);

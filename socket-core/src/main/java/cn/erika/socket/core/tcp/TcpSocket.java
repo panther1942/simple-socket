@@ -28,10 +28,24 @@ public class TcpSocket extends BaseSocket implements Runnable {
         init();
     }
 
+    public TcpSocket(ISocket socket, Handler handler) throws IOException {
+        try {
+            set(Constant.TYPE, Constant.CLIENT);
+            set(Constant.PARENT_SOCKET, socket);
+            this.socket = new Socket();
+            this.handler = handler;
+            this.socket.setReuseAddress(true);
+            this.socket.connect(socket.getRemoteAddress());
+            init();
+        } catch (ConnectException e) {
+            throw new IOException("无法连接到服务器");
+        }
+    }
+
     public TcpSocket(SocketAddress address, Handler handler) throws IOException {
         try {
             set(Constant.TYPE, Constant.CLIENT);
-            this.socket = new java.net.Socket();
+            this.socket = new Socket();
             this.handler = handler;
             this.socket.setReuseAddress(true);
             this.socket.connect(address);
@@ -64,7 +78,7 @@ public class TcpSocket extends BaseSocket implements Runnable {
                 reader.read(this, cache, len);
             }
         } catch (IOException e) {
-            handler.onError(this, e);
+            log.warn("连接断开");
             close();
         }
     }
