@@ -5,8 +5,6 @@ import cn.erika.config.GlobalSettings;
 import cn.erika.context.Application;
 import cn.erika.context.BaseService;
 import cn.erika.context.annotation.Component;
-import cn.erika.context.annotation.Enhance;
-import cn.erika.socket.aop.CountFileTransTimeAspect;
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.core.component.FileInfo;
 import cn.erika.socket.core.component.Message;
@@ -20,7 +18,6 @@ public class FileUploadService extends BaseService implements ISocketService {
     private static DecimalFormat df = new DecimalFormat("0.00%");
     private final String BASE_DIR = GlobalSettings.baseDir;
 
-    @Enhance(CountFileTransTimeAspect.class)
     @Override
     public void client(ISocket socket, Message message) {
         FileInfo info = message.get(Constant.FILE_INFO);
@@ -32,7 +29,7 @@ public class FileUploadService extends BaseService implements ISocketService {
             in.skip(skip);
             long pos = skip;
             int len;
-            byte[] data = new byte[8 * 1024 * 1024];
+            byte[] data = new byte[4 * 1024 * 1024];
             log.info("发送文件: " + file.getAbsolutePath());
 
             while ((len = in.read(data)) > -1) {
@@ -50,7 +47,6 @@ public class FileUploadService extends BaseService implements ISocketService {
             Message request = new Message(Constant.SRV_POST_UPLOAD);
             request.add(Constant.SEND_STATUS, "发送完成");
             socket.send(request);
-            socket.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

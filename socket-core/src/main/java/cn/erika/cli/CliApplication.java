@@ -12,6 +12,7 @@ import cn.erika.context.scan.PackageScannerHandler;
 import cn.erika.socket.SocketApplication;
 import cn.erika.socket.handler.IClient;
 import cn.erika.socket.handler.IServer;
+import cn.erika.socket.services.impl.fileTransfer.FileUploadService;
 import cn.erika.util.log.ConsoleLogger;
 import cn.erika.util.log.FileLogger;
 import cn.erika.util.log.Logger;
@@ -37,6 +38,7 @@ public class CliApplication extends SocketApplication implements Runnable {
     static {
         LoggerFactory.register(new ConsoleLogger());
         LoggerFactory.register(new FileLogger(GlobalSettings.logDir, GlobalSettings.logName));
+        LoggerFactory.ignore(FileUploadService.class);
     }
 
     @Override

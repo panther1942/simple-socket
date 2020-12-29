@@ -1,6 +1,9 @@
 package cn.erika.util.exception;
 
-public class SerialException extends Exception {
+import java.io.IOException;
+
+public class SerialException extends IOException {
+
     public SerialException() {
         super();
     }
@@ -11,5 +14,9 @@ public class SerialException extends Exception {
 
     public SerialException(String s, Throwable throwable) {
         super(s, throwable);
+    }
+
+    public SerialException(Throwable throwable) {
+        super(throwable);
     }
 }

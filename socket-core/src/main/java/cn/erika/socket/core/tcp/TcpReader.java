@@ -5,6 +5,7 @@ import cn.erika.socket.core.component.DataInfo;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Base64;
 import java.util.Date;
 
 // 根据自定协议实现的一个处理数据的类
@@ -79,6 +80,8 @@ class TcpReader {
         info.setPos(Long.parseLong(strHead.substring(14, 24)));
         // 长度 10字节
         info.setLen(Integer.parseInt(strHead.substring(24, 34)));
+        // 签名 32
+        info.setSign(strHead.substring(34,66));
         byte[] tmp = new byte[len - DataInfo.LEN];
         System.arraycopy(data, DataInfo.LEN, tmp, 0, len - DataInfo.LEN);
         return tmp;

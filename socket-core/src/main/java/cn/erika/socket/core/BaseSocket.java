@@ -10,10 +10,9 @@ import cn.erika.util.exception.CompressException;
 import cn.erika.util.exception.SerialException;
 import cn.erika.util.log.Logger;
 import cn.erika.util.log.LoggerFactory;
-import cn.erika.util.security.DigitalSignatureAlgorithm;
-import cn.erika.util.security.SecurityAlgorithm;
-import cn.erika.util.security.SecurityUtils;
+import cn.erika.util.security.*;
 import cn.erika.util.string.SerialUtils;
+import cn.erika.util.string.StringUtils;
 
 import java.io.IOException;
 import java.net.SocketException;
@@ -75,9 +74,13 @@ public abstract class BaseSocket implements ISocket {
                         throw new CompressException("不支持的压缩格式");
                 }
             }
+//            log.debug("数据长度: " + data.length);
             info.setPos(0);
             info.setLen(data.length);
             info.setData(data);
+            String sign = StringUtils.byteToHexString(MessageDigest.sum(info.getData(), MessageDigestAlgorithm.MD5));
+            info.setSign(sign);
+//            log.debug("计算数据签名: " + sign);
             send(info);
         } catch (CompressException e) {
             log.error("压缩时出现错误: " + e.getMessage());
@@ -102,6 +105,15 @@ public abstract class BaseSocket implements ISocket {
         try {
             boolean isEncrypt = get(Constant.ENCRYPT);
             byte[] data = info.getData();
+            String sign = info.getSign();
+//            log.debug("数据长度: " + info.getLen());
+            String targetSign = StringUtils.byteToHexString(MessageDigest.sum(data, MessageDigestAlgorithm.MD5));
+//            log.debug("原始数据签名: " + sign);
+//            log.debug("计算数据签名: " + targetSign);
+            if (!sign.equals(targetSign)) {
+                log.error("警告！ 签名不正确");
+            }
+
             switch (info.getCompress()) {
                 case NONE:
                     break;
@@ -121,13 +133,13 @@ public abstract class BaseSocket implements ISocket {
             if (isEncrypt) {
                 byte[] publicKey = get(Constant.PUBLIC_KEY);
                 DigitalSignatureAlgorithm digitalSignatureAlgorithm = get(Constant.DIGITAL_SIGNATURE_ALGORITHM);
-                byte[] sign = message.get(Constant.DIGITAL_SIGNATURE);
+                byte[] rsaSign = message.get(Constant.DIGITAL_SIGNATURE);
                 message.del(Constant.DIGITAL_SIGNATURE);
                 if (!SecurityUtils.verify(SerialUtils.serialObject(message),
-                        sign, publicKey, digitalSignatureAlgorithm)) {
+                        rsaSign, publicKey, digitalSignatureAlgorithm)) {
                     throw new SecurityException("验签失败");
                 }
-                message.add(Constant.DIGITAL_SIGNATURE, sign);
+                message.add(Constant.DIGITAL_SIGNATURE, rsaSign);
             }
             receive(message);
         } catch (CompressException e) {

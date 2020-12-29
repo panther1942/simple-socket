@@ -1,6 +1,9 @@
 package cn.erika.socket.core.component;
 
+import cn.erika.util.string.StringUtils;
+
 import java.io.Serializable;
+import java.util.Base64;
 import java.util.Date;
 
 /**
@@ -10,7 +13,7 @@ import java.util.Date;
 public class DataInfo implements Serializable {
     private static final long serialVersionUID = 1L;
     // 数据头部长度
-    public static final int LEN = 13 + 1 + 10 + 10;
+    public static final int LEN = 13 + 1 + 10 + 10 + 32;
 
     // 时间戳13字节
     private Date timestamp;
@@ -20,6 +23,8 @@ public class DataInfo implements Serializable {
     private long pos;
     // 长度10字节
     private int len;
+    // 签名 MD5 16
+    private String sign;
     // 数据和数据头分两次发送 因为数据体长度不固定
     private byte[] data;
 
@@ -55,6 +60,14 @@ public class DataInfo implements Serializable {
         this.len = len;
     }
 
+    public String getSign() {
+        return sign;
+    }
+
+    public void setSign(String sign) {
+        this.sign = sign;
+    }
+
     public byte[] getData() {
         return data;
     }
@@ -70,7 +83,8 @@ public class DataInfo implements Serializable {
         String compress = String.format("%1s", this.compress.value).replaceAll("\\s", "0");
         String pos = String.format("%10s", this.pos).replaceAll("\\s", "0");
         String len = String.format("%10s", this.len).replaceAll("\\s", "0");
-        return timestamp + compress + pos + len;
+        String sign = String.format("%32s", this.sign);
+        return timestamp + compress + pos + len + sign;
     }
 
     // 数据压缩目前貌似就GZIP靠谱点

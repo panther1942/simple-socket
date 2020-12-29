@@ -23,7 +23,8 @@ public class SerialUtils {
                 }
             }
         } catch (IOException e) {
-            throw new SerialException("序列化出错", e);
+            e.printStackTrace();
+            throw new SerialException(e);
         }
     }
 
@@ -33,6 +34,7 @@ public class SerialUtils {
         try {
             try {
                 bIn = new ByteArrayInputStream(data);
+                // 错误发生在这一行
                 in = new ObjectInputStream(bIn);
                 return (T) in.readObject();
             } catch (ClassNotFoundException e) {
@@ -46,7 +48,8 @@ public class SerialUtils {
                 }
             }
         } catch (IOException e) {
-            throw new SerialException("反序列化出错", e);
+            e.printStackTrace();
+            throw new SerialException(e);
         }
     }
 }

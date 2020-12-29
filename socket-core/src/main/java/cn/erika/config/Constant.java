@@ -34,8 +34,6 @@ public class Constant {
     public static final String BIN = "bin";
     public static final String RESULT = "result";
     public static final String EXIT = "exit";
-    public static final String SUCCESS = "success";
-    public static final String FAILED = "failed";
 
     public static final String FILENAME = "filename";
     public static final String FILEPATH = "filepath";
@@ -55,8 +53,6 @@ public class Constant {
     public static final String SRV_EXCHANGE_PASSWORD = "srv_exchange_password";
     public static final String SRV_EXCHANGE_RESULT = "srv_exchange_result";
     public static final String SRV_EXCHANGE_TOKEN = "srv_exchange_token";
-
-    public static final String SRV_AUTH_RESULT = "srv_auth_result";
     public static final String SRV_ACCOUNT_AUTH = "srv_account_auth";
 
     public static final String USERNAME = "username";

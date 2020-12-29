@@ -16,6 +16,9 @@ public class Logger {
     }
 
     private void prints(LogLevel level, Class originClass, String message) {
+        if (LoggerFactory.isIgnore(originClass)) {
+            return;
+        }
         if (this.level.getValue() <= level.getValue()) {
             String line = ConsoleUtils.consoleLog(level.getName(), originClass, message);
             for (LogPrinter printer : logPrinterList) {

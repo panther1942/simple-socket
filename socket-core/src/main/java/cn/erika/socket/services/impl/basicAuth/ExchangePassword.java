@@ -39,15 +39,13 @@ public class ExchangePassword extends BaseService implements ISocketService {
             log.debug("发送会话密钥，类型:" + securityAlgorithm.getValue() + ", 密钥:" + securityKey);
             Message request = new Message(Constant.SRV_EXCHANGE_PASSWORD);
 
-            request.add(Constant.SECURITY_ALGORITHM,
-                    SecurityUtils.encrypt(SerialUtils.serialObject(securityAlgorithm), serverPublicKey));
-            request.add(Constant.SECURITY_KEY,
-                    SecurityUtils.encrypt(SerialUtils.serialObject(securityKey), serverPublicKey));
+            request.add(Constant.SECURITY_ALGORITHM, encryptWithRsa(securityAlgorithm, serverPublicKey));
+            request.add(Constant.SECURITY_KEY, encryptWithRsa(securityKey, serverPublicKey));
 
             if (securityAlgorithm.isNeedIv()) {
                 byte[] securityIv = StringUtils.randomByte(securityAlgorithm.getIvLength());
                 socket.set(Constant.SECURITY_IV, securityIv);
-                request.add(Constant.SECURITY_IV, SecurityUtils.encrypt(securityIv, serverPublicKey));
+                request.add(Constant.SECURITY_IV, encryptWithRsa(securityIv, serverPublicKey));
             }
             socket.send(request);
         } catch (SerialException e) {
@@ -66,10 +64,8 @@ public class ExchangePassword extends BaseService implements ISocketService {
                 if (bSecurityAlgorithm == null || bSecurityKey == null) {
                     throw new SecurityException("缺少加密信息");
                 }
-                SecurityAlgorithm securityAlgorithm = SerialUtils.serialObject(
-                        SecurityUtils.decrypt(bSecurityAlgorithm, GlobalSettings.privateKey));
-                String securityKey = SerialUtils.serialObject(
-                        SecurityUtils.decrypt(bSecurityKey, GlobalSettings.privateKey));
+                SecurityAlgorithm securityAlgorithm = decryptWithRsa(bSecurityAlgorithm, GlobalSettings.privateKey);
+                String securityKey = decryptWithRsa(bSecurityKey, GlobalSettings.privateKey);
 
                 socket.set(Constant.SECURITY_ALGORITHM, securityAlgorithm);
                 socket.set(Constant.SECURITY_KEY, securityKey);
@@ -78,7 +74,7 @@ public class ExchangePassword extends BaseService implements ISocketService {
                     if (bSecurityIv == null) {
                         throw new SecurityException("加密方式缺少向量");
                     }
-                    byte[] securityIv = SecurityUtils.decrypt(bSecurityIv, GlobalSettings.privateKey);
+                    byte[] securityIv = decryptWithRsa(bSecurityIv, GlobalSettings.privateKey);
                     socket.set(Constant.SECURITY_IV, securityIv);
                 }
                 log.debug("收到会话密钥，类型:" + securityAlgorithm + ", 密钥:" + securityKey);

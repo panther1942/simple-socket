@@ -66,11 +66,11 @@ public class FileUploadPreService extends BaseService implements ISocketService 
                     IServer server = getBean(IServer.class);
                     server.addToken(socket, token);
                     message.add(Constant.TOKEN, token);
-                    message.add(Constant.RECEIVE_STATUS, Constant.SUCCESS);
+                    message.add(Constant.RECEIVE_STATUS, true);
                     // 先不管断点续传
                     info.setFilePos(0);
                 } else {
-                    message.add(Constant.RECEIVE_STATUS, Constant.FAILED);
+                    message.add(Constant.RECEIVE_STATUS, false);
                 }
                 socket.send(message);
             } catch (BeanException e) {
@@ -118,8 +118,8 @@ public class FileUploadPreService extends BaseService implements ISocketService 
     }
 
     private void upload(ISocket socket, Message message) {
-        String status = message.get(Constant.RECEIVE_STATUS);
-        if (Constant.SUCCESS.equals(status)) {
+        boolean status = message.get(Constant.RECEIVE_STATUS);
+        if (status) {
             try {
                 new FileSender(socket, message);
             } catch (Exception e) {
