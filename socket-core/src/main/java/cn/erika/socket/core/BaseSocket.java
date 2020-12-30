@@ -129,7 +129,12 @@ public abstract class BaseSocket implements ISocket {
                 byte[] securityIv = get(Constant.SECURITY_IV);
                 data = SecurityUtils.decrypt(data, securityKey, securityAlgorithm, securityIv);
             }
-            Message message = SerialUtils.serialObject(data);
+            Message message = SerialUtils.serialObject(data, Message.class);
+            if (message == null) {
+//                throw new RuntimeException();
+                System.err.println("message为空！！！");
+                return;
+            }
             if (isEncrypt) {
                 byte[] publicKey = get(Constant.PUBLIC_KEY);
                 DigitalSignatureAlgorithm digitalSignatureAlgorithm = get(Constant.DIGITAL_SIGNATURE_ALGORITHM);

@@ -13,20 +13,25 @@ import cn.erika.util.security.*;
 import cn.erika.util.string.SerialUtils;
 import cn.erika.util.string.StringUtils;
 
+import java.util.Base64;
+
 @Component(Constant.SRV_EXCHANGE_PASSWORD)
 public class ExchangePassword extends BaseService implements ISocketService {
 
     @Override
     public void client(ISocket socket, Message message) {
         try {
-            byte[] serverPublicKey = message.get(Constant.PUBLIC_KEY);
+            byte[] serverPublicKey = decoder.decode((byte[]) message.get(Constant.PUBLIC_KEY));
             if (serverPublicKey == null) {
                 throw new SecurityException("缺少公钥信息");
             }
-            DigitalSignatureAlgorithm digitalSignatureAlgorithm = message.get(Constant.DIGITAL_SIGNATURE_ALGORITHM);
+            DigitalSignatureAlgorithm digitalSignatureAlgorithm = DigitalSignatureAlgorithm.valueOf(
+                    message.get(Constant.DIGITAL_SIGNATURE_ALGORITHM));
+
             byte[] serverPublicKeySign = MessageDigest.sum(serverPublicKey, MessageDigestAlgorithm.MD5);
-            log.debug("获取服务器公钥 签名（MD5）: " +
+            log.debug("获取服务器公钥 签名信息（MD5）: " +
                     StringUtils.byteToHexString(serverPublicKeySign) + "\n签名算法: " + digitalSignatureAlgorithm);
+
             socket.set(Constant.DIGITAL_SIGNATURE_ALGORITHM, digitalSignatureAlgorithm);
             socket.set(Constant.PUBLIC_KEY, serverPublicKey);
 
@@ -38,8 +43,7 @@ public class ExchangePassword extends BaseService implements ISocketService {
 
             log.debug("发送会话密钥，类型:" + securityAlgorithm.getValue() + ", 密钥:" + securityKey);
             Message request = new Message(Constant.SRV_EXCHANGE_PASSWORD);
-
-            request.add(Constant.SECURITY_ALGORITHM, encryptWithRsa(securityAlgorithm, serverPublicKey));
+            request.add(Constant.SECURITY_ALGORITHM, encryptWithRsa(securityAlgorithm.getValue(), serverPublicKey));
             request.add(Constant.SECURITY_KEY, encryptWithRsa(securityKey, serverPublicKey));
 
             if (securityAlgorithm.isNeedIv()) {
@@ -64,8 +68,9 @@ public class ExchangePassword extends BaseService implements ISocketService {
                 if (bSecurityAlgorithm == null || bSecurityKey == null) {
                     throw new SecurityException("缺少加密信息");
                 }
-                SecurityAlgorithm securityAlgorithm = decryptWithRsa(bSecurityAlgorithm, GlobalSettings.privateKey);
-                String securityKey = decryptWithRsa(bSecurityKey, GlobalSettings.privateKey);
+                SecurityAlgorithm securityAlgorithm = SecurityAlgorithm.valueOf(
+                        decryptWithRsaToString(bSecurityAlgorithm, GlobalSettings.privateKey));
+                String securityKey = decryptWithRsaToString(bSecurityKey, GlobalSettings.privateKey);
 
                 socket.set(Constant.SECURITY_ALGORITHM, securityAlgorithm);
                 socket.set(Constant.SECURITY_KEY, securityKey);
@@ -87,10 +92,10 @@ public class ExchangePassword extends BaseService implements ISocketService {
             } catch (SerialException e) {
                 log.error("序列化错误: " + e.getMessage());
             } catch (SecurityException e) {
-                throw new AuthenticateException("加密协商失败");
+                throw new AuthenticateException(e.getMessage());
             }
         } catch (AuthenticateException e) {
-            log.error("加密协商失败");
+            log.error("加密协商失败", e);
             Message reply = new Message(Constant.SRV_EXCHANGE_RESULT);
             reply.add(Constant.RESULT, false);
             reply.add(Constant.TEXT, e.getMessage());

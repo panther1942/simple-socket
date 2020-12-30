@@ -40,7 +40,7 @@ public class FileUploadService extends BaseService implements ISocketService {
                 System.arraycopy(data, 0, tmp, 0, len);
                 Message msg = new Message(Constant.SRV_UPLOAD);
                 msg.add(Constant.FILE_POS, pos);
-                msg.add(Constant.BIN, Base64.getEncoder().encodeToString(tmp));
+                msg.add(Constant.BIN, encoder.encodeToString(tmp));
                 msg.add(Constant.LEN, tmp.length);
                 pos += len;
 //                log.debug("本次发送长度: " + len);
@@ -73,7 +73,7 @@ public class FileUploadService extends BaseService implements ISocketService {
         try (RandomAccessFile out = new RandomAccessFile(file, "rwd")) {
             log.info("当前进度: " + df.format((filePos + len) / (double) fileLength));
             out.seek(filePos);
-            out.write(Base64.getDecoder().decode(data), 0, len);
+            out.write(decoder.decode(data), 0, len);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

@@ -22,7 +22,7 @@ public class ExchangeToken extends BaseService implements ISocketService {
         if (message == null) {
             message = new Message(Constant.SRV_EXCHANGE_TOKEN);
             message.add(Constant.TOKEN, socket.get(Constant.TOKEN));
-            message.add(Constant.PUBLIC_KEY, GlobalSettings.publicKey);
+            message.add(Constant.PUBLIC_KEY, encoder.encodeToString(GlobalSettings.publicKey));
             socket.send(message);
         } else {
             boolean result = message.get(Constant.RESULT);
@@ -38,8 +38,9 @@ public class ExchangeToken extends BaseService implements ISocketService {
                     }
                     byte[] privateKey = GlobalSettings.privateKey;
                     try {
-                        SecurityAlgorithm securityAlgorithm = decryptWithRsa(bSecurityAlgorithm, privateKey);
-                        String securityKey = decryptWithRsa(bSecurityKey, privateKey);
+                        SecurityAlgorithm securityAlgorithm = SecurityAlgorithm.valueOf(
+                                decryptWithRsaToString(bSecurityAlgorithm, privateKey));
+                        String securityKey = decryptWithRsaToString(bSecurityKey, privateKey);
                         socket.set(Constant.SECURITY_ALGORITHM, securityAlgorithm);
                         socket.set(Constant.SECURITY_KEY, securityKey);
 
@@ -80,13 +81,13 @@ public class ExchangeToken extends BaseService implements ISocketService {
             if (message != null) {
                 IServer server = getBean(IServer.class);
                 String token = message.get(Constant.TOKEN);
-                byte[] publicKey = message.get(Constant.PUBLIC_KEY);
+                byte[] publicKey = decoder.decode((String) message.get(Constant.PUBLIC_KEY));
                 try {
                     ISocket parent = server.checkToken(token, publicKey);
-//                    boolean isAuthenticated = parent.get(Constant.AUTHENTICATED);
-//                    if (!isAuthenticated) {
-//                        throw new AuthenticateException("未经认证的连接");
-//                    }
+                    boolean isAuthenticated = parent.get(Constant.AUTHENTICATED);
+                    if (!isAuthenticated) {
+                        throw new AuthenticateException("未经认证的连接");
+                    }
                     log.debug("认证通过");
                     socket.set(Constant.PARENT_SOCKET, parent);
                     socket.set(Constant.PUBLIC_KEY, publicKey);
@@ -101,7 +102,7 @@ public class ExchangeToken extends BaseService implements ISocketService {
                     socket.set(Constant.SECURITY_KEY, securityKey);
 
                     Message reply = new Message(Constant.SRV_EXCHANGE_TOKEN);
-                    reply.add(Constant.SECURITY_ALGORITHM, encryptWithRsa(securityAlgorithm, publicKey));
+                    reply.add(Constant.SECURITY_ALGORITHM, encryptWithRsa(securityAlgorithm.getValue(), publicKey));
                     reply.add(Constant.SECURITY_KEY, encryptWithRsa(securityKey, publicKey));
 
                     if (securityAlgorithm.isNeedIv()) {

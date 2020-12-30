@@ -57,6 +57,7 @@ public class TcpSocket extends BaseSocket implements Runnable {
 
     private void init() throws IOException {
         set(Constant.LINK_TIME, new Date());
+        this.socket.setTcpNoDelay(true);
         this.charset = GlobalSettings.charset;
         this.reader = new TcpReader(charset);
         this.in = socket.getInputStream();

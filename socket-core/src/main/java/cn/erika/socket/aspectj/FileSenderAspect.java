@@ -43,7 +43,8 @@ public class FileSenderAspect {
 
 //    upload /home/erika/Downloads/config.json config.json
 //    upload /home/erika/Downloads/aspectj-1.9.6.jar aspectj.jar
-//    upload /home/erika/Downloads/config.json config.json
+//    upload /home/erika/Downloads/81053568_0.jpg 81053568_0.jpg
+//    upload /home/erika/Downloads/apipost_3.2.3-linux-x64.tar.xz apipost.tar.xz
 
     //    upload /home/erika/Downloads/phpMyAdmin-5.0.4-all-languages.zip phpMyAdmin.zip
     //    upload /home/erika/Downloads/linux_history.png linux_history.png
@@ -63,5 +64,4 @@ public class FileSenderAspect {
         return result;
     }
 
-//    upload /home/erika/Downloads/apipost_3.2.3-linux-x64.tar.xz apipost.tar.xz
 }

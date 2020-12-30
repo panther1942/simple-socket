@@ -2,6 +2,7 @@ package cn.erika;
 
 import cn.erika.service.DemoServiceImpl;
 import cn.erika.service.IDemoService;
+import cn.erika.util.SerialUtils;
 import cn.erika.util.log.Logger;
 import cn.erika.util.log.LoggerFactory;
 import cn.erika.util.security.MessageDigest;
@@ -16,6 +17,8 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CoreTest {
 
@@ -67,6 +70,47 @@ public class CoreTest {
         for (int i = 0; i < sign.length(); i++) {
             char c = sign.charAt(i);
             System.out.println(Integer.parseInt(String.valueOf(c), 16));
+        }
+    }
+
+    @Test
+    public void testSerial(){
+
+        File srcFile = new File("/home/erika/Downloads/81053568_0.jpg");
+        File destFile = new File("downloads/81053568_0.jpg");
+        try {
+            if (destFile.exists()) {
+                destFile.delete();
+            }
+            if(!destFile.getParentFile().exists()){
+                destFile.getParentFile().mkdirs();
+            }
+            destFile.createNewFile();
+        } catch (IOException e) {
+            System.err.println(destFile.getAbsolutePath());
+            e.printStackTrace();
+        }
+        try (RandomAccessFile fileReader = new RandomAccessFile(srcFile, "r");
+             RandomAccessFile fileWriter = new RandomAccessFile(destFile, "rw")) {
+            System.out.println(MessageDigest.crc32Sum(srcFile));
+            int len = 0;
+            byte[] tmp = new byte[4096];
+            while ((len = fileReader.read(tmp)) > -1) {
+                Map<String, Object> srcPak = new HashMap<>();
+                srcPak.put("LEN", len);
+                srcPak.put("BIN", tmp);
+
+                byte[] data = SerialUtils.serialObject(srcPak);
+                Map<String, Object> destPak = SerialUtils.serialObject(data);
+                int len2 = (int) destPak.get("LEN");
+                byte[] tmp2 = (byte[]) destPak.get("BIN");
+                fileWriter.write(tmp2, 0, len2);
+            }
+            System.out.println(MessageDigest.crc32Sum(destFile));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
