@@ -2,6 +2,7 @@ package cn.erika.socket.aspectj;
 
 import cn.erika.config.Constant;
 import cn.erika.socket.core.ISocket;
+import cn.erika.socket.core.component.FileInfo;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.handler.bio.FileSender;
 import cn.erika.util.log.Logger;
@@ -56,11 +57,16 @@ public class FileSenderAspect {
         Object[] params = new Object[2];
         params[0] = socket;
         params[1] = message;
+
+        FileInfo info = message.get(Constant.FILE_INFO);
+        long len = info.getFileLength();
         Date start = new Date();
         Object result = joinPoint.proceed(params);
         Date end = new Date();
 
-        log.info(String.format("传输用时: %d 秒", (end.getTime() - start.getTime()) / 1000));
+        double time = ((double) end.getTime() - start.getTime()) / 1000;
+        double speed = len / time / 1024;
+        log.info(String.format("传输用时: %f 秒, 平均速率: %f kb/s", time, speed));
         return result;
     }
 
