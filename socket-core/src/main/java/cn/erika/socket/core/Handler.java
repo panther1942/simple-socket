@@ -4,16 +4,16 @@ import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.component.Message;
 
 public interface Handler {
-    public void init(ISocket socket);
+    void init(ISocket socket);
 
-    public void onMessage(ISocket socket, Message message) throws BeanException;
+    void onMessage(ISocket socket, Message message) throws BeanException;
 
-    public void onError(ISocket socket, Throwable throwable);
+    void onError(ISocket socket, Throwable throwable);
 
-    public void onClose(ISocket socket);
+    void onClose(ISocket socket);
 
-    public void close();
+    void close();
 
-    public boolean isClosed();
+    boolean isClosed();
 
 }

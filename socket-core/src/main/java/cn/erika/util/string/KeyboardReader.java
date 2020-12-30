@@ -5,9 +5,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 
+/**
+ * 从键盘读取字符的工具类
+ */
 public class KeyboardReader {
+    // 获取本地字符集作为输入流的默认字符集 Linux=UTF-8 Win=GBK
     private static final String LOCAL_CODE = System.getProperty("file.encoding");
-
+    // 单例模式 避免多实例冲突
     private static KeyboardReader readerKB;
     // 输入对象，读取键盘属于读取字符
     private BufferedReader reader;

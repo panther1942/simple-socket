@@ -37,7 +37,7 @@ public class CliApplication extends SocketApplication implements Runnable {
 
     static {
         LoggerFactory.register(new ConsoleLogger());
-        LoggerFactory.register(new FileLogger(GlobalSettings.logDir, GlobalSettings.logName));
+        LoggerFactory.register(new FileLogger(GlobalSettings.logDir, GlobalSettings.logName, GlobalSettings.charset));
 //        LoggerFactory.ignore(FileUploadService.class);
     }
 

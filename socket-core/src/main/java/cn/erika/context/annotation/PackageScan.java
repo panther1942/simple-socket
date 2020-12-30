@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 // 用来记录需要扫描的包名
 public @interface PackageScan {
-    public String[] value() default {};
+    String[] value() default {};
 }

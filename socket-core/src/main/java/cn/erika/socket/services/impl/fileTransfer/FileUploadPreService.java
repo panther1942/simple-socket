@@ -14,7 +14,7 @@ import cn.erika.socket.exception.FileException;
 import cn.erika.socket.handler.IServer;
 import cn.erika.socket.handler.bio.FileSender;
 import cn.erika.socket.services.ISocketService;
-import cn.erika.util.security.MessageDigest;
+import cn.erika.util.security.MessageDigestUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -94,7 +94,7 @@ public class FileUploadPreService extends BaseService implements ISocketService 
                 log.info("文件完整路径: " + file.getAbsolutePath() + " 文件名: " + filename + " 文件长度: " + file.length());
             }
             log.info("计算文件校验码");
-            long checkCode = MessageDigest.crc32Sum(file);
+            long checkCode = MessageDigestUtils.crc32Sum(file);
             log.info("文件校验码: " + checkCode);
 
             Message request = new Message(Constant.SRV_PRE_UPLOAD);

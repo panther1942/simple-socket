@@ -7,11 +7,14 @@ import cn.erika.socket.core.component.Message;
 
 import java.lang.reflect.Method;
 
+/**
+ * 自动根据socket的type选择方法
+ */
 public class ServiceSelector implements BeanSelector {
     private String type;
 
-    public ServiceSelector(String type) {
-        this.type = type;
+    public ServiceSelector(ISocket socket) {
+        this.type = socket.get(Constant.TYPE);
     }
 
     @Override

@@ -7,7 +7,7 @@ import cn.erika.socket.core.component.LinkManager;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.exception.AuthenticateException;
 import cn.erika.socket.exception.TokenException;
-import cn.erika.util.security.MessageDigest;
+import cn.erika.util.security.MessageDigestUtils;
 
 import java.net.SocketAddress;
 import java.net.SocketException;
@@ -46,8 +46,8 @@ public abstract class BaseServer extends BaseHandler implements Runnable, IServe
             throw new TokenException("token无效");
         } else {
             byte[] pubKey = socket.get(Constant.PUBLIC_KEY);
-            long srcToken = MessageDigest.crc32Sum(pubKey);
-            long targetToken = MessageDigest.crc32Sum(publicKey);
+            long srcToken = MessageDigestUtils.crc32Sum(pubKey);
+            long targetToken = MessageDigestUtils.crc32Sum(publicKey);
             if (srcToken == targetToken) {
                 tokenList.remove(token);
                 return socket;

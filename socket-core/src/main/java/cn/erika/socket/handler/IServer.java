@@ -7,19 +7,19 @@ import java.net.SocketAddress;
 
 public interface IServer {
 
-    public void addToken(ISocket socket, String token) throws AuthenticateException;
+    void addToken(ISocket socket, String token) throws AuthenticateException;
 
-    public ISocket checkToken(String token, byte[] publicKey) throws AuthenticateException;
+    ISocket checkToken(String token, byte[] publicKey) throws AuthenticateException;
 
-    public void status();
+    void status();
 
-    public void send(String uid, String message);
+    void send(String uid, String message);
 
-    public void listen();
+    void listen();
 
-    public void close();
+    void close();
 
-    public boolean isClosed();
+    boolean isClosed();
 
-    public SocketAddress getLocalAddress();
+    SocketAddress getLocalAddress();
 }

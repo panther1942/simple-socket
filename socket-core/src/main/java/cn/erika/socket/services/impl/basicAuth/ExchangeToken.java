@@ -10,57 +10,65 @@ import cn.erika.socket.core.component.Message;
 import cn.erika.socket.exception.AuthenticateException;
 import cn.erika.socket.handler.IServer;
 import cn.erika.socket.services.ISocketService;
-import cn.erika.util.exception.SerialException;
 import cn.erika.util.security.SecurityAlgorithm;
 import cn.erika.util.string.StringUtils;
 
+/**
+ * 基础安全组件 用于确保通信安全
+ * <p>
+ * 这一步用于在已有的连接上新开子连接的认证
+ */
 @Component(Constant.SRV_EXCHANGE_TOKEN)
 public class ExchangeToken extends BaseService implements ISocketService {
 
     @Override
     public void client(ISocket socket, Message message) {
+        // 认证由客户端发起 不能被动发起
         if (message == null) {
             message = new Message(Constant.SRV_EXCHANGE_TOKEN);
+            // 发送token和公钥 供服务器识别身份
             message.add(Constant.TOKEN, socket.get(Constant.TOKEN));
             message.add(Constant.PUBLIC_KEY, encoder.encodeToString(GlobalSettings.publicKey));
             socket.send(message);
         } else {
-            boolean result = message.get(Constant.RESULT);
+            Boolean result = message.get(Constant.RESULT);
             try {
-                if (result) {
+                if (result != null && result) {
                     log.info("加密协商成功");
+                    // 这里的对称加密由服务器定
                     byte[] bSecurityAlgorithm = message.get(Constant.SECURITY_ALGORITHM);
                     byte[] bSecurityKey = message.get(Constant.SECURITY_KEY);
                     byte[] bSecurityIv = message.get(Constant.SECURITY_IV);
 
                     if (bSecurityAlgorithm == null || bSecurityKey == null) {
-                        throw new SecurityException("缺少加密信息");
+                        throw new AuthenticateException("缺少加密信息");
                     }
                     byte[] privateKey = GlobalSettings.privateKey;
-                    try {
-                        SecurityAlgorithm securityAlgorithm = SecurityAlgorithm.valueOf(
-                                decryptWithRsaToString(bSecurityAlgorithm, privateKey));
-                        String securityKey = decryptWithRsaToString(bSecurityKey, privateKey);
-                        socket.set(Constant.SECURITY_ALGORITHM, securityAlgorithm);
-                        socket.set(Constant.SECURITY_KEY, securityKey);
+                    // 算法
+                    SecurityAlgorithm securityAlgorithm = SecurityAlgorithm.valueOf(
+                            decryptWithRsaToString(bSecurityAlgorithm, privateKey));
+                    // 密钥
+                    String securityKey = decryptWithRsaToString(bSecurityKey, privateKey);
 
-                        if (securityAlgorithm.isNeedIv()) {
-                            if (bSecurityIv == null) {
-                                throw new SecurityException("加密方式缺少向量");
-                            }
-                            byte[] securityIv = decryptWithRsa(bSecurityIv, privateKey);
-                            socket.set(Constant.SECURITY_IV, securityIv);
+                    socket.set(Constant.SECURITY_ALGORITHM, securityAlgorithm);
+                    socket.set(Constant.SECURITY_KEY, securityKey);
+
+                    // 向量
+                    if (securityAlgorithm.isNeedIv()) {
+                        if (bSecurityIv == null) {
+                            throw new AuthenticateException("加密方式缺少向量");
                         }
-                        Message reply = new Message(Constant.SRV_EXCHANGE_RESULT);
-                        reply.add(Constant.RESULT, true);
-                        reply.add(Constant.TEXT, "加密协商成功");
-                        socket.send(reply);
-                        socket.set(Constant.ENCRYPT, true);
-                    } catch (SerialException e) {
-                        log.error("序列化错误: " + e.getMessage());
-                    } catch (SecurityException e) {
-                        throw new AuthenticateException("加密协商失败: " + e.getMessage());
+                        byte[] securityIv = decryptWithRsa(bSecurityIv, privateKey);
+                        socket.set(Constant.SECURITY_IV, securityIv);
                     }
+
+                    // 告知协商结果
+                    Message reply = new Message(Constant.SRV_EXCHANGE_RESULT);
+                    reply.add(Constant.RESULT, true);
+                    reply.add(Constant.TEXT, "加密协商成功");
+                    socket.send(reply);
+                    // 设置连接的加密flag
+                    socket.set(Constant.ENCRYPT, true);
                 } else {
                     throw new AuthenticateException("认证失败");
                 }
@@ -70,6 +78,7 @@ public class ExchangeToken extends BaseService implements ISocketService {
                 reply.add(Constant.RESULT, false);
                 reply.add(Constant.TEXT, e.getMessage());
                 socket.send(reply);
+                // 协商失败则告知后断开连接
                 socket.close();
             }
         }
@@ -106,7 +115,7 @@ public class ExchangeToken extends BaseService implements ISocketService {
                     reply.add(Constant.SECURITY_KEY, encryptWithRsa(securityKey, publicKey));
 
                     if (securityAlgorithm.isNeedIv()) {
-                        securityIv = StringUtils.randomByte(securityAlgorithm.getIvLength());
+                        securityIv = StringUtils.randomString(securityAlgorithm.getIvLength()).getBytes(charset);
                         socket.set(Constant.SECURITY_IV, securityIv);
                         reply.add(Constant.SECURITY_IV, encryptWithRsa(securityIv, publicKey));
                     }
@@ -119,12 +128,10 @@ public class ExchangeToken extends BaseService implements ISocketService {
                     reply.add(Constant.TEXT, e.getMessage());
                     socket.send(reply);
                     socket.close();
-                } catch (SerialException e) {
-                    log.error("序列化错误: " + e.getMessage());
                 }
             }
         } catch (BeanException e) {
-            e.printStackTrace();
+            log.error("内部错误 无法获取服务器实例: ");
         }
     }
 }

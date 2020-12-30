@@ -5,6 +5,7 @@ import cn.erika.config.GlobalSettings;
 import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.component.DataInfo;
 import cn.erika.socket.core.component.Message;
+import cn.erika.socket.exception.UnsupportedAlgorithmException;
 import cn.erika.util.compress.GZIP;
 import cn.erika.util.exception.CompressException;
 import cn.erika.util.exception.SerialException;
@@ -17,6 +18,7 @@ import cn.erika.util.string.StringUtils;
 import java.io.IOException;
 import java.net.SocketException;
 import java.nio.charset.Charset;
+import java.security.InvalidKeyException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -78,7 +80,7 @@ public abstract class BaseSocket implements ISocket {
             info.setPos(0);
             info.setLen(data.length);
             info.setData(data);
-            String sign = StringUtils.byteToHexString(MessageDigest.sum(info.getData(), MessageDigestAlgorithm.MD5));
+            String sign = StringUtils.byte2HexString(MessageDigestUtils.sum(info.getData(), MessageDigestAlgorithm.MD5));
             info.setSign(sign);
 //            log.debug("计算数据签名: " + sign);
             send(info);
@@ -86,6 +88,12 @@ public abstract class BaseSocket implements ISocket {
             log.error("压缩时出现错误: " + e.getMessage());
         } catch (SerialException e) {
             log.error("序列化出现错误: " + e.getMessage());
+        } catch (InvalidKeyException e) {
+            log.error("公钥无效");
+            close();
+        } catch (UnsupportedAlgorithmException e) {
+            log.error(e.getMessage(), e);
+            close();
         }
     }
 
@@ -107,7 +115,7 @@ public abstract class BaseSocket implements ISocket {
             byte[] data = info.getData();
             String sign = info.getSign();
 //            log.debug("数据长度: " + info.getLen());
-            String targetSign = StringUtils.byteToHexString(MessageDigest.sum(data, MessageDigestAlgorithm.MD5));
+            String targetSign = StringUtils.byte2HexString(MessageDigestUtils.sum(data, MessageDigestAlgorithm.MD5));
 //            log.debug("原始数据签名: " + sign);
 //            log.debug("计算数据签名: " + targetSign);
             if (!sign.equals(targetSign)) {
@@ -142,7 +150,7 @@ public abstract class BaseSocket implements ISocket {
                 message.del(Constant.DIGITAL_SIGNATURE);
                 if (!SecurityUtils.verify(message.toString().getBytes(charset),
                         rsaSign, publicKey, digitalSignatureAlgorithm)) {
-                    throw new SecurityException("验签失败");
+                    throw new InvalidKeyException("验签失败");
                 }
                 message.add(Constant.DIGITAL_SIGNATURE, rsaSign);
             }
@@ -151,8 +159,11 @@ public abstract class BaseSocket implements ISocket {
             log.error("解压缩时出现错误: " + e.getMessage());
         } catch (SerialException e) {
             log.error("反序列化出现错误: " + e.getMessage());
-        } catch (SecurityException e) {
-            log.error("签名验证失败", e);
+        } catch (InvalidKeyException e) {
+            log.error("签名验证失败");
+            close();
+        } catch (UnsupportedAlgorithmException e) {
+            log.error(e.getMessage(), e);
             close();
         }
     }

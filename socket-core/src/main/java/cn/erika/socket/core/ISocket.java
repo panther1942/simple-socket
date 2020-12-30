@@ -7,23 +7,23 @@ import java.io.IOException;
 import java.net.SocketAddress;
 
 public interface ISocket {
-    public void send(Message message);
+    void send(Message message);
 
-    public void receive(DataInfo info);
+    void receive(DataInfo info);
 
-    public boolean isClosed();
+    boolean isClosed();
 
-    public void close();
+    void close();
 
-    public SocketAddress getRemoteAddress();
+    SocketAddress getRemoteAddress();
 
-    public SocketAddress getLocalAddress();
+    SocketAddress getLocalAddress();
 
-    public <T> T set(String k, Object v);
+    <T> T set(String k, Object v);
 
-    public <T> T get(String k);
+    <T> T get(String k);
 
-    public <T> T remove(String k);
+    <T> T remove(String k);
 
-    public Handler getHandler();
+    Handler getHandler();
 }

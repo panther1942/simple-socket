@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 // 用来记录服务名称
 public @interface ServiceMapping {
-    public String value() default "";
+    String value() default "";
 }

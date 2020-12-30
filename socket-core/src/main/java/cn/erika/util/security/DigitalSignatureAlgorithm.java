@@ -1,5 +1,8 @@
 package cn.erika.util.security;
 
+/**
+ * 数字签名算法的枚举类 配合不对称加密算法使用
+ */
 public enum DigitalSignatureAlgorithm {
     MD2withRSA("MD2withRSA"),
     MD5withRSA("MD5withRSA"),

@@ -1,5 +1,10 @@
 package cn.erika.util.security;
 
+/**
+ * 消息签名算法的枚举类
+ * 建议非重要信息使用MD5或者CRC32
+ * CRC32不是消息签名 只是确保消息完整
+ */
 public enum MessageDigestAlgorithm {
     MD5("MD5"),
     SHA1("SHA1"),
@@ -16,14 +21,5 @@ public enum MessageDigestAlgorithm {
 
     public String getValue() {
         return value;
-    }
-
-    public static MessageDigestAlgorithm getByName(String name) {
-        for (MessageDigestAlgorithm algorithm : MessageDigestAlgorithm.values()) {
-            if (algorithm.value.equals(name)) {
-                return algorithm;
-            }
-        }
-        return null;
     }
 }

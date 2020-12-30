@@ -1,5 +1,8 @@
 package cn.erika.util.security;
 
+/**
+ * 对称加密算法的枚举类
+ */
 public enum SecurityAlgorithm {
     AES128ECB("AES128ECB", "AES", "ECB", 128, false, 0),
     AES192ECB("AES192ECB", "AES", "ECB", 192, false, 0),
@@ -20,11 +23,17 @@ public enum SecurityAlgorithm {
     TDES168CBC("TDES168CBC", "TripleDES", "CBC", 168, true, 8),
     TDES168CTR("TDES168CTR", "TripleDES", "CTR", 168, true, 8);
 
+    // 算法名称
     private String value;
+    // 算法类型
     private String name;
+    // 算法模式
     private String mode;
+    // 加密位数
     private int securityLength;
+    // 是否需要向量
     private boolean needIv;
+    // 向量要求长度
     private int ivLength;
 
     SecurityAlgorithm(String value, String name, String mode, int securityLength, boolean needIv, int ivLength) {
@@ -58,17 +67,5 @@ public enum SecurityAlgorithm {
 
     public int getIvLength() {
         return ivLength;
-    }
-
-    public static SecurityAlgorithm getByName(String name) {
-        if (name == null) {
-            return null;
-        }
-        for (SecurityAlgorithm algorithm : SecurityAlgorithm.values()) {
-            if (algorithm.getValue().equals(name)) {
-                return algorithm;
-            }
-        }
-        return null;
     }
 }

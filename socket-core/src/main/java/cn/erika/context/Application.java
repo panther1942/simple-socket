@@ -22,7 +22,6 @@ public abstract class Application {
     // 运行时数据存放区 可以用redis代替
     private static Map<String, Object> storage = new ConcurrentHashMap<>();
 
-    private static Application app;
     // bean工厂 用于存储需要缓存的bean
     protected BeanFactory beanFactory = BeanFactory.getInstance();
 
@@ -37,7 +36,7 @@ public abstract class Application {
             Thread thread = Thread.currentThread();
             thread.setName("main");
             printSysInfo();
-            app = clazz.newInstance();
+            Application app = clazz.newInstance();
             try {
                 app.beforeStartup();
                 app.scanPackage(clazz);

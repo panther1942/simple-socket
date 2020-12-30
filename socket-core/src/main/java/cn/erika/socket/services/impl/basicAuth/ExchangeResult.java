@@ -7,6 +7,11 @@ import cn.erika.socket.core.ISocket;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.services.ISocketService;
 
+/**
+ * 基础安全组件 用于确保通信安全
+ * <p>
+ * 这一步用于通知协商结果
+ */
 @Component(Constant.SRV_EXCHANGE_RESULT)
 public class ExchangeResult extends BaseService implements ISocketService {
 
@@ -21,13 +26,16 @@ public class ExchangeResult extends BaseService implements ISocketService {
     }
 
     private void deal(ISocket socket, Message message) {
-        boolean result = message.get(Constant.RESULT);
+        Boolean result = message.get(Constant.RESULT);
         String msg = message.get(Constant.TEXT);
-        if (result) {
+        if (result != null && result) {
+            // 协商成功则设置连接的加密flag
             log.info(msg);
             socket.set(Constant.ENCRYPT, true);
         } else {
-            throw new SecurityException(msg);
+            // 协商失败 则关闭连接
+            log.error(msg);
+            socket.close();
         }
     }
 }

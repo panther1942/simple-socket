@@ -9,14 +9,14 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 // 标记需要使用Application管理实例的组件
 public @interface Component {
-    public String value() default "";
+    String value() default "";
 
-    public Type type() default Type.SingleTon;
+    Type type() default Type.SingleTon;
 
-    public boolean ignore() default false;
+    boolean ignore() default false;
 
-    public enum Type {
+    enum Type {
         SingleTon(),
-        ProtoType();
+        ProtoType()
     }
 }

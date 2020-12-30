@@ -10,11 +10,10 @@ import cn.erika.socket.core.ISocket;
 import cn.erika.socket.core.component.FileInfo;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.services.ISocketService;
-import cn.erika.util.security.MessageDigest;
+import cn.erika.util.security.MessageDigestUtils;
 
 import java.io.*;
 import java.text.DecimalFormat;
-import java.util.Base64;
 
 @Component(Constant.SRV_UPLOAD)
 public class FileUploadService extends BaseService implements ISocketService {
@@ -43,7 +42,6 @@ public class FileUploadService extends BaseService implements ISocketService {
                 msg.add(Constant.BIN, encoder.encodeToString(tmp));
                 msg.add(Constant.LEN, tmp.length);
                 pos += len;
-//                log.debug("本次发送长度: " + len);
                 log.info("进度: " + df.format(pos / (double) file.length()));
                 socket.send(msg);
             }
@@ -64,8 +62,8 @@ public class FileUploadService extends BaseService implements ISocketService {
         FileInfo info = Application.get(token);
         String filename = info.getFilename();
         long fileLength = info.getFileLength();
-        long filePos = message.get(Constant.FILE_POS);
-        int len = message.get(Constant.LEN);
+        Long filePos = message.get(Constant.FILE_POS);
+        Integer len = message.get(Constant.LEN);
         String data = message.get(Constant.BIN);
 
         File file = new File(BASE_DIR + filename);
@@ -74,10 +72,12 @@ public class FileUploadService extends BaseService implements ISocketService {
             log.info("当前进度: " + df.format((filePos + len) / (double) fileLength));
             out.seek(filePos);
             out.write(decoder.decode(data), 0, len);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
+            Message error = new Message(Constant.SRV_TEXT);
+            error.add(Constant.TEXT, e.getMessage());
+            socket.send(error);
+            socket.close();
         }
 
         if (filePos + len >= fileLength) {
@@ -86,7 +86,7 @@ public class FileUploadService extends BaseService implements ISocketService {
                 long checkCode = info.getCheckCode();
                 log.info("文件位置: " + file.getAbsolutePath());
                 BaseSocket parent = socket.get(Constant.PARENT_SOCKET);
-                long targetCode = MessageDigest.crc32Sum(file);
+                long targetCode = MessageDigestUtils.crc32Sum(file);
                 System.out.println("文件校验码: " + targetCode);
                 if (checkCode == targetCode) {
                     log.info("数据完整");
@@ -95,10 +95,8 @@ public class FileUploadService extends BaseService implements ISocketService {
                     log.warn("数据不完整");
                     parent.send(new Message(Constant.SRV_POST_UPLOAD, "接收失败"));
                 }
-            } catch (SecurityException e) {
-                e.printStackTrace();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("校验出错: " + e.getMessage());
             }
         }
     }

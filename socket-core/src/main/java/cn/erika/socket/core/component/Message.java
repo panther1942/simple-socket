@@ -29,7 +29,11 @@ public class Message implements Serializable {
 
     @SuppressWarnings("unchecked")
     public <T> T get(String key) {
-        return (T) payload.get(key);
+        if (payload.containsKey(key)) {
+            return (T) payload.get(key);
+        } else {
+            return null;
+        }
     }
 
     public void del(String key) {

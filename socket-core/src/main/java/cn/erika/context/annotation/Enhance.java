@@ -11,5 +11,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 // 用来标记要使用的增强器
 public @interface Enhance {
-    public Class<? extends Advise> value();
+    Class<? extends Advise> value();
 }

@@ -165,12 +165,8 @@ public class BeanFactory {
         } else if (src.isAssignableFrom(dest)) {
             // 如果参数类型匹配 或为其子类
             return true;
-        } else if (src.isPrimitive() && src.getName().equals(dest.getCanonicalName())) {
-            return true;
-        } else {
-            // 如果既不为空 且参数类型又不匹配
-            return false;
-        }
+        } else // 如果既不为空 且参数类型又不匹配
+            return src.isPrimitive() && src.getName().equals(dest.getCanonicalName());
     }
 
     @SuppressWarnings("unchecked")

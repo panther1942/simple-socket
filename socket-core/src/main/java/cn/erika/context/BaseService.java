@@ -3,12 +3,14 @@ package cn.erika.context;
 import cn.erika.config.GlobalSettings;
 import cn.erika.context.bean.BeanFactory;
 import cn.erika.context.exception.BeanException;
+import cn.erika.socket.exception.UnsupportedAlgorithmException;
 import cn.erika.util.exception.SerialException;
 import cn.erika.util.log.Logger;
 import cn.erika.util.log.LoggerFactory;
 import cn.erika.util.security.SecurityUtils;
 
 import java.nio.charset.Charset;
+import java.security.InvalidKeyException;
 import java.util.Base64;
 
 public abstract class BaseService {
@@ -30,19 +32,29 @@ public abstract class BaseService {
         return beanFactory.createBean(clazz, args);
     }
 
-    protected byte[] encryptWithRsa(byte[] data, byte[] publicKey) throws SerialException {
-        return encoder.encode(SecurityUtils.encrypt(data, publicKey));
+    protected byte[] encryptWithRsa(byte[] data, byte[] publicKey) {
+        try {
+            return encoder.encode(SecurityUtils.encrypt(data, publicKey));
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
-    protected byte[] encryptWithRsa(String data, byte[] publicKey) throws SerialException {
+    protected byte[] encryptWithRsa(String data, byte[] publicKey) {
         return encryptWithRsa(data.getBytes(charset), publicKey);
     }
 
-    protected byte[] decryptWithRsa(byte[] data, byte[] privateKey) throws SerialException {
-        return SecurityUtils.decrypt(decoder.decode(data), privateKey);
+    protected byte[] decryptWithRsa(byte[] data, byte[] privateKey) {
+        try {
+            return SecurityUtils.decrypt(decoder.decode(data), privateKey);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
-    protected String decryptWithRsaToString(byte[] data, byte[] privateKey) throws SerialException {
+    protected String decryptWithRsaToString(byte[] data, byte[] privateKey) {
         return new String(decryptWithRsa(data, privateKey));
     }
 }

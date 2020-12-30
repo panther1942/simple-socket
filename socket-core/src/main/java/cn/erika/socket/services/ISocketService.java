@@ -3,9 +3,13 @@ package cn.erika.socket.services;
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.core.component.Message;
 
+/**
+ * socket服务都必须实现这个接口
+ * 实现两个方法对应客户端和服务器的不同动作
+ */
 public interface ISocketService {
 
-    public void client(ISocket socket, Message message);
+    void client(ISocket socket, Message message);
 
-    public void server(ISocket socket, Message message);
+    void server(ISocket socket, Message message);
 }

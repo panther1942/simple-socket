@@ -1,5 +1,21 @@
 package cn.erika.util.string;
 
+/**
+ * base64算法 仅能编码ascii这128个字符
+ * 吃饱了撑的写的
+ * <p>
+ * 编码原理
+ * ascii表上的每个字符都能用一个字节表示 也就是8bit
+ * Base64表中使用64(+1)个可见字符 只需要6bit
+ * 要表示这128个字符 就每三个字节划为一组 共计24bit 划分为4组 每组6bit
+ * 即每组表示的字符就在这张表里
+ * <p>
+ * 如果只有2个字节 则第三个base字节的低2位补0 第四位为'='
+ * <p>
+ * 如果只有1个字节 则第二个base字节的低4位补0 第三、四位为'='
+ * <p>
+ * 解码操作反之
+ */
 public class Base64Utils {
     private static final byte[] base64Map = new byte[]{
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',

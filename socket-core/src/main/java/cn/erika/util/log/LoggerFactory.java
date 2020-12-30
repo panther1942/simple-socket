@@ -25,6 +25,10 @@ public class LoggerFactory {
         return ignoreList.contains(clazz);
     }
 
+    public static boolean isEnable(){
+        return GlobalSettings.logEnable;
+    }
+
     public static Logger getLogger(Class originClass) {
         return getLogger(GlobalSettings.logLevel, originClass);
     }

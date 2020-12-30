@@ -5,12 +5,10 @@ import cn.erika.util.exception.CompressException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class GZIP {
-    private static final Charset CHARSET = Charset.forName("UTF-8");
 
     public static byte[] compress(byte[] data) throws CompressException {
         if (data == null || data.length == 0) {
@@ -49,21 +47,5 @@ public class GZIP {
         } catch (IOException e) {
             throw new CompressException("解压过程中发生异常", e);
         }
-    }
-
-    public static byte[] compress(String data, Charset charset) throws CompressException {
-        return compress(data.getBytes(charset));
-    }
-
-    public static byte[] compress(String data) throws CompressException {
-        return compress(data, CHARSET);
-    }
-
-    public static String uncompressToString(byte[] data, Charset charset) throws CompressException {
-        return new String(uncompress(data), charset);
-    }
-
-    public static String uncompressToString(byte[] data) throws CompressException {
-        return uncompressToString(data, CHARSET);
     }
 }
