@@ -79,8 +79,7 @@ public class TcpSocket extends BaseSocket implements Runnable {
                 reader.read(this, cache, len);
             }
         } catch (IOException e) {
-            log.warn("连接断开");
-            close();
+            log.warn("关闭连接: " + get(Constant.UID));
         }
     }
 

@@ -36,10 +36,10 @@ public class FileUploadPreService extends BaseService implements ISocketService 
     @Override
     public void server(ISocket socket, Message message) {
         String token = message.get(Constant.TOKEN);
-        log.info("准备接收客户端发送文件: " + message.toString());
         try {
             FileInfo info = message.get(Constant.FILE_INFO);
             String filename = info.getFilename();
+            log.info("准备接收客户端发送文件: " + filename);
             File baseDir = new File(BASE_DIR);
             File file = new File(BASE_DIR + filename);
             if (!baseDir.exists()) {
@@ -72,16 +72,21 @@ public class FileUploadPreService extends BaseService implements ISocketService 
                 }
                 socket.send(message);
             } catch (BeanException e) {
-                log.error("内部错误: "+e.getMessage());
+                log.error("内部错误: " + e.getMessage());
             } catch (AuthenticateException e) {
                 log.error("无法添加认证信息: " + e.getMessage());
             }
         } catch (IOException e) {
-            log.error("本地文件读写错误: "+e.getMessage());
+            log.error("本地文件读写错误: " + e.getMessage());
         }
     }
 
     private void preUpload(ISocket socket, Message message) {
+        boolean isAuth = socket.get(Constant.AUTHENTICATED);
+        if (!isAuth) {
+            log.warn("还没有认证(login)");
+            return;
+        }
         String filename = message.get(Constant.FILENAME);
         String filepath = message.get(Constant.FILEPATH);
         try {

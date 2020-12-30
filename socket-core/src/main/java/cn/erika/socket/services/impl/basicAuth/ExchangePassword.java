@@ -39,7 +39,7 @@ public class ExchangePassword extends BaseService implements ISocketService {
             try {
                 byte[] keySign = MessageDigestUtils.sum(serverPublicKey, MessageDigestAlgorithm.MD5);
                 log.debug("获取服务器公钥 签名信息（MD5）: " +
-                        StringUtils.byte2HexString(serverPublicKey) + "\n签名算法: " + digitalSignatureAlgorithm);
+                        StringUtils.byte2HexString(keySign) + "\n签名算法: " + digitalSignatureAlgorithm);
             } catch (UnsupportedAlgorithmException e) {
                 log.warn(e.getMessage());
             }

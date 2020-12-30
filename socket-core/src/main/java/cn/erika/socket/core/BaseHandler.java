@@ -49,7 +49,7 @@ public abstract class BaseHandler implements Handler {
 
     @Override
     public void onError(ISocket socket, Throwable throwable) {
-        log.error(throwable.getMessage(), throwable);
+        log.error(throwable.getMessage());
     }
 
     protected void execute(ISocket socket, String serviceName, Message message) throws BeanException {

@@ -27,11 +27,12 @@ public abstract class BaseServer extends BaseHandler implements Runnable, IServe
 
     @Override
     public void onClose(ISocket socket) {
+        log.info("客户端离线: " + socket.get(Constant.UID));
         linkManager.popLink(socket);
     }
 
     @Override
-    public void addToken(ISocket socket, String token) throws AuthenticateException{
+    public void addToken(ISocket socket, String token) throws AuthenticateException {
         if (!tokenList.containsKey(token)) {
             tokenList.put(token, socket);
         } else {
@@ -40,7 +41,7 @@ public abstract class BaseServer extends BaseHandler implements Runnable, IServe
     }
 
     @Override
-    public ISocket checkToken(String token, byte[] publicKey) throws AuthenticateException{
+    public ISocket checkToken(String token, byte[] publicKey) throws AuthenticateException {
         ISocket socket = tokenList.get(token);
         if (socket == null) {
             throw new TokenException("token无效");

@@ -17,6 +17,7 @@ public class LoginService extends AbstractClientService implements ICliService {
 
     @Override
     public void execute(String... args) throws BeanException {
+        super.execute(args);
         IClient client = getBean(IClient.class);
         String username = args[1];
         String password = args[2];

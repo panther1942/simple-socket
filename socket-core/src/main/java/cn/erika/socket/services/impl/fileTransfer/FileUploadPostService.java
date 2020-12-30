@@ -19,6 +19,7 @@ public class FileUploadPostService extends BaseService implements ISocketService
 
     @Override
     public void server(ISocket socket, Message message) {
+        socket.send(new Message(Constant.SRV_EXIT));
         socket.close();
     }
 }
