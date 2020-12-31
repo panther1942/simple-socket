@@ -9,10 +9,11 @@ import cn.erika.socket.core.component.Message;
 import cn.erika.socket.exception.AuthenticateException;
 import cn.erika.socket.exception.UnsupportedAlgorithmException;
 import cn.erika.socket.services.ISocketService;
-import cn.erika.util.security.algorithm.DigitalSignatureAlgorithm;
-import cn.erika.util.security.algorithm.MessageDigestAlgorithm;
+import cn.erika.util.security.DigitalSignatureAlgorithm;
+import cn.erika.util.security.SecurityUtils;
+import cn.erika.util.security.algorithm.BasicMessageDigestAlgorithm;
 import cn.erika.util.security.MessageDigestUtils;
-import cn.erika.util.security.algorithm.SecurityAlgorithm;
+import cn.erika.util.security.SecurityAlgorithm;
 import cn.erika.util.string.StringUtils;
 
 /**
@@ -32,12 +33,13 @@ public class ExchangePassword extends BaseService implements ISocketService {
                 throw new AuthenticateException("缺少公钥信息");
             }
             // 数字加密算法
-            DigitalSignatureAlgorithm digitalSignatureAlgorithm = DigitalSignatureAlgorithm.valueOf(
-                    message.get(Constant.DIGITAL_SIGNATURE_ALGORITHM));
+            DigitalSignatureAlgorithm digitalSignatureAlgorithm = SecurityUtils.getDigitalSignatureAlgorithmByValue(
+                    message.get(Constant.DIGITAL_SIGNATURE_ALGORITHM)
+            );
 
             // 打印一下信息
             try {
-                byte[] keySign = MessageDigestUtils.sum(serverPublicKey, MessageDigestAlgorithm.MD5);
+                byte[] keySign = MessageDigestUtils.sum(serverPublicKey, BasicMessageDigestAlgorithm.MD5);
                 log.debug("获取服务器公钥 签名信息（MD5）: " +
                         StringUtils.byte2HexString(keySign) + "\n签名算法: " + digitalSignatureAlgorithm);
             } catch (UnsupportedAlgorithmException e) {
@@ -85,7 +87,7 @@ public class ExchangePassword extends BaseService implements ISocketService {
                 throw new AuthenticateException("缺少加密信息");
             }
             // 算法
-            SecurityAlgorithm securityAlgorithm = SecurityAlgorithm.valueOf(
+            SecurityAlgorithm securityAlgorithm = SecurityUtils.getSecurityAlgorithmByValue(
                     decryptWithRsaToString(bSecurityAlgorithm, GlobalSettings.privateKey));
             // 密钥
             String securityKey = decryptWithRsaToString(bSecurityKey, GlobalSettings.privateKey);

@@ -1,22 +1,19 @@
 package cn.erika.util.security;
 
 import cn.erika.socket.exception.UnsupportedAlgorithmException;
-import cn.erika.util.security.algorithm.AsymmetricAlgorithm;
-import cn.erika.util.security.algorithm.DigitalSignatureAlgorithm;
-import cn.erika.util.security.algorithm.SecurityAlgorithm;
-import sun.security.ec.ECPrivateKeyImpl;
-import sun.security.ec.ECPublicKeyImpl;
+import cn.erika.util.security.algorithm.BasicAsymmetricAlgorithm;
 
 import javax.crypto.*;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.math.BigInteger;
 import java.security.*;
-import java.security.interfaces.ECKey;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
-import java.security.spec.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 加密工具类
@@ -35,9 +32,13 @@ public class SecurityUtils {
     private static final String SECURE_RANDOM = "SHA1PRNG";
 
     // 默认的不对称加密算法
-    private static final AsymmetricAlgorithm DEFAULT_ASYMMETRIC_ALGORITHM = AsymmetricAlgorithm.RSA;
+    private static final AsymmetricAlgorithm DEFAULT_ASYMMETRIC_ALGORITHM = BasicAsymmetricAlgorithm.RSA;
     // 默认的不对称加密长度
     private static final int DEFAULT_ASYMMETRIC_LENGTH = 2048;
+
+    private static Map<String, DigitalSignatureAlgorithm> digitalSignatureAlgorithmMap = new HashMap<>();
+    private static Map<String, MessageDigestAlgorithm> messageDigestAlgorithmMap = new HashMap<>();
+    private static Map<String, SecurityAlgorithm> securityAlgorithmMap = new HashMap<>();
 
     /**
      * 生成不对称密钥对
@@ -68,42 +69,28 @@ public class SecurityUtils {
         return initKey(DEFAULT_ASYMMETRIC_ALGORITHM, DEFAULT_ASYMMETRIC_LENGTH);
     }
 
-    /**
-     * 生成ECC(圆锥曲线加密算法)的密钥 鬼知道为啥网上这块的代码都一样
-     *
-     * @return EC算法的密钥对
-     * @throws InvalidKeyException 如果初始化密钥无效则抛出该异常
-     */
-    public static byte[][] initEcKey() throws InvalidKeyException {
-        byte[][] keyPair = new byte[2][];
-        BigInteger x1 = new BigInteger(
-                "2fe13c0537bbc11acaa07d793de4e6d5e5c94eee8", 16);
-        BigInteger x2 = new BigInteger(
-                "289070fb05d38ff58321f2e800536d538ccdaa3d9", 16);
-        ECPoint g = new ECPoint(x1, x2);
-        // the order of generator
-        BigInteger n = new BigInteger(
-                "5846006549323611672814741753598448348329118574063", 10);
-        // the cofactor
-        int h = 2;
-        int m = 163;
-        int[] ks = {7, 6, 3};
-        ECFieldF2m ecField = new ECFieldF2m(m, ks);
-        // y^2+xy=x^3+x^2+1
-        BigInteger a = new BigInteger("1", 2);
-        BigInteger b = new BigInteger("1", 2);
-        EllipticCurve ellipticCurve = new EllipticCurve(ecField, a, b);
-        ECParameterSpec ecParameterSpec = new ECParameterSpec(ellipticCurve, g,
-                n, h);
-        // 公钥
-        ECPublicKey publicKey = new ECPublicKeyImpl(g, ecParameterSpec);
-        BigInteger s = new BigInteger(
-                "1234006549323611672814741753598448348329118574063", 10);
-        // 私钥
-        ECPrivateKey privateKey = new ECPrivateKeyImpl(s, ecParameterSpec);
-        keyPair[0] = publicKey.getEncoded();
-        keyPair[1] = privateKey.getEncoded();
-        return keyPair;
+    public static void registerDigitalSignatureAlgorithm(DigitalSignatureAlgorithm algorithm) {
+        digitalSignatureAlgorithmMap.put(algorithm.getValue(), algorithm);
+    }
+
+    public static DigitalSignatureAlgorithm getDigitalSignatureAlgorithmByValue(String algorithm) {
+        return digitalSignatureAlgorithmMap.get(algorithm);
+    }
+
+    public static void registerMessageDigestAlgorithm(MessageDigestAlgorithm algorithm) {
+        messageDigestAlgorithmMap.put(algorithm.getValue(), algorithm);
+    }
+
+    public static MessageDigestAlgorithm getMessageDigestAlgorithmByValue(String algorithm) {
+        return messageDigestAlgorithmMap.get(algorithm);
+    }
+
+    public static void registerSecurityAlgorithm(SecurityAlgorithm algorithm) {
+        securityAlgorithmMap.put(algorithm.getValue(), algorithm);
+    }
+
+    public static SecurityAlgorithm getSecurityAlgorithmByValue(String algorithm) {
+        return securityAlgorithmMap.get(algorithm);
     }
 
     /**
@@ -137,7 +124,15 @@ public class SecurityUtils {
         try {
             Cipher cipher = Cipher.getInstance(algorithm.getName() + "/" + algorithm.getMode() + "/" + PADDING_METHOD);
             if (algorithm.isNeedIv()) {
-                cipher.init(Cipher.ENCRYPT_MODE, getSecretKey(password, algorithm), new IvParameterSpec(iv));
+                switch (algorithm.getMode()) {
+                    case "GCM":
+                        cipher.init(Cipher.ENCRYPT_MODE, getSecretKey(password, algorithm),
+                                new GCMParameterSpec(algorithm.getSecurityLength(), iv));
+                        break;
+                    default:
+                        cipher.init(Cipher.ENCRYPT_MODE, getSecretKey(password, algorithm),
+                                new IvParameterSpec(iv));
+                }
             } else {
                 cipher.init(Cipher.ENCRYPT_MODE, getSecretKey(password, algorithm));
             }
@@ -180,7 +175,15 @@ public class SecurityUtils {
         try {
             Cipher cipher = Cipher.getInstance(algorithm.getName() + "/" + algorithm.getMode() + "/" + PADDING_METHOD);
             if (algorithm.isNeedIv()) {
-                cipher.init(Cipher.DECRYPT_MODE, getSecretKey(password, algorithm), new IvParameterSpec(iv));
+                switch (algorithm.getMode()) {
+                    case "GCM":
+                        cipher.init(Cipher.DECRYPT_MODE, getSecretKey(password, algorithm),
+                                new GCMParameterSpec(algorithm.getSecurityLength(), iv));
+                        break;
+                    default:
+                        cipher.init(Cipher.DECRYPT_MODE, getSecretKey(password, algorithm),
+                                new IvParameterSpec(iv));
+                }
             } else {
                 cipher.init(Cipher.DECRYPT_MODE, getSecretKey(password, algorithm));
             }
@@ -218,8 +221,8 @@ public class SecurityUtils {
      * @throws InvalidKeySpecException  公钥无效时抛出该异常
      */
     private static PublicKey getPublicKey(byte[] key, AsymmetricAlgorithm algorithm)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
-        KeyFactory factory = KeyFactory.getInstance(algorithm.getValue());
+            throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+        KeyFactory factory = KeyFactory.getInstance(algorithm.getValue(), algorithm.getProvider());
         X509EncodedKeySpec spec = new X509EncodedKeySpec(key);
         return factory.generatePublic(spec);
     }
@@ -233,8 +236,8 @@ public class SecurityUtils {
      * @throws InvalidKeySpecException  私钥无效时抛出该异常
      */
     private static PrivateKey getPrivateKey(byte[] key, AsymmetricAlgorithm algorithm)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
-        KeyFactory factory = KeyFactory.getInstance(algorithm.getValue());
+            throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+        KeyFactory factory = KeyFactory.getInstance(algorithm.getValue(), algorithm.getProvider());
         PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(key);
         return factory.generatePrivate(spec);
     }
@@ -334,6 +337,8 @@ public class SecurityUtils {
             throw new UnsupportedAlgorithmException("当前环境不支持该加密方法: " + e.getMessage());
         } catch (BadPaddingException | IllegalBlockSizeException | InvalidKeySpecException e) {
             throw new UnsupportedAlgorithmException("加密出错: " + e.getMessage());
+        } catch (NoSuchProviderException e) {
+            throw new UnsupportedAlgorithmException("当前环境不支持该加密算法的提供者: " + e.getMessage());
         }
     }
 
@@ -382,6 +387,8 @@ public class SecurityUtils {
             throw new InvalidKeyException("秘钥无效: " + Base64.getEncoder().encodeToString(key));
         } catch (SignatureException e) {
             throw new RuntimeException("签名对象未正确初始化: " + e.getMessage());
+        } catch (NoSuchProviderException e) {
+            throw new UnsupportedAlgorithmException("当前环境不支持该加密算法的提供者: " + e.getMessage());
         }
     }
 
@@ -432,6 +439,8 @@ public class SecurityUtils {
             throw new InvalidKeyException("秘钥无效: " + Base64.getEncoder().encodeToString(key));
         } catch (SignatureException e) {
             throw new RuntimeException("签名对象未正确初始化: " + e.getMessage());
+        } catch (NoSuchProviderException e) {
+            throw new UnsupportedAlgorithmException("当前环境不支持该加密算法的提供者: " + e.getMessage());
         }
     }
 }

@@ -1,9 +1,12 @@
 package cn.erika.util.security.algorithm;
 
+import cn.erika.util.security.DigitalSignatureAlgorithm;
+import cn.erika.util.security.SecurityUtils;
+
 /**
  * 数字签名算法的枚举类 配合不对称加密算法使用
  */
-public enum DigitalSignatureAlgorithm {
+public enum BasicDigitalSignatureAlgorithm implements DigitalSignatureAlgorithm {
     MD2withRSA("MD2withRSA"),
     MD5withRSA("MD5withRSA"),
     SHA1withRSA("SHA1withRSA"),
@@ -26,10 +29,17 @@ public enum DigitalSignatureAlgorithm {
 
     private String value;
 
-    DigitalSignatureAlgorithm(String value) {
+    static {
+        for (DigitalSignatureAlgorithm algorithm : values()) {
+            SecurityUtils.registerDigitalSignatureAlgorithm(algorithm);
+        }
+    }
+
+    BasicDigitalSignatureAlgorithm(String value) {
         this.value = value;
     }
 
+    @Override
     public String getValue() {
         return value;
     }

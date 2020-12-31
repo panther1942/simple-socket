@@ -2,8 +2,10 @@ package cn.erika.config;
 
 import cn.erika.socket.core.component.DataInfo;
 import cn.erika.util.log.LogLevel;
-import cn.erika.util.security.algorithm.DigitalSignatureAlgorithm;
-import cn.erika.util.security.algorithm.SecurityAlgorithm;
+import cn.erika.util.security.DigitalSignatureAlgorithm;
+import cn.erika.util.security.SecurityAlgorithm;
+import cn.erika.util.security.algorithm.BasicDigitalSignatureAlgorithm;
+import cn.erika.util.security.algorithm.BasicSecurityAlgorithm;
 
 import java.nio.charset.Charset;
 
@@ -23,11 +25,11 @@ public class GlobalSettings {
     public static byte[] publicKey;
 
     // 对称加密算法
-    public static SecurityAlgorithm securityAlgorithm = SecurityAlgorithm.AES256CTR;
+    public static SecurityAlgorithm securityAlgorithm = BasicSecurityAlgorithm.AES256CTR;
     // 对称加密长度
     public static int securityLength = 18;
     // 签名算法
-    public static DigitalSignatureAlgorithm signAlgorithm = DigitalSignatureAlgorithm.SHA256withRSA;
+    public static DigitalSignatureAlgorithm signAlgorithm = BasicDigitalSignatureAlgorithm.SHA256withRSA;
 
     public static boolean enableCompress = true;
     public static DataInfo.Compress compressType = DataInfo.Compress.GZIP;

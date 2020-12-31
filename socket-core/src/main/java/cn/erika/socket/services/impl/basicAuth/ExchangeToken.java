@@ -10,7 +10,8 @@ import cn.erika.socket.core.component.Message;
 import cn.erika.socket.exception.AuthenticateException;
 import cn.erika.socket.handler.IServer;
 import cn.erika.socket.services.ISocketService;
-import cn.erika.util.security.algorithm.SecurityAlgorithm;
+import cn.erika.util.security.SecurityAlgorithm;
+import cn.erika.util.security.SecurityUtils;
 import cn.erika.util.string.StringUtils;
 
 /**
@@ -45,7 +46,7 @@ public class ExchangeToken extends BaseService implements ISocketService {
                     }
                     byte[] privateKey = GlobalSettings.privateKey;
                     // 算法
-                    SecurityAlgorithm securityAlgorithm = SecurityAlgorithm.valueOf(
+                    SecurityAlgorithm securityAlgorithm = SecurityUtils.getSecurityAlgorithmByValue(
                             decryptWithRsaToString(bSecurityAlgorithm, privateKey));
                     // 密钥
                     String securityKey = decryptWithRsaToString(bSecurityKey, privateKey);

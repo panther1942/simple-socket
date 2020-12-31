@@ -12,9 +12,9 @@ import cn.erika.util.exception.SerialException;
 import cn.erika.util.log.Logger;
 import cn.erika.util.log.LoggerFactory;
 import cn.erika.util.security.*;
-import cn.erika.util.security.algorithm.DigitalSignatureAlgorithm;
-import cn.erika.util.security.algorithm.MessageDigestAlgorithm;
-import cn.erika.util.security.algorithm.SecurityAlgorithm;
+import cn.erika.util.security.DigitalSignatureAlgorithm;
+import cn.erika.util.security.algorithm.BasicMessageDigestAlgorithm;
+import cn.erika.util.security.SecurityAlgorithm;
 import cn.erika.util.string.SerialUtils;
 import cn.erika.util.string.StringUtils;
 
@@ -83,7 +83,7 @@ public abstract class BaseSocket implements ISocket {
             info.setPos(0);
             info.setLen(data.length);
             info.setData(data);
-            String sign = StringUtils.byte2HexString(MessageDigestUtils.sum(info.getData(), MessageDigestAlgorithm.MD5));
+            String sign = StringUtils.byte2HexString(MessageDigestUtils.sum(info.getData(), BasicMessageDigestAlgorithm.MD5));
             info.setSign(sign);
 //            log.debug("计算数据签名: " + sign);
             send(info);
@@ -118,9 +118,9 @@ public abstract class BaseSocket implements ISocket {
             byte[] data = info.getData();
             String sign = info.getSign();
 //            log.debug("数据长度: " + info.getLen());
-            String targetSign = StringUtils.byte2HexString(MessageDigestUtils.sum(data, MessageDigestAlgorithm.MD5));
-//            log.debug("原始数据签名: " + sign);
-//            log.debug("计算数据签名: " + targetSign);
+            String targetSign = StringUtils.byte2HexString(MessageDigestUtils.sum(data, BasicMessageDigestAlgorithm.MD5));
+            log.debug("原始数据签名: " + sign);
+            log.debug("计算数据签名: " + targetSign);
             if (!sign.equals(targetSign)) {
                 log.error("警告！ 签名不正确");
             }
@@ -141,11 +141,6 @@ public abstract class BaseSocket implements ISocket {
                 data = SecurityUtils.decrypt(data, securityKey, securityAlgorithm, securityIv);
             }
             Message message = SerialUtils.serialObject(data, Message.class);
-            if (message == null) {
-//                throw new RuntimeException();
-                System.err.println("message为空！！！");
-                return;
-            }
             if (isEncrypt) {
                 byte[] publicKey = get(Constant.PUBLIC_KEY);
                 DigitalSignatureAlgorithm digitalSignatureAlgorithm = get(Constant.DIGITAL_SIGNATURE_ALGORITHM);
@@ -163,7 +158,7 @@ public abstract class BaseSocket implements ISocket {
         } catch (SerialException e) {
             log.error("反序列化出现错误: " + e.getMessage());
         } catch (InvalidKeyException e) {
-            log.error("签名验证失败");
+            log.error("签名验证失败", e);
             close();
         } catch (UnsupportedAlgorithmException e) {
             log.error(e.getMessage(), e);

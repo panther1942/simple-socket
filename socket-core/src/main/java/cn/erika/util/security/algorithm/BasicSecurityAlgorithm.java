@@ -1,9 +1,12 @@
 package cn.erika.util.security.algorithm;
 
+import cn.erika.util.security.SecurityAlgorithm;
+import cn.erika.util.security.SecurityUtils;
+
 /**
  * 对称加密算法的枚举类
  */
-public enum SecurityAlgorithm {
+public enum BasicSecurityAlgorithm implements SecurityAlgorithm {
     AES128ECB("AES128ECB", "AES", "ECB", 128, false, 0),
     AES192ECB("AES192ECB", "AES", "ECB", 192, false, 0),
     AES256ECB("AES256ECB", "AES", "ECB", 256, false, 0),
@@ -36,7 +39,13 @@ public enum SecurityAlgorithm {
     // 向量要求长度
     private int ivLength;
 
-    SecurityAlgorithm(String value, String name, String mode, int securityLength, boolean needIv, int ivLength) {
+    static {
+        for (SecurityAlgorithm algorithm : values()) {
+            SecurityUtils.registerSecurityAlgorithm(algorithm);
+        }
+    }
+
+    BasicSecurityAlgorithm(String value, String name, String mode, int securityLength, boolean needIv, int ivLength) {
         this.value = value;
         this.name = name;
         this.mode = mode;
@@ -45,26 +54,32 @@ public enum SecurityAlgorithm {
         this.ivLength = ivLength;
     }
 
+    @Override
     public String getValue() {
         return this.value;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getMode() {
         return mode;
     }
 
+    @Override
     public int getSecurityLength() {
         return securityLength;
     }
 
+    @Override
     public boolean isNeedIv() {
         return needIv;
     }
 
+    @Override
     public int getIvLength() {
         return ivLength;
     }

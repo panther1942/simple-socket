@@ -1,7 +1,6 @@
 package cn.erika.util.security;
 
 import cn.erika.socket.exception.UnsupportedAlgorithmException;
-import cn.erika.util.security.algorithm.MessageDigestAlgorithm;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,7 +17,7 @@ import java.util.zip.CRC32;
 public class MessageDigestUtils {
 
     /**
-     * 使用指定的算法计算校验和 编码将使用UTF-8计算 实际调用sum(byte[], MessageDigestAlgorithm)方法
+     * 使用指定的算法计算校验和 编码将使用UTF-8计算 实际调用sum(byte[], BasicMessageDigestAlgorithm)方法
      *
      * @param data      要计算校验和的字符串
      * @param algorithm 要使用的签名算法
@@ -33,7 +32,7 @@ public class MessageDigestUtils {
     }
 
     /**
-     * 使用指定的算法和字符集计算校验和 实际调用sum(byte[], MessageDigestAlgorithm)方法
+     * 使用指定的算法和字符集计算校验和 实际调用sum(byte[], BasicMessageDigestAlgorithm)方法
      *
      * @param data      要计算校验和的字符串
      * @param charset   指定的字符集

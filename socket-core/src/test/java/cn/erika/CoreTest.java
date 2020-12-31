@@ -11,11 +11,10 @@ import cn.erika.util.SerialUtils;
 import cn.erika.util.log.ConsoleLogger;
 import cn.erika.util.log.Logger;
 import cn.erika.util.log.LoggerFactory;
-import cn.erika.util.security.algorithm.AsymmetricAlgorithm;
 import cn.erika.util.security.MessageDigestUtils;
 import cn.erika.util.security.SecurityUtils;
+import cn.erika.util.security.algorithm.BasicAsymmetricAlgorithm;
 import cn.erika.util.string.Base64Utils;
-import cn.erika.util.string.ConsoleUtils;
 import cn.erika.util.string.StringUtils;
 import org.junit.Test;
 
@@ -130,16 +129,15 @@ public class CoreTest {
 
     @Test
     public void testSupportSecurity() {
-        String target = "EC";
+        String target = "RSA";
         Provider[] providers = Security.getProviders();
         for (Provider provider : providers) {
-            System.out.println(ConsoleUtils.drawLineWithTitle(provider.getName(), "-", 80));
             for (Provider.Service service : provider.getServices()) {
                 String algorithm = service.getAlgorithm();
                 if (algorithm.contains(target)) {
-                    System.err.println(algorithm);
+                    System.err.printf("%15s: %s\n", provider.getName(), algorithm);
                 } else {
-                    System.out.println(algorithm);
+                    System.out.printf("%15s: %s\n", provider.getName(), algorithm);
                 }
             }
         }
@@ -150,28 +148,6 @@ public class CoreTest {
         Provider provider = new org.bouncycastle.jce.provider.BouncyCastleProvider();
         for (Provider.Service service : provider.getServices()) {
             System.out.println(String.format("%s: %s", service.getType(), service.getAlgorithm()));
-        }
-    }
-
-    @Test
-    public void testEc() {
-        try {
-            byte[][] keyPair = SecurityUtils.initEcKey();
-            String data = StringUtils.randomString(1024);
-
-            byte[] enData = SecurityUtils.encrypt(data.getBytes(), keyPair[0], AsymmetricAlgorithm.EC);
-
-            byte[] deData = SecurityUtils.decrypt(enData, keyPair[1], AsymmetricAlgorithm.EC);
-
-            System.out.println(new String(deData));
-
-
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (UnsupportedAlgorithmException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -215,7 +191,7 @@ public class CoreTest {
             int rsa2048 = 245;
 
             String line = StringUtils.randomString(rsa1024);
-            byte[][] keyPair = SecurityUtils.initKey(AsymmetricAlgorithm.RSA, 1024);
+            byte[][] keyPair = SecurityUtils.initKey(BasicAsymmetricAlgorithm.RSA, 1024);
 
             System.out.println(Base64.getEncoder().encodeToString(keyPair[0]));
             System.out.println();
