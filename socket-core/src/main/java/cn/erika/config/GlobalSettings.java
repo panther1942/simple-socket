@@ -2,9 +2,8 @@ package cn.erika.config;
 
 import cn.erika.socket.core.component.DataInfo;
 import cn.erika.util.log.LogLevel;
-import cn.erika.util.security.AsymmetricAlgorithm;
-import cn.erika.util.security.DigitalSignatureAlgorithm;
-import cn.erika.util.security.SecurityAlgorithm;
+import cn.erika.util.security.algorithm.DigitalSignatureAlgorithm;
+import cn.erika.util.security.algorithm.SecurityAlgorithm;
 
 import java.nio.charset.Charset;
 

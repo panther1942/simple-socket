@@ -1,8 +1,7 @@
 package cn.erika.util.string;
 
 /**
- * base64算法 仅能编码ascii这128个字符
- * 吃饱了撑的写的
+ * base64算法
  * <p>
  * 编码原理
  * ascii表上的每个字符都能用一个字节表示 也就是8bit
@@ -33,39 +32,39 @@ public class Base64Utils {
         byte[] result = new byte[length * 4];
 
         int readPos = 0;
-        int resultPos = 0;
+        int writePos = 0;
+
         while (readPos < data.length) {
-            byte[] arr = new byte[3];
-            int[] baseChar = new int[4];
+            byte[] byteArr = new byte[3];
+            int[] baseArr = new int[4];
             int arrPos = 0;
             for (; arrPos < 3 && readPos + arrPos < data.length; arrPos++) {
-                arr[arrPos] = data[readPos + arrPos];
+                byteArr[arrPos] = data[readPos + arrPos];
             }
             readPos += arrPos;
-
             switch (arrPos) {
                 case 3:
-                    baseChar[0] = arr[0] >> 2;
-                    baseChar[1] = ((arr[0] & 3) << 4) + (arr[1] >> 4);
-                    baseChar[2] = ((arr[1] & 15) << 2) + (arr[2] >> 6);
-                    baseChar[3] = arr[2] & 63;
+                    baseArr[0] = (byteArr[0] & 0xFC) >> 2;
+                    baseArr[1] = ((byteArr[0] & 0x03) << 4) | ((byteArr[1] & 0xF0) >> 4);
+                    baseArr[2] = ((byteArr[1] & 0x0F) << 2) | ((byteArr[2] & 0xC0) >> 6);
+                    baseArr[3] = byteArr[2] & 0x3F;
                     break;
                 case 2:
-                    baseChar[0] = arr[0] >> 2;
-                    baseChar[1] = ((arr[0] & 3) << 4) + (arr[1] >> 4);
-                    baseChar[2] = (arr[1] & 15) << 2;
-                    baseChar[3] = 64;
+                    baseArr[0] = (byteArr[0] & 0xFC) >> 2;
+                    baseArr[1] = ((byteArr[0] & 0x03) << 4) | ((byteArr[1] & 0xF0) >> 4);
+                    baseArr[2] = (byteArr[1] & 0x0F) << 2;
+                    baseArr[3] = 0x40;
                     break;
                 case 1:
-                    baseChar[0] = arr[0] >> 2;
-                    baseChar[1] = (arr[0] & 3) << 4;
-                    baseChar[2] = 64;
-                    baseChar[3] = 64;
+                    baseArr[0] = (byteArr[0] & 0xFC) >> 2;
+                    baseArr[1] = (byteArr[0] & 0x03) << 4;
+                    baseArr[2] = 0x40;
+                    baseArr[3] = 0x40;
                     break;
             }
 
-            for (int aBaseChar : baseChar) {
-                result[resultPos++] = base64Map[aBaseChar];
+            for (int aBaseChar : baseArr) {
+                result[writePos++] = base64Map[aBaseChar];
             }
         }
         return result;
@@ -76,38 +75,38 @@ public class Base64Utils {
             throw new RuntimeException("不合规的Base64编码");
         }
         byte[] result = new byte[data.length / 4 * 3];
-        int resultPos = 0;
 
+        int writePos = 0;
+        int readPos = 0;
         for (int i = 0; i < data.length; i += 4) {
-            int[] arr = new int[4];
-            int[] baseChar = new int[3];
-            int arrPos = 0;
-            for (; arrPos < 4 && data[i + arrPos] != '='; arrPos++) {
-                arr[arrPos] = getPosByByte(data[i + arrPos]);
+            int[] asciiArr = new int[4];
+            int[] byteArr = new int[3];
+            for (readPos = 0; readPos < 4 && data[i + readPos] != '='; readPos++) {
+                asciiArr[readPos] = getPosByByte(data[i + readPos]);
             }
 
-            switch (arrPos) {
+            switch (readPos) {
                 case 4:
-                    baseChar[0] = ((arr[0] & 63) << 2) + (arr[1] >> 4);
-                    baseChar[1] = ((arr[1] & 31) << 4) + (arr[2] >> 2);
-                    baseChar[2] = ((arr[2] & 3) << 6) + arr[3];
+                    byteArr[0] = ((asciiArr[0] & 0x3F) << 2) | ((asciiArr[1] & 0x30) >> 4);
+                    byteArr[1] = ((asciiArr[1] & 0x0F) << 4) | ((asciiArr[2] & 0x3C) >> 2);
+                    byteArr[2] = ((asciiArr[2] & 0x03) << 6) | (asciiArr[3] & 0x3F);
                     break;
                 case 3:
-                    baseChar[0] = ((arr[0] & 63) << 2) + (arr[1] >> 4);
-                    baseChar[1] = ((arr[1] & 31) << 4) + (arr[2] >> 2);
-                    baseChar[2] = (arr[2] & 3) << 6;
+                    byteArr[0] = ((asciiArr[0] & 0x3F) << 2) | ((asciiArr[1] & 0x30) >> 4);
+                    byteArr[1] = ((asciiArr[1] & 0x0F) << 4) | ((asciiArr[2] & 0x3C) >> 2);
                     break;
                 case 2:
-                    baseChar[0] = ((arr[0] & 63) << 2) + (arr[1] >> 4);
-                    baseChar[1] = (arr[1] & 31) << 4;
+                    byteArr[0] = ((asciiArr[0] & 0x3F) << 2) | ((asciiArr[1] & 0x30) >> 4);
                     break;
             }
 
-            for (int j = 0; j < arrPos - 1; j++) {
-                result[resultPos++] = (byte) baseChar[j];
+            for (int j = 0; j < readPos - 1; j++) {
+                result[writePos++] = (byte) byteArr[j];
             }
         }
-        return result;
+        byte[] tmp = new byte[result.length - 4 + readPos];
+        System.arraycopy(result, 0, tmp, 0, tmp.length);
+        return tmp;
     }
 
     private static int getPosByByte(byte b) {

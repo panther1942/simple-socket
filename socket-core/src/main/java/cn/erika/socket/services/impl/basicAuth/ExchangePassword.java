@@ -9,10 +9,10 @@ import cn.erika.socket.core.component.Message;
 import cn.erika.socket.exception.AuthenticateException;
 import cn.erika.socket.exception.UnsupportedAlgorithmException;
 import cn.erika.socket.services.ISocketService;
-import cn.erika.util.security.DigitalSignatureAlgorithm;
-import cn.erika.util.security.MessageDigestAlgorithm;
+import cn.erika.util.security.algorithm.DigitalSignatureAlgorithm;
+import cn.erika.util.security.algorithm.MessageDigestAlgorithm;
 import cn.erika.util.security.MessageDigestUtils;
-import cn.erika.util.security.SecurityAlgorithm;
+import cn.erika.util.security.algorithm.SecurityAlgorithm;
 import cn.erika.util.string.StringUtils;
 
 /**

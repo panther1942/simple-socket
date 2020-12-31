@@ -1,4 +1,4 @@
-package cn.erika.util.security;
+package cn.erika.util.security.algorithm;
 
 /**
  * 对称加密算法的枚举类

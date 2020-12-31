@@ -21,9 +21,17 @@ public class StringUtils {
      * @return 生成的字符串
      */
     public static String randomString(int len) {
+        return randomString(len, 33, 126);
+    }
+
+    public static String randomNumber(int len) {
+        return randomString(len, 48, 57);
+    }
+
+    public static String randomString(int len, int start, int end) {
         StringBuilder buffer = new StringBuilder();
         for (int i = 0; i < len; i++) {
-            int idx = random.nextInt(93) + 33;
+            int idx = random.nextInt(end - start + 1) + start;
             buffer.append(String.valueOf((char) idx));
         }
         return buffer.toString();
@@ -97,7 +105,7 @@ public class StringUtils {
     }
 
     private static byte getHexByte(char c) {
-        for (int i= 0;i<hexMap.length;i++) {
+        for (int i = 0; i < hexMap.length; i++) {
             if (hexMap[i] == c) {
                 return (byte) i;
             }

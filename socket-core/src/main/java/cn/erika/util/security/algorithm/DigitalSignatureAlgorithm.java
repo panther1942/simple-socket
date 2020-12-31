@@ -1,4 +1,4 @@
-package cn.erika.util.security;
+package cn.erika.util.security.algorithm;
 
 /**
  * 数字签名算法的枚举类 配合不对称加密算法使用

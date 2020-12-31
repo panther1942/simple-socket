@@ -1,6 +1,9 @@
 package cn.erika.util.security;
 
 import cn.erika.socket.exception.UnsupportedAlgorithmException;
+import cn.erika.util.security.algorithm.AsymmetricAlgorithm;
+import cn.erika.util.security.algorithm.DigitalSignatureAlgorithm;
+import cn.erika.util.security.algorithm.SecurityAlgorithm;
 import sun.security.ec.ECPrivateKeyImpl;
 import sun.security.ec.ECPublicKeyImpl;
 
@@ -314,56 +317,23 @@ public class SecurityUtils {
             throws UnsupportedAlgorithmException, InvalidKeyException {
         try {
             Key key;
-            ECKey ecKey = null;
-            KeySpec spec = null;
             switch (mode) {
                 case Cipher.ENCRYPT_MODE:
                     key = getPublicKey(bKey, algorithm);
-                    if (algorithm == AsymmetricAlgorithm.EC) {
-                        ecKey = (ECKey) key;
-                        spec = new ECPublicKeySpec(((ECPublicKey) ecKey).getW(), ecKey.getParams());
-                    }
                     break;
                 case Cipher.DECRYPT_MODE:
                     key = getPrivateKey(bKey, algorithm);
-                    if (algorithm == AsymmetricAlgorithm.EC) {
-                        ecKey = (ECKey) key;
-                        spec = new ECPrivateKeySpec(((ECPrivateKey) ecKey).getS(), ecKey.getParams());
-                    }
                     break;
                 default:
                     throw new UnsupportedAlgorithmException("不支持的模式: " + mode);
             }
-            // Cipher不支持EC算法加密操作
-            Cipher cipher = null;
-            switch (algorithm) {
-                case RSA:
-                    cipher = Cipher.getInstance(key.getAlgorithm());
-                    cipher.init(mode, key);
-                    break;
-                case EC:
-                    cipher = new NullCipher();
-                    switch (mode) {
-                        case Cipher.ENCRYPT_MODE:
-                            cipher.init(mode, key, ((ECPublicKeySpec) spec).getParams());
-                            break;
-                        case Cipher.DECRYPT_MODE:
-                            cipher.init(mode, key, ((ECPrivateKeySpec) spec).getParams());
-                            break;
-                        default:
-                            throw new UnsupportedAlgorithmException("不支持的模式: " + mode);
-                    }
-                    break;
-                default:
-                    throw new UnsupportedAlgorithmException("不支持的加密模式(jdk没实现 我也没写)");
-            }
+            Cipher cipher = Cipher.getInstance(key.getAlgorithm());
+            cipher.init(mode, key);
             return cipher.doFinal(data);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new UnsupportedAlgorithmException("当前环境不支持该加密方法: " + e.getMessage());
         } catch (BadPaddingException | IllegalBlockSizeException | InvalidKeySpecException e) {
             throw new UnsupportedAlgorithmException("加密出错: " + e.getMessage());
-        } catch (InvalidAlgorithmParameterException e) {
-            throw new UnsupportedAlgorithmException("EC错误: " + e.getMessage());
         }
     }
 

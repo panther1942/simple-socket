@@ -1,4 +1,4 @@
-package cn.erika.util.security;
+package cn.erika.util.security.algorithm;
 
 /**
  * 消息签名算法的枚举类

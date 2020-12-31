@@ -1,5 +1,8 @@
 package cn.erika;
 
+import cn.erika.enumTest.Food;
+import cn.erika.enumTest.Fruit;
+import cn.erika.enumTest.Vegetables;
 import cn.erika.service.DemoServiceImpl;
 import cn.erika.service.IDemoService;
 import cn.erika.socket.core.component.Message;
@@ -8,10 +11,11 @@ import cn.erika.util.SerialUtils;
 import cn.erika.util.log.ConsoleLogger;
 import cn.erika.util.log.Logger;
 import cn.erika.util.log.LoggerFactory;
-import cn.erika.util.security.AsymmetricAlgorithm;
+import cn.erika.util.security.algorithm.AsymmetricAlgorithm;
 import cn.erika.util.security.MessageDigestUtils;
 import cn.erika.util.security.SecurityUtils;
 import cn.erika.util.string.Base64Utils;
+import cn.erika.util.string.ConsoleUtils;
 import cn.erika.util.string.StringUtils;
 import org.junit.Test;
 
@@ -21,6 +25,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
+import java.security.Security;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,8 +70,8 @@ public class CoreTest {
 
         System.out.println(Character.toChars(Base64Utils.base64Map[('A' & 0x00000011) + 1]));*/
 
-        String src = "Hello World";
-//        String src = "你好 世界";
+//        String src = "Hello World";
+        String src = "你好 世界";
         byte[] encrypt = Base64Utils.encode(src.getBytes());
         System.out.println(new String(encrypt));
         byte[] decrypt = Base64Utils.decode(encrypt);
@@ -83,9 +89,8 @@ public class CoreTest {
 
     @Test
     public void testSerial() {
-
-        File srcFile = new File("/home/erika/Downloads/81053568_0.jpg");
-        File destFile = new File("downloads/81053568_0.jpg");
+        File srcFile = new File("/home/erika/Downloads/phpMyAdmin-5.0.4-all-languages.zip");
+        File destFile = new File("downloads/phpMyAdmin.zip");
         try {
             if (destFile.exists()) {
                 destFile.delete();
@@ -106,12 +111,13 @@ public class CoreTest {
             while ((len = fileReader.read(tmp)) > -1) {
                 Map<String, Object> srcPak = new HashMap<>();
                 srcPak.put("LEN", len);
-                srcPak.put("BIN", tmp);
+                srcPak.put("BIN", Base64Utils.encode(tmp));
 
                 byte[] data = SerialUtils.serialObject(srcPak);
                 Map<String, Object> destPak = SerialUtils.serialObject(data);
                 int len2 = (int) destPak.get("LEN");
-                byte[] tmp2 = (byte[]) destPak.get("BIN");
+                byte[] tmp2 = Base64Utils.decode((byte[]) destPak.get("BIN"));
+
                 fileWriter.write(tmp2, 0, len2);
             }
             System.out.println(MessageDigestUtils.crc32Sum(destFile));
@@ -123,10 +129,35 @@ public class CoreTest {
     }
 
     @Test
+    public void testSupportSecurity() {
+        String target = "EC";
+        Provider[] providers = Security.getProviders();
+        for (Provider provider : providers) {
+            System.out.println(ConsoleUtils.drawLineWithTitle(provider.getName(), "-", 80));
+            for (Provider.Service service : provider.getServices()) {
+                String algorithm = service.getAlgorithm();
+                if (algorithm.contains(target)) {
+                    System.err.println(algorithm);
+                } else {
+                    System.out.println(algorithm);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void printProvider() {
+        Provider provider = new org.bouncycastle.jce.provider.BouncyCastleProvider();
+        for (Provider.Service service : provider.getServices()) {
+            System.out.println(String.format("%s: %s", service.getType(), service.getAlgorithm()));
+        }
+    }
+
+    @Test
     public void testEc() {
         try {
             byte[][] keyPair = SecurityUtils.initEcKey();
-            String data = "Hello World";
+            String data = StringUtils.randomString(1024);
 
             byte[] enData = SecurityUtils.encrypt(data.getBytes(), keyPair[0], AsymmetricAlgorithm.EC);
 
@@ -139,13 +170,16 @@ public class CoreTest {
             e.printStackTrace();
         } catch (UnsupportedAlgorithmException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     @Test
     public void testRandomString() {
         for (int i = 0; i < 50; i++) {
-            System.out.println(StringUtils.randomString(32));
+//            System.out.println(StringUtils.randomString(32));
+            System.out.println(StringUtils.randomNumber(32));
         }
     }
 
@@ -175,26 +209,52 @@ public class CoreTest {
     }
 
     @Test
-    public void testRsa() throws NoSuchAlgorithmException, UnsupportedAlgorithmException, InvalidKeyException {
-        int rsa1024 = 117;
-        int rsa2048 = 245;
+    public void testRsa() {
+        try {
+            int rsa1024 = 117;
+            int rsa2048 = 245;
 
-        String line = StringUtils.randomString(rsa1024);
-        byte[][] keyPair = SecurityUtils.initKey(AsymmetricAlgorithm.RSA, 1024);
+            String line = StringUtils.randomString(rsa1024);
+            byte[][] keyPair = SecurityUtils.initKey(AsymmetricAlgorithm.RSA, 1024);
 
-        System.out.println(Base64.getEncoder().encodeToString(keyPair[0]));
-        System.out.println();
+            System.out.println(Base64.getEncoder().encodeToString(keyPair[0]));
+            System.out.println();
 
-        byte[] enData = SecurityUtils.encrypt(line.getBytes(), keyPair[0]);
-        byte[] deData = SecurityUtils.decrypt(enData, keyPair[1]);
+            byte[] enData = SecurityUtils.encrypt(line.getBytes(), keyPair[0]);
+            byte[] deData = SecurityUtils.decrypt(enData, keyPair[1]);
 
-        System.out.println(new String(deData));
+            System.out.println(new String(deData));
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (UnsupportedAlgorithmException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
     public void testMessage() {
         Message message = new Message();
-        boolean isEnable = message.get("enabled");
+        Boolean isEnable = message.get("enabled");
         System.out.println(isEnable);
+    }
+
+    @Test
+    public void testEnum() {
+        Fruit a = Fruit.苹果;
+        Vegetables b = Vegetables.大白菜;
+
+        eatFood(a);
+        eatFood(b);
+    }
+
+    private static void eatFood(Food food) {
+        food.eat();
+        // 接口不能用switch
+        /*switch (food) {
+            case Fruit.桃子:
+                break;
+        }*/
     }
 }

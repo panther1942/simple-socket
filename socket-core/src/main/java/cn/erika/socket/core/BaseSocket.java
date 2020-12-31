@@ -12,6 +12,9 @@ import cn.erika.util.exception.SerialException;
 import cn.erika.util.log.Logger;
 import cn.erika.util.log.LoggerFactory;
 import cn.erika.util.security.*;
+import cn.erika.util.security.algorithm.DigitalSignatureAlgorithm;
+import cn.erika.util.security.algorithm.MessageDigestAlgorithm;
+import cn.erika.util.security.algorithm.SecurityAlgorithm;
 import cn.erika.util.string.SerialUtils;
 import cn.erika.util.string.StringUtils;
 
