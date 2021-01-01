@@ -1,7 +1,7 @@
 package cn.erika.util;
 
-import cn.erika.util.security.SecurityAlgorithm;
-import cn.erika.util.security.SecurityUtils;
+import cn.erika.utils.security.SecurityAlgorithm;
+import cn.erika.utils.security.SecurityUtils;
 
 public enum SecurityAlgorithmExtra implements SecurityAlgorithm {
     AES128OFB("AES128OFB", "AES", "OFB", 128, true, 16),

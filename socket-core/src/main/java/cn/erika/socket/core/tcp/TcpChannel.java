@@ -5,6 +5,7 @@ import cn.erika.config.GlobalSettings;
 import cn.erika.socket.core.BaseSocket;
 import cn.erika.socket.core.Handler;
 import cn.erika.socket.core.ISocket;
+import cn.erika.socket.exception.DataFormatException;
 
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -15,7 +16,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Date;
 
-public class TcpChannel extends BaseSocket{
+public class TcpChannel extends BaseSocket {
     private TcpReader reader;
 
     private SocketChannel channel;
@@ -61,8 +62,10 @@ public class TcpChannel extends BaseSocket{
                 int len = buffer.limit();
                 reader.read(this, data, len);
             }
-        } catch (SocketException e) {
-            handler.onError(this, e);
+        } catch (IOException e) {
+            log.warn("关闭连接: " + get(Constant.UID));
+        } catch (DataFormatException e) {
+            log.error(e.getMessage());
             close();
         }
     }

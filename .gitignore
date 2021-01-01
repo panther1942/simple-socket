@@ -4,7 +4,11 @@ target/
 *.class
 *.iml
 *.log
+*.zip
 
 download/
+downloads/
+Download/
+Downloads/
 /log
 /logs

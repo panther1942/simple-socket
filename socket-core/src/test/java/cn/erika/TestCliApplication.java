@@ -15,7 +15,6 @@ public class TestCliApplication extends CliApplication {
     @Override
     protected void beforeStartup() {
         super.beforeStartup();
-        GlobalSettings.securityAlgorithm = SecurityAlgorithmExtra.AES128CFB;
     }
 
     @Override

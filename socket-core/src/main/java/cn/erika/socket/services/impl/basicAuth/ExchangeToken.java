@@ -10,9 +10,9 @@ import cn.erika.socket.core.component.Message;
 import cn.erika.socket.exception.AuthenticateException;
 import cn.erika.socket.handler.IServer;
 import cn.erika.socket.services.ISocketService;
-import cn.erika.util.security.SecurityAlgorithm;
-import cn.erika.util.security.SecurityUtils;
-import cn.erika.util.string.StringUtils;
+import cn.erika.utils.security.SecurityAlgorithm;
+import cn.erika.utils.security.SecurityUtils;
+import cn.erika.utils.string.StringUtils;
 
 /**
  * 基础安全组件 用于确保通信安全

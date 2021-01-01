@@ -6,9 +6,9 @@ import cn.erika.context.bean.BeanFactory;
 import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.services.ServiceSelector;
-import cn.erika.util.log.Logger;
-import cn.erika.util.log.LoggerFactory;
-import cn.erika.util.security.SecurityUtils;
+import cn.erika.utils.log.Logger;
+import cn.erika.utils.log.LoggerFactory;
+import cn.erika.utils.security.SecurityUtils;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -44,7 +44,11 @@ public abstract class BaseHandler implements Handler {
     @Override
     public void onMessage(ISocket socket, Message message) throws BeanException {
         String serviceName = message.get(Constant.SERVICE_NAME);
-        execute(socket, serviceName, message);
+        if (serviceName != null) {
+            execute(socket, serviceName, message);
+        } else {
+            log.warn("未知的服务请求: " + message.toString());
+        }
     }
 
     @Override

@@ -8,14 +8,17 @@ import cn.erika.service.IDemoService;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.exception.UnsupportedAlgorithmException;
 import cn.erika.util.SerialUtils;
-import cn.erika.util.log.ConsoleLogger;
-import cn.erika.util.log.Logger;
-import cn.erika.util.log.LoggerFactory;
-import cn.erika.util.security.MessageDigestUtils;
-import cn.erika.util.security.SecurityUtils;
-import cn.erika.util.security.algorithm.BasicAsymmetricAlgorithm;
-import cn.erika.util.string.Base64Utils;
-import cn.erika.util.string.StringUtils;
+import cn.erika.utils.io.compress.ZIP;
+import cn.erika.utils.exception.CompressException;
+import cn.erika.utils.io.FileUtils;
+import cn.erika.utils.log.ConsoleLogger;
+import cn.erika.utils.log.Logger;
+import cn.erika.utils.log.LoggerFactory;
+import cn.erika.utils.security.MessageDigestUtils;
+import cn.erika.utils.security.SecurityUtils;
+import cn.erika.utils.security.algorithm.BasicAsymmetricAlgorithm;
+import cn.erika.utils.string.Base64Utils;
+import cn.erika.utils.string.StringUtils;
 import org.junit.Test;
 
 import java.io.File;
@@ -232,5 +235,53 @@ public class CoreTest {
             case Fruit.桃子:
                 break;
         }*/
+    }
+
+    @Test
+    public void testZipCompress() throws IOException, CompressException {
+        LoggerFactory.register(new ConsoleLogger());
+        File in = new File("/home/erika/Downloads/config.json");
+        File out = new File("downloads/config.zip");
+        System.out.println(out.getAbsolutePath());
+        ZIP zip = new ZIP();
+        zip.compress(in, out);
+    }
+
+    @Test
+    public void testZipDecompress() throws CompressException {
+        LoggerFactory.register(new ConsoleLogger());
+//        File in = new File("downloads/config.zip");
+//        File out = new File("downloads");
+        File in = new File("downloads/archive.zip");
+        File out = new File("downloads/archive");
+        System.out.println(out.getAbsolutePath());
+        ZIP zip = new ZIP();
+        zip.decompress(in, out);
+    }
+
+    @Test
+    public void testZipCompressDir() throws IOException, CompressException {
+        LoggerFactory.register(new ConsoleLogger());
+        File in = new File("downloads");
+        File out = new File("downloads/archive.zip");
+        System.out.println(out.getAbsolutePath());
+        ZIP zip = new ZIP();
+        zip.compressDir(in, out);
+    }
+
+    @Test
+    public void testZipFileRW() throws IOException, CompressException {
+        String srcFilename = "srcFile.txt";
+        String archiveName = "archive.zip";
+        String unarchiveDir = "unarchive";
+
+        String str = "Hello World";
+        ZIP zip = new ZIP();
+
+        FileUtils.writeFile(srcFilename, Base64Utils.encode(str.getBytes()));
+        zip.compress(new File(srcFilename), new File(archiveName));
+        zip.decompress(new File(archiveName), new File(unarchiveDir));
+        byte[] arr = FileUtils.readFile(unarchiveDir + "/" + srcFilename);
+        System.out.println(new String(Base64Utils.decode(arr)));
     }
 }

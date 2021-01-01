@@ -14,7 +14,7 @@ import cn.erika.socket.exception.FileException;
 import cn.erika.socket.handler.IServer;
 import cn.erika.socket.handler.bio.FileSender;
 import cn.erika.socket.services.ISocketService;
-import cn.erika.util.security.MessageDigestUtils;
+import cn.erika.utils.security.MessageDigestUtils;
 
 import java.io.File;
 import java.io.IOException;

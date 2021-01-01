@@ -6,17 +6,19 @@ import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.component.DataInfo;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.exception.UnsupportedAlgorithmException;
-import cn.erika.util.compress.GZIP;
-import cn.erika.util.exception.CompressException;
-import cn.erika.util.exception.SerialException;
-import cn.erika.util.log.Logger;
-import cn.erika.util.log.LoggerFactory;
-import cn.erika.util.security.*;
-import cn.erika.util.security.DigitalSignatureAlgorithm;
-import cn.erika.util.security.algorithm.BasicMessageDigestAlgorithm;
-import cn.erika.util.security.SecurityAlgorithm;
-import cn.erika.util.string.SerialUtils;
-import cn.erika.util.string.StringUtils;
+import cn.erika.utils.io.compress.CompressUtils;
+import cn.erika.utils.exception.CompressException;
+import cn.erika.utils.exception.NoSuchCompressAlgorithm;
+import cn.erika.utils.exception.SerialException;
+import cn.erika.utils.log.Logger;
+import cn.erika.utils.log.LoggerFactory;
+import cn.erika.utils.security.DigitalSignatureAlgorithm;
+import cn.erika.utils.security.MessageDigestUtils;
+import cn.erika.utils.security.SecurityAlgorithm;
+import cn.erika.utils.security.SecurityUtils;
+import cn.erika.utils.security.algorithm.BasicMessageDigestAlgorithm;
+import cn.erika.utils.string.SerialUtils;
+import cn.erika.utils.string.StringUtils;
 
 import java.io.IOException;
 import java.net.SocketException;
@@ -67,17 +69,10 @@ public abstract class BaseSocket implements ISocket {
             DataInfo info = new DataInfo();
             info.setTimestamp(new Date());
             if (GlobalSettings.enableCompress) {
-                switch (GlobalSettings.compressType) {
-                    case NONE:
-                        info.setCompress(DataInfo.Compress.NONE);
-                        break;
-                    case GZIP:
-                        info.setCompress(DataInfo.Compress.GZIP);
-                        data = GZIP.compress(data);
-                        break;
-                    default:
-                        throw new CompressException("不支持的压缩格式");
-                }
+//                log.debug("压缩算法: "+CompressUtils.getByCode(GlobalSettings.compressCode).getName());
+                int compressCode = GlobalSettings.compressCode;
+                info.setCompress(compressCode);
+                data = CompressUtils.compress(data, compressCode);
             }
 //            log.debug("数据长度: " + data.length);
             info.setPos(0);
@@ -87,8 +82,8 @@ public abstract class BaseSocket implements ISocket {
             info.setSign(sign);
 //            log.debug("计算数据签名: " + sign);
             send(info);
-        } catch (CompressException e) {
-            log.error("压缩时出现错误: " + e.getMessage());
+        } catch (CompressException | NoSuchCompressAlgorithm e) {
+            log.error("压缩时出现错误: " + e.getMessage(), e);
         } catch (SerialException e) {
             log.error("序列化出现错误: " + e.getMessage());
         } catch (InvalidKeyException e) {
@@ -124,16 +119,8 @@ public abstract class BaseSocket implements ISocket {
             if (!sign.equals(targetSign)) {
                 log.error("警告！ 签名不正确");
             }
-
-            switch (info.getCompress()) {
-                case NONE:
-                    break;
-                case GZIP:
-                    data = GZIP.uncompress(data);
-                    break;
-                default:
-                    throw new CompressException("不支持的压缩格式");
-            }
+            int compressCode = info.getCompress();
+            data = CompressUtils.decompress(data, compressCode);
             if (isEncrypt) {
                 SecurityAlgorithm securityAlgorithm = get(Constant.SECURITY_ALGORITHM);
                 String securityKey = get(Constant.SECURITY_KEY);
@@ -153,7 +140,7 @@ public abstract class BaseSocket implements ISocket {
                 message.add(Constant.DIGITAL_SIGNATURE, rsaSign);
             }
             receive(message);
-        } catch (CompressException e) {
+        } catch (CompressException | NoSuchCompressAlgorithm e) {
             log.error("解压缩时出现错误: " + e.getMessage());
         } catch (SerialException e) {
             log.error("反序列化出现错误: " + e.getMessage());

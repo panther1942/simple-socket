@@ -9,12 +9,12 @@ import cn.erika.socket.core.component.Message;
 import cn.erika.socket.exception.AuthenticateException;
 import cn.erika.socket.exception.UnsupportedAlgorithmException;
 import cn.erika.socket.services.ISocketService;
-import cn.erika.util.security.DigitalSignatureAlgorithm;
-import cn.erika.util.security.SecurityUtils;
-import cn.erika.util.security.algorithm.BasicMessageDigestAlgorithm;
-import cn.erika.util.security.MessageDigestUtils;
-import cn.erika.util.security.SecurityAlgorithm;
-import cn.erika.util.string.StringUtils;
+import cn.erika.utils.security.DigitalSignatureAlgorithm;
+import cn.erika.utils.security.SecurityUtils;
+import cn.erika.utils.security.algorithm.BasicMessageDigestAlgorithm;
+import cn.erika.utils.security.MessageDigestUtils;
+import cn.erika.utils.security.SecurityAlgorithm;
+import cn.erika.utils.string.StringUtils;
 
 /**
  * 基础安全组件 用于确保通信安全
@@ -87,8 +87,11 @@ public class ExchangePassword extends BaseService implements ISocketService {
                 throw new AuthenticateException("缺少加密信息");
             }
             // 算法
-            SecurityAlgorithm securityAlgorithm = SecurityUtils.getSecurityAlgorithmByValue(
-                    decryptWithRsaToString(bSecurityAlgorithm, GlobalSettings.privateKey));
+            String securityAlgorithmName = decryptWithRsaToString(bSecurityAlgorithm, GlobalSettings.privateKey);
+            SecurityAlgorithm securityAlgorithm = SecurityUtils.getSecurityAlgorithmByValue(securityAlgorithmName);
+            if (securityAlgorithm == null) {
+                throw new AuthenticateException("不支持的加密算法: " + securityAlgorithmName);
+            }
             // 密钥
             String securityKey = decryptWithRsaToString(bSecurityKey, GlobalSettings.privateKey);
 
@@ -114,7 +117,7 @@ public class ExchangePassword extends BaseService implements ISocketService {
             // 发送完消息再设置加密flag
             socket.set(Constant.ENCRYPT, true);
         } catch (AuthenticateException e) {
-            log.error("加密协商失败", e);
+            log.error("加密协商失败");
             Message reply = new Message(Constant.SRV_EXCHANGE_RESULT);
             reply.add(Constant.RESULT, false);
             reply.add(Constant.TEXT, e.getMessage());

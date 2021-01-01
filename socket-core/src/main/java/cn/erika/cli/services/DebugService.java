@@ -4,7 +4,7 @@ import cn.erika.config.GlobalSettings;
 import cn.erika.context.BaseService;
 import cn.erika.context.annotation.Component;
 import cn.erika.context.exception.BeanException;
-import cn.erika.util.log.LogLevel;
+import cn.erika.utils.log.LogLevel;
 
 @Component("log")
 public class DebugService extends BaseService implements ICliService {

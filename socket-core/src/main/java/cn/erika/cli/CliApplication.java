@@ -12,13 +12,12 @@ import cn.erika.context.scan.PackageScannerHandler;
 import cn.erika.socket.SocketApplication;
 import cn.erika.socket.handler.IClient;
 import cn.erika.socket.handler.IServer;
-import cn.erika.socket.services.impl.fileTransfer.FileUploadService;
-import cn.erika.util.log.ConsoleLogger;
-import cn.erika.util.log.FileLogger;
-import cn.erika.util.log.Logger;
-import cn.erika.util.log.LoggerFactory;
-import cn.erika.util.string.KeyboardReader;
-import cn.erika.util.string.StringUtils;
+import cn.erika.utils.log.ConsoleLogger;
+import cn.erika.utils.log.FileLogger;
+import cn.erika.utils.log.Logger;
+import cn.erika.utils.log.LoggerFactory;
+import cn.erika.utils.string.KeyboardReader;
+import cn.erika.utils.string.StringUtils;
 
 import java.io.IOException;
 import java.util.Comparator;
@@ -38,7 +37,7 @@ public class CliApplication extends SocketApplication implements Runnable {
     static {
         LoggerFactory.register(new ConsoleLogger());
         LoggerFactory.register(new FileLogger(GlobalSettings.logDir, GlobalSettings.logName, GlobalSettings.charset));
-//        LoggerFactory.ignore(FileUploadService.class);
+//        LoggerFactory.ignore(FileUploadService.cla ss);
     }
 
     @Override

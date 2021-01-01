@@ -5,6 +5,7 @@ import cn.erika.config.GlobalSettings;
 import cn.erika.socket.core.BaseSocket;
 import cn.erika.socket.core.Handler;
 import cn.erika.socket.core.ISocket;
+import cn.erika.socket.exception.DataFormatException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,6 +81,9 @@ public class TcpSocket extends BaseSocket implements Runnable {
             }
         } catch (IOException e) {
             log.warn("关闭连接: " + get(Constant.UID));
+        } catch (DataFormatException e) {
+            log.error(e.getMessage());
+            close();
         }
     }
 

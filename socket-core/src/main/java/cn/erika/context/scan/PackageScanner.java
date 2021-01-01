@@ -1,7 +1,7 @@
 package cn.erika.context.scan;
 
-import cn.erika.util.log.Logger;
-import cn.erika.util.log.LoggerFactory;
+import cn.erika.utils.log.Logger;
+import cn.erika.utils.log.LoggerFactory;
 
 import java.io.*;
 import java.net.JarURLConnection;

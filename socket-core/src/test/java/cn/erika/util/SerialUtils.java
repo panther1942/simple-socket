@@ -1,6 +1,6 @@
 package cn.erika.util;
 
-import cn.erika.util.exception.SerialException;
+import cn.erika.utils.exception.SerialException;
 
 import java.io.*;
 

@@ -10,7 +10,7 @@ import cn.erika.socket.core.ISocket;
 import cn.erika.socket.core.component.FileInfo;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.services.ISocketService;
-import cn.erika.util.security.MessageDigestUtils;
+import cn.erika.utils.security.MessageDigestUtils;
 
 import java.io.*;
 import java.text.DecimalFormat;

@@ -7,7 +7,7 @@ import cn.erika.socket.core.component.LinkManager;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.exception.AuthenticateException;
 import cn.erika.socket.exception.TokenException;
-import cn.erika.util.security.MessageDigestUtils;
+import cn.erika.utils.security.MessageDigestUtils;
 
 import java.net.SocketAddress;
 import java.net.SocketException;
@@ -86,7 +86,6 @@ public abstract class BaseServer extends BaseHandler implements Runnable, IServe
     public void listen() {
         Thread t = new Thread(this, this.getClass().getSimpleName());
         t.setName(this.getClass().getSimpleName());
-        t.setDaemon(true);
         t.start();
     }
 

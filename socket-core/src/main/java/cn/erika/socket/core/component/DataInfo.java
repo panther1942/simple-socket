@@ -1,9 +1,6 @@
 package cn.erika.socket.core.component;
 
-import cn.erika.util.string.StringUtils;
-
 import java.io.Serializable;
-import java.util.Base64;
 import java.util.Date;
 
 /**
@@ -13,12 +10,12 @@ import java.util.Date;
 public class DataInfo implements Serializable {
     private static final long serialVersionUID = 1L;
     // 数据头部长度
-    public static final int LEN = 13 + 1 + 10 + 10 + 32;
+    public static final int LEN = 13 + 2 + 10 + 10 + 32;
 
     // 时间戳13字节
     private Date timestamp;
-    // 是否压缩10字节
-    private Compress compress = Compress.NONE; // 0: none 1: gzip
+    // 是否压缩2字节 16进制
+    private int compress = 0x00;
     // 偏移量10字节
     private long pos;
     // 长度10字节
@@ -36,11 +33,11 @@ public class DataInfo implements Serializable {
         this.timestamp = timestamp;
     }
 
-    public Compress getCompress() {
+    public int getCompress() {
         return compress;
     }
 
-    public void setCompress(Compress compress) {
+    public void setCompress(int compress) {
         this.compress = compress;
     }
 
@@ -80,31 +77,10 @@ public class DataInfo implements Serializable {
     @Override
     public String toString() {
         String timestamp = String.format("%13s", this.timestamp.getTime()).replaceAll("\\s", "0");
-        String compress = String.format("%1s", this.compress.value).replaceAll("\\s", "0");
+        String compress = String.format("%2x", this.compress).replaceAll("\\s", "0");
         String pos = String.format("%10s", this.pos).replaceAll("\\s", "0");
         String len = String.format("%10s", this.len).replaceAll("\\s", "0");
         String sign = String.format("%32s", this.sign);
         return timestamp + compress + pos + len + sign;
-    }
-
-    // 数据压缩目前貌似就GZIP靠谱点
-    public enum Compress {
-        NONE(0),
-        GZIP(1);
-
-        private int value;
-
-        Compress(int value) {
-            this.value = value;
-        }
-
-        public static Compress getByValue(int value) {
-            for (Compress compress : Compress.values()) {
-                if (compress.value == value) {
-                    return compress;
-                }
-            }
-            return null;
-        }
     }
 }
