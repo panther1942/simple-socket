@@ -69,32 +69,65 @@ public class SecurityUtils {
         return initKey(DEFAULT_ASYMMETRIC_ALGORITHM, DEFAULT_ASYMMETRIC_LENGTH);
     }
 
+    /**
+     * 注册数字签名算法
+     *
+     * @param algorithm 数字签名算法
+     */
     public static void registerDigitalSignatureAlgorithm(DigitalSignatureAlgorithm algorithm) {
         if (!digitalSignatureAlgorithmMap.containsKey(algorithm.getValue())) {
             digitalSignatureAlgorithmMap.put(algorithm.getValue(), algorithm);
         }
     }
 
+    /**
+     * 通过名称获取数字签名算法
+     *
+     * @param algorithm 数字签名算法名称
+     * @return 数字签名算法
+     */
     public static DigitalSignatureAlgorithm getDigitalSignatureAlgorithmByValue(String algorithm) {
         return digitalSignatureAlgorithmMap.get(algorithm);
     }
 
+    /**
+     * 注册消息摘要算法
+     *
+     * @param algorithm 消息摘要算法
+     */
     public static void registerMessageDigestAlgorithm(MessageDigestAlgorithm algorithm) {
         if (!messageDigestAlgorithmMap.containsKey(algorithm.getValue())) {
             messageDigestAlgorithmMap.put(algorithm.getValue(), algorithm);
         }
     }
 
+    /**
+     * 通过名称获取消息摘要算法
+     *
+     * @param algorithm 消息摘要算法名称
+     * @return 消息摘要算法
+     */
     public static MessageDigestAlgorithm getMessageDigestAlgorithmByValue(String algorithm) {
         return messageDigestAlgorithmMap.get(algorithm);
     }
 
+    /**
+     * 注册对称加密算法
+     *
+     * @param algorithm 对称加密算法
+     */
     public static void registerSecurityAlgorithm(SecurityAlgorithm algorithm) {
         if (!securityAlgorithmMap.containsKey(algorithm.getValue())) {
             securityAlgorithmMap.put(algorithm.getValue(), algorithm);
         }
     }
 
+    /**
+     * 通过名称获取对称加密算法
+     *
+     * @param algorithm 对称加密算法名称
+     * @return 对称加密算法
+     */
     public static SecurityAlgorithm getSecurityAlgorithmByValue(String algorithm) {
         return securityAlgorithmMap.get(algorithm);
     }

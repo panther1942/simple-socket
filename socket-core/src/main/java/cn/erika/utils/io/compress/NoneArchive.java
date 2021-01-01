@@ -26,15 +26,12 @@ public class NoneArchive implements CompressAlgorithm {
     }
 
     @Override
-    public byte[] decompress(byte[] data) throws CompressException {
+    public byte[] uncompress(byte[] data) throws CompressException {
         return data;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof CompressAlgorithm)) {
-            return false;
-        }
-        return CompressUtils.compare(this, (CompressAlgorithm) o);
+        return compare(o);
     }
 }

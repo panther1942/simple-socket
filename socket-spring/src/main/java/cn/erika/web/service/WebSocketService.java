@@ -32,7 +32,7 @@ public class WebSocketService implements Serializable {
     @OnMessage
     public void onMessage(Session session, String message) {
         System.out.println(message);
-        if ("server".equals(clientId)) {
+        if ("server".equalsIgnoreCase(clientId)) {
             sendMessage(message);
         } else {
             Session server = clientList.get("server");

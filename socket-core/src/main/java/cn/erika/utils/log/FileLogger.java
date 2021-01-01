@@ -98,7 +98,7 @@ public class FileLogger implements LogPrinter {
             return false;
         }
         FileLogger that = (FileLogger) o;
-        if (this.logDir.equals(that.logName) && this.logName.equals(that.logName)) {
+        if (this.logDir.equalsIgnoreCase(that.logName) && this.logName.equalsIgnoreCase(that.logName)) {
             return true;
         }
         return false;

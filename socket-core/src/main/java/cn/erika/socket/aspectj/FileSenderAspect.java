@@ -33,7 +33,7 @@ public class FileSenderAspect {
 
     @AfterReturning(value = "onMessage() && args(socket,message)", argNames = "joinPoint,socket,message")
     public void afterReturning(JoinPoint joinPoint, ISocket socket, Message message) {
-        if (Constant.SRV_EXCHANGE_TOKEN.equals(message.get(Constant.SERVICE_NAME))) {
+        if (Constant.SRV_EXCHANGE_TOKEN.equalsIgnoreCase(message.get(Constant.SERVICE_NAME))) {
             boolean result = message.get(Constant.RESULT);
             if (result) {
                 FileSender fileSender = (FileSender) joinPoint.getTarget();

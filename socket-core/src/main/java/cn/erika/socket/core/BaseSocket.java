@@ -116,11 +116,11 @@ public abstract class BaseSocket implements ISocket {
             String targetSign = StringUtils.byte2HexString(MessageDigestUtils.sum(data, BasicMessageDigestAlgorithm.MD5));
             log.debug("原始数据签名: " + sign);
             log.debug("计算数据签名: " + targetSign);
-            if (!sign.equals(targetSign)) {
+            if (!sign.equalsIgnoreCase(targetSign)) {
                 log.error("警告！ 签名不正确");
             }
             int compressCode = info.getCompress();
-            data = CompressUtils.decompress(data, compressCode);
+            data = CompressUtils.uncompress(data, compressCode);
             if (isEncrypt) {
                 SecurityAlgorithm securityAlgorithm = get(Constant.SECURITY_ALGORITHM);
                 String securityKey = get(Constant.SECURITY_KEY);
@@ -215,5 +215,18 @@ public abstract class BaseSocket implements ISocket {
     @Override
     public Handler getHandler() {
         return this.handler;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ISocket)) {
+            return false;
+        }
+        ISocket that = (ISocket) o;
+        if (this.getLocalAddress().equals(that.getLocalAddress())
+                && this.getRemoteAddress().equals(that.getRemoteAddress())) {
+            return true;
+        }
+        return false;
     }
 }

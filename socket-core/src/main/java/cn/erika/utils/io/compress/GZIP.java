@@ -45,7 +45,7 @@ public class GZIP implements CompressAlgorithm {
     }
 
     @Override
-    public byte[] decompress(byte[] data) throws CompressException {
+    public byte[] uncompress(byte[] data) throws CompressException {
         if (data == null || data.length == 0) {
             return data;
         }
@@ -69,9 +69,6 @@ public class GZIP implements CompressAlgorithm {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof CompressAlgorithm)) {
-            return false;
-        }
-        return CompressUtils.compare(this, (CompressAlgorithm) o);
+        return compare(o);
     }
 }
