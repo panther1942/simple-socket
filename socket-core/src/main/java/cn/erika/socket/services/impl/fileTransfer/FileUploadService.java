@@ -16,6 +16,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.DecimalFormat;
+import java.util.Date;
 
 @Component(Constant.SRV_UPLOAD)
 public class FileUploadService extends BaseService implements ISocketService {
@@ -63,10 +64,13 @@ public class FileUploadService extends BaseService implements ISocketService {
         String token = socket.get(Constant.TOKEN);
         FileInfo info = socket.getHandler().get(token);
         String filename = info.getFilename();
+        Date timestamp = info.getTimestamp();
         long fileLength = info.getFileLength();
         Long filePos = message.get(Constant.FILE_POS);
         Integer len = message.get(Constant.LEN);
         String data = message.get(Constant.BIN);
+
+        filename = timestamp.getTime() + "_" + filename;
 
         File file = new File(BASE_DIR + filename);
 
@@ -92,10 +96,12 @@ public class FileUploadService extends BaseService implements ISocketService {
                 System.out.println("文件校验码: " + targetCode);
                 if (checkCode == targetCode) {
                     log.info("数据完整");
-                    parent.send(new Message(Constant.SRV_POST_UPLOAD, "接收完成"));
+                    parent.send(new Message(Constant.SRV_POST_UPLOAD,
+                            "接收完成: " + file.getAbsolutePath()));
                 } else {
                     log.warn("数据不完整");
-                    parent.send(new Message(Constant.SRV_POST_UPLOAD, "接收失败"));
+                    parent.send(new Message(Constant.SRV_POST_UPLOAD,
+                            "接收失败: " + file.getAbsolutePath()));
                 }
             } catch (IOException e) {
                 log.error("校验出错: " + e.getMessage());

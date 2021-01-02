@@ -116,6 +116,7 @@ public class ExchangePassword extends BaseService implements ISocketService {
             socket.send(reply);
             // 发送完消息再设置加密flag
             socket.set(Constant.ENCRYPT, true);
+            // 服务器执行任务队列
             socket.getHandler().onReady(socket);
         } catch (AuthenticateException e) {
             log.error("加密协商失败");

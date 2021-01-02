@@ -86,7 +86,7 @@ class TcpReader {
             info.setLen(Integer.parseInt(strHead.substring(25, 35)));
             // 签名 32
             info.setSign(strHead.substring(35, 67));
-            log.debug(info.toString());
+//            log.debug(info.toString());
             byte[] tmp = new byte[len - DataInfo.LEN];
             System.arraycopy(data, DataInfo.LEN, tmp, 0, len - DataInfo.LEN);
             return tmp;

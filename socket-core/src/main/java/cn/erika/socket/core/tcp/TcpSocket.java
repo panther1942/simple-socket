@@ -22,7 +22,7 @@ public class TcpSocket extends BaseSocket implements Runnable {
     private InputStream in;
     private OutputStream out;
 
-    public TcpSocket(java.net.Socket socket, Handler handler) throws IOException {
+    public TcpSocket(Socket socket, Handler handler) throws IOException {
         set(Constant.TYPE, Constant.SERVER);
         this.socket = socket;
         this.handler = handler;
@@ -30,12 +30,12 @@ public class TcpSocket extends BaseSocket implements Runnable {
     }
 
     public TcpSocket(ISocket socket, Handler handler) throws IOException {
+        set(Constant.TYPE, Constant.CLIENT);
+        set(Constant.PARENT_SOCKET, socket);
+        this.socket = new Socket();
+        this.handler = handler;
+        this.socket.setReuseAddress(true);
         try {
-            set(Constant.TYPE, Constant.CLIENT);
-            set(Constant.PARENT_SOCKET, socket);
-            this.socket = new Socket();
-            this.handler = handler;
-            this.socket.setReuseAddress(true);
             this.socket.connect(socket.getRemoteAddress());
             init();
         } catch (ConnectException e) {
@@ -44,11 +44,11 @@ public class TcpSocket extends BaseSocket implements Runnable {
     }
 
     public TcpSocket(SocketAddress address, Handler handler) throws IOException {
+        set(Constant.TYPE, Constant.CLIENT);
+        this.socket = new Socket();
+        this.handler = handler;
+        this.socket.setReuseAddress(true);
         try {
-            set(Constant.TYPE, Constant.CLIENT);
-            this.socket = new Socket();
-            this.handler = handler;
-            this.socket.setReuseAddress(true);
             this.socket.connect(address);
             init();
         } catch (ConnectException e) {

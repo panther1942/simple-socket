@@ -1,6 +1,7 @@
 package cn.erika.socket.core.component;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class FileInfo implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -13,6 +14,8 @@ public class FileInfo implements Serializable {
     private long filePos;
     // 文件签名(CRC)
     private long checkCode;
+    // 时间戳
+    private Date timestamp = new Date();
 
     public String getFilename() {
         return filename;
@@ -46,6 +49,14 @@ public class FileInfo implements Serializable {
         this.checkCode = checkCode;
     }
 
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
+
     @Override
     public String toString() {
         return "FileInfo{" +
@@ -53,6 +64,7 @@ public class FileInfo implements Serializable {
                 ", fileLength=" + fileLength +
                 ", filePos=" + filePos +
                 ", checkCode=" + checkCode +
+                ", timestamp=" + timestamp +
                 '}';
     }
 }

@@ -114,8 +114,8 @@ public abstract class BaseSocket implements ISocket {
             String sign = info.getSign();
 //            log.debug("数据长度: " + info.getLen());
             String targetSign = StringUtils.byte2HexString(MessageDigestUtils.sum(data, BasicMessageDigestAlgorithm.MD5));
-            log.debug("原始数据签名: " + sign);
-            log.debug("计算数据签名: " + targetSign);
+//            log.debug("原始数据签名: " + sign);
+//            log.debug("计算数据签名: " + targetSign);
             if (!sign.equalsIgnoreCase(targetSign)) {
                 log.error("警告！ 签名不正确");
             }

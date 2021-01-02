@@ -4,6 +4,7 @@ import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
 import cn.erika.socket.core.BaseSocket;
 import cn.erika.socket.core.Handler;
+import cn.erika.socket.core.ISocket;
 import cn.erika.socket.exception.DataFormatException;
 
 import java.io.IOException;
@@ -23,8 +24,6 @@ public class TcpChannel extends BaseSocket {
     public TcpChannel(SocketChannel channel, Handler handler, Selector selector) throws IOException {
         set(Constant.TYPE, Constant.SERVER);
         this.handler = handler;
-        this.charset = GlobalSettings.charset;
-        this.reader = new TcpReader(charset);
         this.selector = selector;
         this.channel = channel;
         this.channel.configureBlocking(false);
@@ -32,11 +31,21 @@ public class TcpChannel extends BaseSocket {
         init();
     }
 
+    public TcpChannel(ISocket socket, Handler handler, Selector selector) throws IOException {
+        set(Constant.TYPE, Constant.CLIENT);
+        set(Constant.PARENT_SOCKET, socket);
+        this.handler = handler;
+        this.charset = GlobalSettings.charset;
+        this.channel = SocketChannel.open();
+        this.channel.configureBlocking(false);
+        this.channel.register(selector, SelectionKey.OP_CONNECT);
+        this.channel.connect(socket.getRemoteAddress());
+        init();
+    }
+
     public TcpChannel(SocketAddress address, Handler handler, Selector selector) throws IOException {
         set(Constant.TYPE, Constant.CLIENT);
         this.handler = handler;
-        this.charset = GlobalSettings.charset;
-        this.reader = new TcpReader(charset);
         this.selector = selector;
         this.channel = SocketChannel.open();
         this.channel.configureBlocking(false);
@@ -47,6 +56,9 @@ public class TcpChannel extends BaseSocket {
 
     private void init() throws IOException {
         set(Constant.LINK_TIME, new Date());
+        this.charset = GlobalSettings.charset;
+        this.reader = new TcpReader(charset);
+
         handler.init(this);
     }
 

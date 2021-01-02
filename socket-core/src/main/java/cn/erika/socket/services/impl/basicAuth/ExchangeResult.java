@@ -18,7 +18,11 @@ public class ExchangeResult extends BaseService implements ISocketService {
 
     @Override
     public void client(ISocket socket, Message message) {
-        deal(socket, message);
+        if (deal(socket, message)) {
+            // 客户端执行任务队列
+            socket.getHandler().onReady(socket);
+        }
+
     }
 
     @Override
@@ -39,7 +43,6 @@ public class ExchangeResult extends BaseService implements ISocketService {
             // 协商成功则设置连接的加密flag
             log.info(msg);
             socket.set(Constant.ENCRYPT, true);
-            socket.getHandler().onReady(socket);
             return true;
         } else {
             // 协商失败 则关闭连接
