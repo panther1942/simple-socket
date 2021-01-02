@@ -27,7 +27,11 @@ public abstract class BasicClient extends BaseHandler{
     }
 
     public void send(String message) {
-        socket.send(new Message(Constant.SRV_TEXT, message));
+        if (socket != null) {
+            socket.send(new Message(Constant.SRV_TEXT, message));
+        }else{
+            log.warn("未连接到服务器");
+        }
     }
 
     public SocketAddress getLocalAddress() {

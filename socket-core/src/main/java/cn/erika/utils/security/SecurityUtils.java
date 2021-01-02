@@ -2,6 +2,7 @@ package cn.erika.utils.security;
 
 import cn.erika.socket.exception.UnsupportedAlgorithmException;
 import cn.erika.utils.security.algorithm.BasicAsymmetricAlgorithm;
+import cn.erika.utils.string.Base64Utils;
 
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
@@ -30,6 +31,8 @@ public class SecurityUtils {
     private static final String PADDING_METHOD = "PKCS5Padding";
     // 种子随机生成器使用SHA1PRNG 用于获取加密/解密器
     private static final String SECURE_RANDOM = "SHA1PRNG";
+
+    private static final int GCM_TAG_LEN = 16;
 
     // 默认的不对称加密算法
     private static final AsymmetricAlgorithm DEFAULT_ASYMMETRIC_ALGORITHM = BasicAsymmetricAlgorithm.RSA;
@@ -138,22 +141,7 @@ public class SecurityUtils {
      * @param data      需要加密的数据
      * @param password  密码
      * @param algorithm 对称加密算法
-     * @return 加密后的数据
-     * @throws UnsupportedAlgorithmException 如果不支持加密方式或者加密出错，则抛出该异常
-     * @throws InvalidKeyException           如果密钥无效则抛出该异常
-     */
-    public static byte[] encrypt(byte[] data, String password, SecurityAlgorithm algorithm)
-            throws UnsupportedAlgorithmException, InvalidKeyException {
-        return encrypt(data, password, algorithm, null);
-    }
-
-    /**
-     * 使用对称加密算法加密数据
-     *
-     * @param data      需要加密的数据
-     * @param password  密码
-     * @param algorithm 对称加密算法
-     * @param iv        向量
+     * @param iv        向量 不需要就null
      * @return 加密后的数据
      * @throws UnsupportedAlgorithmException 如果不支持加密方式或者加密出错，则抛出该异常
      * @throws InvalidKeyException           如果密钥无效则抛出该异常
@@ -166,7 +154,7 @@ public class SecurityUtils {
                 switch (algorithm.getMode()) {
                     case "GCM":
                         cipher.init(Cipher.ENCRYPT_MODE, getSecretKey(password, algorithm),
-                                new GCMParameterSpec(algorithm.getSecurityLength(), iv));
+                                new GCMParameterSpec(8 * GCM_TAG_LEN, iv));
                         break;
                     default:
                         cipher.init(Cipher.ENCRYPT_MODE, getSecretKey(password, algorithm),
@@ -177,9 +165,9 @@ public class SecurityUtils {
             }
             return cipher.doFinal(data);
         } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
-            throw new UnsupportedAlgorithmException("不支持的加密方法: " + e.getMessage());
+            throw new UnsupportedAlgorithmException("不支持的加密方法: " + e.getMessage(), e);
         } catch (NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException e) {
-            throw new UnsupportedAlgorithmException("加密出错: " + e.getMessage());
+            throw new UnsupportedAlgorithmException("加密出错: " + e.getMessage(), e);
         }
     }
 
@@ -189,22 +177,7 @@ public class SecurityUtils {
      * @param data      需要解密的数据
      * @param password  密码
      * @param algorithm 对称加密算法
-     * @return 解密后的数据
-     * @throws UnsupportedAlgorithmException 如果不支持加密方式或者加密出错，则抛出该异常
-     * @throws InvalidKeyException           如果密钥无效则抛出该异常
-     */
-    public static byte[] decrypt(byte[] data, String password, SecurityAlgorithm algorithm)
-            throws InvalidKeyException, UnsupportedAlgorithmException {
-        return decrypt(data, password, algorithm, null);
-    }
-
-    /**
-     * 使用对称加密算法解密数据
-     *
-     * @param data      需要解密的数据
-     * @param password  密码
-     * @param algorithm 对称加密算法
-     * @param iv        向量
+     * @param iv        向量 不需要就null
      * @return 解密后的数据
      * @throws UnsupportedAlgorithmException 如果不支持加密方式或者加密出错，则抛出该异常
      * @throws InvalidKeyException           如果密钥无效则抛出该异常
@@ -217,7 +190,7 @@ public class SecurityUtils {
                 switch (algorithm.getMode()) {
                     case "GCM":
                         cipher.init(Cipher.DECRYPT_MODE, getSecretKey(password, algorithm),
-                                new GCMParameterSpec(algorithm.getSecurityLength(), iv));
+                                new GCMParameterSpec(8 * GCM_TAG_LEN, iv));
                         break;
                     default:
                         cipher.init(Cipher.DECRYPT_MODE, getSecretKey(password, algorithm),
@@ -228,9 +201,9 @@ public class SecurityUtils {
             }
             return cipher.doFinal(data);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException e) {
-            throw new UnsupportedAlgorithmException("不支持的加密方法: " + e.getMessage());
+            throw new UnsupportedAlgorithmException("不支持的加密方法: " + e.getMessage(), e);
         } catch (BadPaddingException | IllegalBlockSizeException e) {
-            throw new UnsupportedAlgorithmException("加密出错: " + e.getMessage());
+            throw new UnsupportedAlgorithmException("解密出错: " + e.getMessage(), e);
         }
     }
 

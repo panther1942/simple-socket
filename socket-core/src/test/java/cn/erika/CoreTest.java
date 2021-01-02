@@ -132,15 +132,16 @@ public class CoreTest {
 
     @Test
     public void testSupportSecurity() {
-        String target = "RSA";
+        String target = "GCM";
         Provider[] providers = Security.getProviders();
         for (Provider provider : providers) {
             for (Provider.Service service : provider.getServices()) {
+                String type = service.getType();
                 String algorithm = service.getAlgorithm();
                 if (algorithm.contains(target)) {
-                    System.err.printf("%15s: %s\n", provider.getName(), algorithm);
+                    System.err.printf("%-15s[%s]: %s\n", provider.getName(), type, algorithm);
                 } else {
-                    System.out.printf("%15s: %s\n", provider.getName(), algorithm);
+                    System.out.printf("%-15s[%s]: %s\n", provider.getName(), type, algorithm);
                 }
             }
         }
