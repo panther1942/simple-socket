@@ -2,7 +2,7 @@ package cn.erika.socket.handler.nio;
 
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.core.tcp.TcpChannel;
-import cn.erika.socket.handler.BasicServer;
+import cn.erika.socket.handler.BaseServer;
 import cn.erika.socket.handler.IServer;
 
 import java.io.IOException;
@@ -14,7 +14,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class NIOServer extends BasicServer implements IServer {
+public class NIOServer extends BaseServer implements IServer {
     private ServerSocketChannel server;
     private Selector selector = Selector.open();
     private ConcurrentHashMap<SocketChannel, TcpChannel> channelMap = new ConcurrentHashMap<>();

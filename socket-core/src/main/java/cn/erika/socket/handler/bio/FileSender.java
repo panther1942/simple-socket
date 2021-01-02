@@ -5,6 +5,7 @@ import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.BaseHandler;
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.core.component.Message;
+import cn.erika.socket.core.component.Task;
 import cn.erika.socket.core.tcp.TcpSocket;
 import cn.erika.utils.log.Logger;
 import cn.erika.utils.log.LoggerFactory;
@@ -28,10 +29,24 @@ public class FileSender extends BaseHandler {
     @Override
     public void init(ISocket socket) {
         super.init(socket);
+        emptyTasks();
+        addTask(new Task() {
+            @Override
+            public void run() {
+                try {
+                    execute(socket, Constant.SRV_UPLOAD, message);
+                } catch (BeanException e) {
+                    onError(socket, e);
+                    close();
+                }
+            }
+        });
         try {
             ISocket parent = socket.get(Constant.PARENT_SOCKET);
             String token = message.get(Constant.TOKEN);
             socket.set(Constant.TOKEN, token);
+            socket.set(Constant.FILEPATH, parent.get(token));
+            parent.remove(token);
             socket.set(Constant.PUBLIC_KEY, parent.get(Constant.PUBLIC_KEY));
             socket.set(Constant.DIGITAL_SIGNATURE_ALGORITHM, parent.get(Constant.DIGITAL_SIGNATURE_ALGORITHM));
             execute(socket, Constant.SRV_EXCHANGE_TOKEN, null);
@@ -41,19 +56,15 @@ public class FileSender extends BaseHandler {
         }
     }
 
+    @Override
+    public void onConnected(ISocket socket) throws BeanException {
+        execute(socket, Constant.SRV_EXCHANGE_KEY, null);
+    }
+
     // 必须要这样写 不然AOP切不进来 Aspectj是静态AOP 编译时插入增强部分
     @Override
     public void onMessage(ISocket socket, Message message) throws BeanException {
         super.onMessage(socket, message);
-    }
-
-    public void upload() {
-        try {
-            execute(socket, Constant.SRV_UPLOAD, message);
-        } catch (BeanException e) {
-            onError(socket, e);
-            close();
-        }
     }
 
     @Override
@@ -69,5 +80,21 @@ public class FileSender extends BaseHandler {
     @Override
     public boolean isClosed() {
         return socket.isClosed();
+    }
+
+
+    @Override
+    public void set(String key, Object value) {
+        socket.set(key, value);
+    }
+
+    @Override
+    public <T> T get(String key) {
+        return socket.get(key);
+    }
+
+    @Override
+    public void remove(String key) {
+        socket.remove(key);
     }
 }

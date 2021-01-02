@@ -20,23 +20,9 @@ import java.util.Date;
 public class FileSenderAspect {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
-    @Pointcut("execution(* cn.erika.socket.handler.bio.FileSender.onMessage(..))")
-    public void onMessage() {
-    }
 
     @Pointcut("execution(* cn.erika.socket.services.impl.fileTransfer.FileUploadService.client(..))")
     public void sendFile() {
-    }
-
-    @AfterReturning(value = "onMessage() && args(socket,message)", argNames = "joinPoint,socket,message")
-    public void afterReturning(JoinPoint joinPoint, ISocket socket, Message message) {
-        if (Constant.SRV_EXCHANGE_TOKEN.equalsIgnoreCase(message.get(Constant.SERVICE_NAME))) {
-            boolean result = message.get(Constant.RESULT);
-            if (result) {
-                FileSender fileSender = (FileSender) joinPoint.getTarget();
-                fileSender.upload();
-            }
-        }
     }
 
 //    upload /home/erika/Downloads/config.json config.json

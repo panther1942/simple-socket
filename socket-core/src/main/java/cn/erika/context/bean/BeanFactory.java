@@ -1,11 +1,13 @@
 package cn.erika.context.bean;
 
+import cn.erika.config.Constant;
 import cn.erika.context.annotation.Component;
 import cn.erika.context.annotation.Enhance;
 import cn.erika.context.exception.BeanException;
 import cn.erika.context.exception.NoSuchBeanException;
 import cn.erika.context.exception.UndeclaredBeanException;
 import cn.erika.context.exception.UndeclaredMethodException;
+import cn.erika.socket.core.component.Task;
 
 import java.lang.reflect.*;
 import java.util.HashMap;
@@ -24,6 +26,9 @@ public class BeanFactory {
     // 存储服务别名 粒度为Method
     private Map<String, Method> serviceList = new HashMap<>();
 
+    private LinkedList<Task> serverTasks = new LinkedList<>();
+    private LinkedList<Task> clientTasks = new LinkedList<>();
+
     private BeanFactory() {
     }
 
@@ -32,6 +37,33 @@ public class BeanFactory {
             factory = new BeanFactory();
         }
         return factory;
+    }
+
+    public List<Task> getTasks(String type) {
+        switch (type) {
+            case Constant.CLIENT:
+                return clientTasks;
+            case Constant.SERVER:
+                return serverTasks;
+            default:
+                List<Task> taskList = new LinkedList<>();
+                taskList.addAll(clientTasks);
+                taskList.addAll(serverTasks);
+                return taskList;
+        }
+    }
+
+    public void addTasks(String type, Task task) throws BeanException {
+        switch (type) {
+            case Constant.CLIENT:
+                clientTasks.add(task);
+                break;
+            case Constant.SERVER:
+                serverTasks.add(task);
+                break;
+            default:
+                throw new BeanException("不支持的任务类型: " + type);
+        }
     }
 
     public void addBean(Class<?> clazz, Object object) {

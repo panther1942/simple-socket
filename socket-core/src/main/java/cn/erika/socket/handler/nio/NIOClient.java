@@ -1,7 +1,8 @@
 package cn.erika.socket.handler.nio;
 
+import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.tcp.TcpChannel;
-import cn.erika.socket.handler.BasicClient;
+import cn.erika.socket.handler.BaseClient;
 import cn.erika.socket.handler.IClient;
 
 import java.io.IOException;
@@ -10,7 +11,7 @@ import java.net.SocketAddress;
 import java.nio.channels.*;
 import java.util.Iterator;
 
-public class NIOClient extends BasicClient implements Runnable, IClient {
+public class NIOClient extends BaseClient implements Runnable, IClient {
     private SocketAddress address;
     private Selector selector;
 
@@ -64,9 +65,12 @@ public class NIOClient extends BasicClient implements Runnable, IClient {
                 channel.finishConnect();
             }
             channel.register(this.selector, SelectionKey.OP_READ);
+            onConnected(socket);
         } catch (ConnectException e) {
             // 说明服务器不在线
-            log.warn(e.getMessage());
+            log.error(e.getMessage());
+        } catch (BeanException e) {
+            log.error("无法初始化连接: " + e.getMessage(), e);
         }
     }
 }

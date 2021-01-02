@@ -54,7 +54,7 @@ public class FileUploadPreService extends BaseService implements ISocketService 
             }
             try {
                 // 考虑一下把文件的元信息记录一下
-                Application.set(token, info);
+                socket.getHandler().set(token, info);
                 // TODO 检查本地下载目录下是否有该文件
                 // 如果有 则校验完整性 1、比较文件大小 2、比较文件签名 3、数据库查询状态标志（可选）
                 // 如果没有或者校验失败 检查当前目录是否可写/文件是否可写 发送准备好的信号
@@ -110,7 +110,7 @@ public class FileUploadPreService extends BaseService implements ISocketService 
             String token = UUID.randomUUID().toString();
             request.add(Constant.FILE_INFO, info);
             request.add(Constant.TOKEN, token);
-            Application.set(token, file.getAbsolutePath());
+            socket.set(token, file.getAbsolutePath());
             log.debug("发送预请求");
             socket.send(request);
         } catch (FileException e) {

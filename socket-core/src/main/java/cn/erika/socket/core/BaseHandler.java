@@ -5,17 +5,22 @@ import cn.erika.config.GlobalSettings;
 import cn.erika.context.bean.BeanFactory;
 import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.component.Message;
+import cn.erika.socket.core.component.Task;
 import cn.erika.socket.services.ServiceSelector;
 import cn.erika.utils.log.Logger;
 import cn.erika.utils.log.LoggerFactory;
 import cn.erika.utils.security.SecurityUtils;
 
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public abstract class BaseHandler implements Handler {
     protected Logger log = LoggerFactory.getLogger(this.getClass());
     protected BeanFactory beanFactory = BeanFactory.getInstance();
+    private List<Task> taskList = new LinkedList<>();
     private ExecutorService servicePool = Executors.newFixedThreadPool(20);
 
     static {
@@ -39,6 +44,16 @@ public abstract class BaseHandler implements Handler {
         socket.set(Constant.ENCRYPT, false);
         // 认证标识
         socket.set(Constant.AUTHENTICATED, false);
+        List<Task> taskList = beanFactory.getTasks(socket.get(Constant.TYPE));
+        addTasks(taskList);
+    }
+
+    @Override
+    public void onReady(ISocket socket) {
+        for (Task task : taskList) {
+            task.setSocket(socket);
+            servicePool.submit(task);
+        }
     }
 
     @Override
@@ -76,5 +91,29 @@ public abstract class BaseHandler implements Handler {
 
     public void close() {
         servicePool.shutdown();
+    }
+
+    @Override
+    public List<Task> getTasks() {
+        return this.taskList;
+    }
+
+    @Override
+    public void addTask(Task task) {
+        taskList.add(task);
+    }
+
+    private void addTasks(Collection<Task> tasks) {
+        taskList.addAll(tasks);
+    }
+
+    @Override
+    public void delTask(Task task) {
+        taskList.remove(task);
+    }
+
+    @Override
+    public void emptyTasks() {
+        taskList.clear();
     }
 }

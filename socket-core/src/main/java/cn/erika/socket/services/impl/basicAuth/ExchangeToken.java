@@ -70,6 +70,7 @@ public class ExchangeToken extends BaseService implements ISocketService {
                     socket.send(reply);
                     // 设置连接的加密flag
                     socket.set(Constant.ENCRYPT, true);
+                    socket.getHandler().onReady(socket);
                 } else {
                     throw new AuthenticateException("认证失败");
                 }

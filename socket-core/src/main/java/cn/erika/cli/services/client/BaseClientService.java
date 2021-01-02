@@ -5,7 +5,7 @@ import cn.erika.context.BaseService;
 import cn.erika.context.exception.BeanException;
 import cn.erika.socket.handler.IClient;
 
-public abstract class BasicClientService extends BaseService {
+public abstract class BaseClientService extends BaseService {
 
     public void execute(String... args) throws BeanException {
         IClient client = getBean(IClient.class);

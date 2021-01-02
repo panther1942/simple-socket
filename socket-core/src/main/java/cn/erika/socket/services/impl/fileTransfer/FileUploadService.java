@@ -2,7 +2,6 @@ package cn.erika.socket.services.impl.fileTransfer;
 
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
-import cn.erika.context.Application;
 import cn.erika.context.BaseService;
 import cn.erika.context.annotation.Component;
 import cn.erika.socket.core.BaseSocket;
@@ -12,7 +11,10 @@ import cn.erika.socket.core.component.Message;
 import cn.erika.socket.services.ISocketService;
 import cn.erika.utils.security.MessageDigestUtils;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.text.DecimalFormat;
 
 @Component(Constant.SRV_UPLOAD)
@@ -23,7 +25,7 @@ public class FileUploadService extends BaseService implements ISocketService {
     @Override
     public void client(ISocket socket, Message message) {
         FileInfo info = message.get(Constant.FILE_INFO);
-        String filepath = Application.get(socket.get(Constant.TOKEN));
+        String filepath = socket.get(Constant.FILEPATH);
         long skip = info.getFilePos();
         File file = new File(filepath);
 
@@ -59,7 +61,7 @@ public class FileUploadService extends BaseService implements ISocketService {
     @Override
     public void server(ISocket socket, Message message) {
         String token = socket.get(Constant.TOKEN);
-        FileInfo info = Application.get(token);
+        FileInfo info = socket.getHandler().get(token);
         String filename = info.getFilename();
         long fileLength = info.getFileLength();
         Long filePos = message.get(Constant.FILE_POS);

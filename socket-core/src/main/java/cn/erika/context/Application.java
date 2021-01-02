@@ -19,8 +19,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class Application {
     private static Logger log = LoggerFactory.getLogger(Application.class);
-    // 运行时数据存放区 可以用redis代替
-    private static Map<String, Object> storage = new ConcurrentHashMap<>();
 
     // bean工厂 用于存储需要缓存的bean
     protected BeanFactory beanFactory = BeanFactory.getInstance();
@@ -107,19 +105,6 @@ public abstract class Application {
     public static void scanPackage() throws IOException {
         PackageScanner scanner = PackageScanner.getInstance();
         scanner.scan();
-    }
-
-    public static void set(String key, Object value) {
-        storage.put(key, value);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> T get(String key) {
-        return (T) storage.get(key);
-    }
-
-    public static void remove(String key) {
-        storage.remove(key);
     }
 
 }
