@@ -28,8 +28,8 @@ public enum BasicSecurityAlgorithm implements SecurityAlgorithm {
     AES256CFB("AES128CFB", "AES", "CFB", 256, true, 16),
 
     AES128GCM("AES128GCM", "AES", "GCM", 128, true, 12),
-    AES192GCM("AES128GCM", "AES", "GCM", 192, true, 12),
-    AES256GCM("AES128GCM", "AES", "GCM", 256, true, 12),
+    AES192GCM("AES192GCM", "AES", "GCM", 192, true, 12),
+    AES256GCM("AES256GCM", "AES", "GCM", 256, true, 12),
 
     DES56ECB("DES56ECB", "DES", "ECB", 56, false, 0),
     DES56CBC("DES56CBC", "DES", "CBC", 56, true, 8),
