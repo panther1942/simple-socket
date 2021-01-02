@@ -22,7 +22,9 @@ public class SerialUtils {
      * @throws SerialException 不知道 先写上 万一用得到
      */
     public static byte[] serialObject(Object obj) throws SerialException {
-        return JSON.toJSONBytes(obj, SerializerFeature.WriteClassName);
+        return JSON.toJSONBytes(obj,
+                SerializerFeature.WriteClassName,
+                SerializerFeature.WriteMapNullValue);
     }
 
     /**

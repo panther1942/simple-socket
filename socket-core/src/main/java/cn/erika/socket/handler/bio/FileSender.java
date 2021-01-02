@@ -22,6 +22,7 @@ public class FileSender extends BaseClient {
     private Message message;
 
     public FileSender(ISocket socket, Message message) throws IOException, BeanException {
+        super();
         this.message = message;
         new TcpSocket(socket, this);
     }

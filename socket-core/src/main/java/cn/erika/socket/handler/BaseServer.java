@@ -6,12 +6,14 @@ import cn.erika.socket.core.BaseHandler;
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.core.component.LinkManager;
 import cn.erika.socket.core.component.Message;
+import cn.erika.socket.core.component.Task;
 import cn.erika.socket.exception.AuthenticateException;
 import cn.erika.socket.exception.TokenException;
 import cn.erika.utils.security.MessageDigestUtils;
 
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -20,6 +22,11 @@ public abstract class BaseServer extends BaseHandler implements Runnable {
     private Map<String, ISocket> tokenList = new ConcurrentHashMap<>();
     // 运行时数据存放区 可以用redis代替
     private Map<String, Object> storage = new ConcurrentHashMap<>();
+
+    public BaseServer() {
+        List<Task> taskList = beanFactory.getTasks(Constant.SERVER);
+        addTasks(taskList);
+    }
 
     @Override
     public void init(ISocket socket) {

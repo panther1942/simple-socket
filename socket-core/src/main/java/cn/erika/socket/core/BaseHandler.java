@@ -44,8 +44,6 @@ public abstract class BaseHandler implements Handler {
         socket.set(Constant.ENCRYPT, false);
         // 认证标识
         socket.set(Constant.AUTHENTICATED, false);
-        List<Task> taskList = beanFactory.getTasks(socket.get(Constant.TYPE));
-        addTasks(taskList);
     }
 
     @Override
@@ -103,7 +101,7 @@ public abstract class BaseHandler implements Handler {
         taskList.add(task);
     }
 
-    private void addTasks(Collection<Task> tasks) {
+    protected void addTasks(Collection<Task> tasks) {
         taskList.addAll(tasks);
     }
 

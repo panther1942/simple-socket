@@ -56,6 +56,8 @@ public class Constant {
     public static final String SRV_EXCHANGE_TOKEN = "srv_exchange_token";
     public static final String SRV_ACCOUNT_AUTH = "srv_account_auth";
 
+    public static final String SRV_FILE_LIST = "srv_file_list";
+
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
 }

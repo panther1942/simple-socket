@@ -5,11 +5,18 @@ import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.BaseHandler;
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.core.component.Message;
+import cn.erika.socket.core.component.Task;
 
 import java.net.SocketAddress;
+import java.util.List;
 
 public abstract class BaseClient extends BaseHandler {
     protected ISocket socket;
+
+    public BaseClient() {
+        List<Task> taskList = beanFactory.getTasks(Constant.CLIENT);
+        addTasks(taskList);
+    }
 
     @Override
     public void init(ISocket socket) {

@@ -48,6 +48,7 @@ public abstract class BaseSocket implements ISocket {
      */
     @Override
     public void send(Message message) {
+//        log.debug(message.toString());
         try {
             boolean isEncrypt = get(Constant.ENCRYPT);
             message.del(Constant.DIGITAL_SIGNATURE);
@@ -128,6 +129,7 @@ public abstract class BaseSocket implements ISocket {
                 data = SecurityUtils.decrypt(data, securityKey, securityAlgorithm, securityIv);
             }
             Message message = SerialUtils.serialObject(data, Message.class);
+//            log.debug(message.toString());
             if (isEncrypt) {
                 byte[] publicKey = get(Constant.PUBLIC_KEY);
                 DigitalSignatureAlgorithm digitalSignatureAlgorithm = get(Constant.DIGITAL_SIGNATURE_ALGORITHM);
