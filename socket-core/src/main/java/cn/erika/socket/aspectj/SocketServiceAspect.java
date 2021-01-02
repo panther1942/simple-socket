@@ -9,15 +9,14 @@ import org.aspectj.lang.JoinPoint;
 public class SocketServiceAspect {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
-//    @Pointcut("execution(* cn.erika.socket.services.ISocketService.*(..))")
+    // @Pointcut("execution(* cn.erika.socket.services.ISocketService.*(..))")
     public void pointcut() {
     }
 
-//    @Before("pointcut()")
+    // @Before("pointcut()")
     public void beforeExecute(JoinPoint joinPoint) {
         String className = joinPoint.getSignature().getDeclaringTypeName();
         String methodName = joinPoint.getSignature().getName();
-        System.out.println(ConsoleUtils.drawLineWithTitle(
-                className + "." + methodName, "-", 100));
+        log.debug((ConsoleUtils.drawLineWithTitle(className + "." + methodName, "-", 100)));
     }
 }

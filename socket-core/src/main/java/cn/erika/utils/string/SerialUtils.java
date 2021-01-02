@@ -76,6 +76,7 @@ public class SerialUtils {
      * @return 反序列化得到的java对象
      * @throws SerialException 如果序列化过程出现错误 则抛出该异常
      */
+    @SuppressWarnings("unchecked")
     public static <T> T serialJavaObject(byte[] data) throws SerialException {
         ByteArrayInputStream bIn = null;
         ObjectInputStream in = null;

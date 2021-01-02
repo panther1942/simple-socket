@@ -1,6 +1,8 @@
 package cn.erika.socket.exception;
 
 public class UnsupportedAlgorithmException extends Exception {
+    private static final long serialVersionUID = 1L;
+
     public UnsupportedAlgorithmException() {
         super();
     }
@@ -15,9 +17,5 @@ public class UnsupportedAlgorithmException extends Exception {
 
     public UnsupportedAlgorithmException(Throwable cause) {
         super(cause);
-    }
-
-    protected UnsupportedAlgorithmException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
     }
 }

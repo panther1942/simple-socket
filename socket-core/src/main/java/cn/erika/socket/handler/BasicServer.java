@@ -14,7 +14,7 @@ import java.net.SocketException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class BaseServer extends BaseHandler implements Runnable, IServer {
+public abstract class BasicServer extends BaseHandler implements Runnable {
     private LinkManager linkManager = new LinkManager();
     private Map<String, ISocket> tokenList = new ConcurrentHashMap<>();
 
@@ -31,7 +31,6 @@ public abstract class BaseServer extends BaseHandler implements Runnable, IServe
         linkManager.popLink(socket);
     }
 
-    @Override
     public void addToken(ISocket socket, String token) throws AuthenticateException {
         if (!tokenList.containsKey(token)) {
             tokenList.put(token, socket);
@@ -40,7 +39,6 @@ public abstract class BaseServer extends BaseHandler implements Runnable, IServe
         }
     }
 
-    @Override
     public ISocket checkToken(String token, byte[] publicKey) throws AuthenticateException {
         ISocket socket = tokenList.get(token);
         if (socket == null) {
@@ -58,7 +56,6 @@ public abstract class BaseServer extends BaseHandler implements Runnable, IServe
         }
     }
 
-    @Override
     public void status() {
         StringBuffer buffer = new StringBuffer();
         for (String id : linkManager.getLinks().keySet()) {
@@ -68,7 +65,6 @@ public abstract class BaseServer extends BaseHandler implements Runnable, IServe
         log.info(buffer.toString());
     }
 
-    @Override
     public void send(String uid, String message) {
         try {
             ISocket socket = linkManager.getLink(uid);
@@ -82,7 +78,6 @@ public abstract class BaseServer extends BaseHandler implements Runnable, IServe
         }
     }
 
-    @Override
     public void listen() {
         Thread t = new Thread(this, this.getClass().getSimpleName());
         t.setName(this.getClass().getSimpleName());

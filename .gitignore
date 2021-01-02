@@ -1,11 +1,15 @@
+# ignore ide config
 .idea/
-target/
+.settings/
+.project
+.classpath
 
+# ignore other file
 *.class
 *.iml
 *.log
 *.zip
-
+target/
 download/
 downloads/
 Download/

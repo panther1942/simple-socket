@@ -72,7 +72,7 @@ public class ConsoleUtils {
      * @param message     输出的日志消息
      * @return 格式化后的字符串
      */
-    public static String consoleLog(String logLevel, Class targetClass, String message) {
+    public static String consoleLog(String logLevel, Class<?> targetClass, String message) {
         // 处理时间日期
         Date now = new Date();
         Thread thread = Thread.currentThread();

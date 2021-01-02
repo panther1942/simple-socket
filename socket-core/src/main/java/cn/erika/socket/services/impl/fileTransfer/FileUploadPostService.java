@@ -1,7 +1,6 @@
 package cn.erika.socket.services.impl.fileTransfer;
 
 import cn.erika.config.Constant;
-import cn.erika.config.GlobalSettings;
 import cn.erika.context.BaseService;
 import cn.erika.context.annotation.Component;
 import cn.erika.socket.core.ISocket;

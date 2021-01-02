@@ -6,7 +6,7 @@ import cn.erika.context.exception.BeanException;
 import cn.erika.socket.handler.IClient;
 
 @Component("disconnect")
-public class DisconnectService extends AbstractClientService implements ICliService {
+public class DisconnectService extends BasicClientService implements ICliService {
     @Override
     public String info() {
         return "断开与服务器的连接";

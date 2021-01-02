@@ -2,7 +2,6 @@ package cn.erika.config;
 
 import cn.erika.util.SecurityAlgorithmExtra;
 import cn.erika.utils.io.compress.GZIP;
-import cn.erika.utils.io.compress.ZIP;
 import cn.erika.utils.log.LogLevel;
 import cn.erika.utils.security.DigitalSignatureAlgorithm;
 import cn.erika.utils.security.SecurityAlgorithm;

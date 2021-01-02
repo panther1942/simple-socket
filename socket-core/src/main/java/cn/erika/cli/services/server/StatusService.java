@@ -6,7 +6,7 @@ import cn.erika.context.exception.BeanException;
 import cn.erika.socket.handler.IServer;
 
 @Component("status")
-public class StatusService extends AbstraceServerService implements ICliService {
+public class StatusService extends BasicServerService implements ICliService {
     @Override
     public String info() {
         return "查看连接到服务器的客户端信息 能看到UID和远端地址";

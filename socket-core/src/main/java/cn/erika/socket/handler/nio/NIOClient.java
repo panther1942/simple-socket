@@ -1,7 +1,7 @@
 package cn.erika.socket.handler.nio;
 
 import cn.erika.socket.core.tcp.TcpChannel;
-import cn.erika.socket.handler.BaseClient;
+import cn.erika.socket.handler.BasicClient;
 import cn.erika.socket.handler.IClient;
 
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.net.SocketAddress;
 import java.nio.channels.*;
 import java.util.Iterator;
 
-public class NIOClient extends BaseClient implements Runnable, IClient {
+public class NIOClient extends BasicClient implements Runnable, IClient {
     private SocketAddress address;
     private Selector selector;
 

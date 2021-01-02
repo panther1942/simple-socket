@@ -3,6 +3,7 @@ package cn.erika.utils.exception;
 import java.io.IOException;
 
 public class SerialException extends IOException {
+    private static final long serialVersionUID = 1L;
 
     public SerialException() {
         super();

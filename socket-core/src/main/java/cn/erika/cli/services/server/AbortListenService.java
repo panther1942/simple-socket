@@ -6,7 +6,7 @@ import cn.erika.context.exception.BeanException;
 import cn.erika.socket.handler.IServer;
 
 @Component("abort")
-public class AbortListenService extends AbstraceServerService implements ICliService {
+public class AbortListenService extends BasicServerService implements ICliService {
     @Override
     public String info() {
         return "中断服务器监听并释放所有与客户端的连接";

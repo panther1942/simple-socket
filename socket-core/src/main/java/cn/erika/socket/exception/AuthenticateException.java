@@ -1,6 +1,8 @@
 package cn.erika.socket.exception;
 
 public class AuthenticateException extends Exception {
+    private static final long serialVersionUID = 1L;
+
     public AuthenticateException() {
         super();
     }

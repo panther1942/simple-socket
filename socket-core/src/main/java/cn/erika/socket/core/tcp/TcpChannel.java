@@ -4,12 +4,10 @@ import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
 import cn.erika.socket.core.BaseSocket;
 import cn.erika.socket.core.Handler;
-import cn.erika.socket.core.ISocket;
 import cn.erika.socket.exception.DataFormatException;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;

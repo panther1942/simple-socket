@@ -8,7 +8,7 @@ import cn.erika.socket.core.component.Message;
 import cn.erika.socket.handler.IClient;
 
 @Component("login")
-public class LoginService extends AbstractClientService implements ICliService {
+public class LoginService extends BasicClientService implements ICliService {
     @Override
     public String info() {
         return "登录认证\n" +

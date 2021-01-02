@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @ServerEndpoint("/ws/{clientId}")
 @Component
 public class WebSocketService implements Serializable {
-    public static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     private static ConcurrentHashMap<String, Session> clientList = new ConcurrentHashMap<>();

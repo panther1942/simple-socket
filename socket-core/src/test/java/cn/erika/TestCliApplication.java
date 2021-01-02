@@ -1,9 +1,7 @@
 package cn.erika;
 
 import cn.erika.cli.CliApplication;
-import cn.erika.config.GlobalSettings;
 import cn.erika.context.annotation.PackageScan;
-import cn.erika.util.SecurityAlgorithmExtra;
 
 @PackageScan("cn.erika")
 public class TestCliApplication extends CliApplication {

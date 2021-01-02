@@ -8,7 +8,7 @@ import cn.erika.socket.core.component.Message;
 
 import java.net.SocketAddress;
 
-public abstract class BaseClient extends BaseHandler implements IClient{
+public abstract class BasicClient extends BaseHandler{
     protected ISocket socket;
 
     @Override
@@ -22,17 +22,14 @@ public abstract class BaseClient extends BaseHandler implements IClient{
         log.info("从服务器断开连接");
     }
 
-    @Override
     public void execute(String serviceName, Message message) throws BeanException {
         execute(socket, serviceName, message);
     }
 
-    @Override
     public void send(String message) {
         socket.send(new Message(Constant.SRV_TEXT, message));
     }
 
-    @Override
     public SocketAddress getLocalAddress() {
         if (socket != null) {
             return socket.getLocalAddress();

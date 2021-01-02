@@ -1,6 +1,8 @@
 package cn.erika.utils.exception;
 
 public class NoSuchCompressAlgorithm extends Exception {
+    private static final long serialVersionUID = 1L;
+
     public NoSuchCompressAlgorithm() {
         super();
     }
@@ -15,9 +17,5 @@ public class NoSuchCompressAlgorithm extends Exception {
 
     public NoSuchCompressAlgorithm(Throwable throwable) {
         super(throwable);
-    }
-
-    protected NoSuchCompressAlgorithm(String s, Throwable throwable, boolean b, boolean b1) {
-        super(s, throwable, b, b1);
     }
 }

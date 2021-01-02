@@ -1,13 +1,13 @@
 package cn.erika.socket.handler.bio;
 
 import cn.erika.socket.core.tcp.TcpSocket;
-import cn.erika.socket.handler.BaseClient;
+import cn.erika.socket.handler.BasicClient;
 import cn.erika.socket.handler.IClient;
 
 import java.io.IOException;
 import java.net.SocketAddress;
 
-public class BIOClient extends BaseClient implements IClient {
+public class BIOClient extends BasicClient implements IClient {
     private SocketAddress address;
 
     public BIOClient(SocketAddress address) {

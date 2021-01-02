@@ -1,6 +1,8 @@
 package cn.erika.context.exception;
 
 public class UndeclaredBeanException extends BeanException {
+    private static final long serialVersionUID = 1L;
+
     public UndeclaredBeanException() {
         super();
     }
@@ -11,5 +13,9 @@ public class UndeclaredBeanException extends BeanException {
 
     public UndeclaredBeanException(String s, Throwable throwable) {
         super(s, throwable);
+    }
+
+    public UndeclaredBeanException(Throwable throwable) {
+        super(throwable);
     }
 }

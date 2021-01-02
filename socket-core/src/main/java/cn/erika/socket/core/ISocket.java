@@ -3,7 +3,6 @@ package cn.erika.socket.core;
 import cn.erika.socket.core.component.DataInfo;
 import cn.erika.socket.core.component.Message;
 
-import java.io.IOException;
 import java.net.SocketAddress;
 
 public interface ISocket {

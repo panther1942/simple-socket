@@ -112,11 +112,11 @@ public class BeanFactory {
         try {
             Object obj;
             if (args != null && args.length > 0) {
-                Class[] paramTypes = new Class[args.length];
+                Class<?>[] paramTypes = new Class[args.length];
                 for (int i = 0; i < args.length; i++) {
                     paramTypes[i] = args[i].getClass();
                 }
-                Constructor con = checkConstructor(clazz, paramTypes);
+                Constructor<?> con = checkConstructor(clazz, paramTypes);
                 if (con != null) {
                     obj = con.newInstance(args);
                 } else {
@@ -136,11 +136,11 @@ public class BeanFactory {
         }
     }
 
-    private Constructor checkConstructor(Class clazz, Class[] paramTypes) {
-        Constructor[] constructors = clazz.getConstructors();
+    private Constructor<?> checkConstructor(Class<?> clazz, Class<?>[] paramTypes) {
+        Constructor<?>[] constructors = clazz.getConstructors();
         boolean flag = false;
-        for (Constructor con : constructors) {
-            Class[] srcTypes = con.getParameterTypes();
+        for (Constructor<?> con : constructors) {
+            Class<?>[] srcTypes = con.getParameterTypes();
             if (srcTypes.length == paramTypes.length) {
                 for (int i = 0; i < srcTypes.length; i++) {
                     if (checkType(srcTypes[i], paramTypes[i])) {
@@ -158,7 +158,7 @@ public class BeanFactory {
         return null;
     }
 
-    private boolean checkType(Class src, Class dest) {
+    private boolean checkType(Class<?> src, Class<?> dest) {
         if (dest == null) {
             // 如果传入的参数部分为空 则匹配这个位置任意类型的参数
             return true;
@@ -239,7 +239,7 @@ public class BeanFactory {
             }
         }
 
-        private Method getMethod(String name, Class... argTypes) throws NoSuchMethodException {
+        private Method getMethod(String name, Class<?>... argTypes) throws NoSuchMethodException {
             List<Method> targetMethod = new LinkedList<>();
             Method[] methods = target.getClass().getMethods();
             boolean flag = false;

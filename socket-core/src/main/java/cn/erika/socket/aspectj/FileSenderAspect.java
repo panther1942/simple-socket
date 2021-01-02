@@ -15,13 +15,10 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 
 import java.util.Date;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Aspect
 public class FileSenderAspect {
     private Logger log = LoggerFactory.getLogger(this.getClass());
-    private Map<ISocket, Date> transCount = new ConcurrentHashMap<>();
 
     @Pointcut("execution(* cn.erika.socket.handler.bio.FileSender.onMessage(..))")
     public void onMessage() {

@@ -8,7 +8,7 @@ import cn.erika.socket.core.component.Message;
 import cn.erika.socket.handler.IClient;
 
 @Component("upload")
-public class FileUploadService extends AbstractClientService implements ICliService {
+public class FileUploadService extends BasicClientService implements ICliService {
     @Override
     public String info() {
         return "上传文件到服务器\n" +

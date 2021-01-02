@@ -7,7 +7,6 @@ import cn.erika.service.DemoServiceImpl;
 import cn.erika.service.IDemoService;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.exception.UnsupportedAlgorithmException;
-import cn.erika.util.SerialUtils;
 import cn.erika.utils.io.compress.ZIP;
 import cn.erika.utils.exception.CompressException;
 import cn.erika.utils.io.FileUtils;
@@ -18,6 +17,7 @@ import cn.erika.utils.security.MessageDigestUtils;
 import cn.erika.utils.security.SecurityUtils;
 import cn.erika.utils.security.algorithm.BasicAsymmetricAlgorithm;
 import cn.erika.utils.string.Base64Utils;
+import cn.erika.utils.string.SerialUtils;
 import cn.erika.utils.string.StringUtils;
 import org.junit.Test;
 
@@ -115,8 +115,8 @@ public class CoreTest {
                 srcPak.put("LEN", len);
                 srcPak.put("BIN", Base64Utils.encode(tmp));
 
-                byte[] data = SerialUtils.serialObject(srcPak);
-                Map<String, Object> destPak = SerialUtils.serialObject(data);
+                byte[] data = SerialUtils.serialJavaObject(srcPak);
+                Map<String, Object> destPak = SerialUtils.serialJavaObject(data);
                 int len2 = (int) destPak.get("LEN");
                 byte[] tmp2 = Base64Utils.decode((byte[]) destPak.get("BIN"));
 

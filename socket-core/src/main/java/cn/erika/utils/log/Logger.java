@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class Logger {
     private LogLevel level;
-    private Class targetClass;
+    private Class<?> targetClass;
     private List<LogPrinter> logPrinterList;
 
     /**
@@ -20,7 +20,7 @@ public class Logger {
      * @param targetClass    目标类 用于获取目标类的信息
      * @param logPrinterList 获取实际打印日志的对象 需要提前在工厂类中注册
      */
-    Logger(LogLevel level, Class targetClass, List<LogPrinter> logPrinterList) {
+    Logger(LogLevel level, Class<?> targetClass, List<LogPrinter> logPrinterList) {
         this.level = level;
         this.targetClass = targetClass;
         this.logPrinterList = logPrinterList;

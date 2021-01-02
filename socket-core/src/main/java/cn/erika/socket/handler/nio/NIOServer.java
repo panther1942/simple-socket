@@ -2,7 +2,7 @@ package cn.erika.socket.handler.nio;
 
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.core.tcp.TcpChannel;
-import cn.erika.socket.handler.BaseServer;
+import cn.erika.socket.handler.BasicServer;
 import cn.erika.socket.handler.IServer;
 
 import java.io.IOException;
@@ -14,7 +14,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class NIOServer extends BaseServer implements Runnable, IServer {
+public class NIOServer extends BasicServer implements IServer {
     private ServerSocketChannel server;
     private Selector selector = Selector.open();
     private ConcurrentHashMap<SocketChannel, TcpChannel> channelMap = new ConcurrentHashMap<>();
@@ -24,7 +24,7 @@ public class NIOServer extends BaseServer implements Runnable, IServer {
         this.server.configureBlocking(false);
         this.server.bind(address);
         this.server.register(selector, SelectionKey.OP_ACCEPT);
-        log.info("服务器监听端口: " + server.getLocalAddress());
+        log.info("服务器监听端口: " + getLocalAddress());
     }
 
     @Override
@@ -75,7 +75,7 @@ public class NIOServer extends BaseServer implements Runnable, IServer {
     public void close() {
         super.close();
         try {
-            if (server.isOpen()) {
+            if (server != null && server.isOpen()) {
                 server.close();
                 log.info("关闭服务器");
             }
@@ -86,7 +86,7 @@ public class NIOServer extends BaseServer implements Runnable, IServer {
 
     @Override
     public boolean isClosed() {
-        return !server.isOpen();
+        return server != null && !server.isOpen();
     }
 
     @Override

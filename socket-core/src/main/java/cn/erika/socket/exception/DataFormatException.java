@@ -1,6 +1,8 @@
 package cn.erika.socket.exception;
 
 public class DataFormatException extends Exception {
+    private static final long serialVersionUID = 1L;
+
     public DataFormatException() {
         super();
     }
@@ -15,9 +17,5 @@ public class DataFormatException extends Exception {
 
     public DataFormatException(Throwable throwable) {
         super(throwable);
-    }
-
-    protected DataFormatException(String s, Throwable throwable, boolean b, boolean b1) {
-        super(s, throwable, b, b1);
     }
 }

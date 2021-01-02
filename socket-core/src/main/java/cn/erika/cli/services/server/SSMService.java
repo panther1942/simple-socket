@@ -6,7 +6,7 @@ import cn.erika.context.exception.BeanException;
 import cn.erika.socket.handler.IServer;
 
 @Component("s_send")
-public class SSMService extends AbstraceServerService implements ICliService {
+public class SSMService extends BasicServerService implements ICliService {
     @Override
     public String info() {
         return "向客户端发送消息\n" +

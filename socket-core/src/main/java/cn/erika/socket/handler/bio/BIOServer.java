@@ -1,7 +1,7 @@
 package cn.erika.socket.handler.bio;
 
 import cn.erika.socket.core.tcp.TcpSocket;
-import cn.erika.socket.handler.BaseServer;
+import cn.erika.socket.handler.BasicServer;
 import cn.erika.socket.handler.IServer;
 
 import java.io.IOException;
@@ -9,13 +9,13 @@ import java.net.ServerSocket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 
-public class BIOServer extends BaseServer implements Runnable, IServer {
+public class BIOServer extends BasicServer implements IServer {
     private ServerSocket server;
 
     public BIOServer(SocketAddress address) throws IOException {
         this.server = new ServerSocket();
         this.server.bind(address);
-        log.info("服务器监听端口: " + server.getLocalSocketAddress());
+        log.info("服务器监听端口: " + getLocalAddress());
     }
 
     @Override
