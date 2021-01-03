@@ -1,18 +1,18 @@
-package cn.erika.service;
+package cn.erika.cli.services.client.fileManager;
 
 import cn.erika.cli.services.ICliService;
-import cn.erika.cli.services.client.BaseClientService;
+import cn.erika.cli.services.client.basic.BaseClientService;
 import cn.erika.config.Constant;
 import cn.erika.context.annotation.Component;
 import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.handler.IClient;
 
-@Component("ls")
-public class SearchServerFileService extends BaseClientService implements ICliService {
+@Component("cd")
+public class ChangeDirectoryService extends BaseClientService implements ICliService {
     @Override
     public String info() {
-        return "查询服务器指定路径上的文件 如果不指定路径则查询工作目录";
+        return "切换到指定目录";
     }
 
     @Override
@@ -24,6 +24,6 @@ public class SearchServerFileService extends BaseClientService implements ICliSe
             String target = args[1];
             data.add(Constant.FILEPATH, target);
         }
-        client.execute(Constant.SRV_FILE_LIST, data);
+        client.execute(Constant.SRV_CD, data);
     }
 }

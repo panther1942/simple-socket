@@ -1,6 +1,7 @@
 package cn.erika.socket.services.impl.auth;
 
 import cn.erika.config.Constant;
+import cn.erika.config.GlobalSettings;
 import cn.erika.context.BaseService;
 import cn.erika.context.annotation.Component;
 import cn.erika.socket.core.ISocket;
@@ -35,6 +36,8 @@ public class AccountAuth extends BaseService implements ISocketService {
                 if (result != null && result) {
                     log.info("认证成功");
                     socket.set(Constant.AUTHENTICATED, true);
+                    socket.set(Constant.PROMPT, message.get(Constant.PROMPT));
+                    GlobalSettings.prompt = message.get(Constant.PROMPT);
                 } else {
                     log.warn("认证失败");
                     socket.set(Constant.AUTHENTICATED, false);
@@ -52,6 +55,8 @@ public class AccountAuth extends BaseService implements ISocketService {
         // 这里只简单的判断一下 以后会加入更复杂的判断 等加入数据库再说
         if ("admin".equals(username) && "admin".equals(password)) {
             socket.set(Constant.AUTHENTICATED, true);
+            socket.set(Constant.PWD, System.getProperty("user.dir"));
+            reply.add(Constant.PROMPT, socket.get(Constant.PWD));
             reply.add(Constant.RESULT, true);
         } else {
             socket.set(Constant.AUTHENTICATED, false);

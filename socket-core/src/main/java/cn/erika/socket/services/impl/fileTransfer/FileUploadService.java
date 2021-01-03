@@ -4,6 +4,8 @@ import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
 import cn.erika.context.BaseService;
 import cn.erika.context.annotation.Component;
+import cn.erika.context.annotation.Enhance;
+import cn.erika.socket.aop.FileUploadTimeCount;
 import cn.erika.socket.core.BaseSocket;
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.core.component.FileInfo;
@@ -23,6 +25,7 @@ public class FileUploadService extends BaseService implements ISocketService {
     private static DecimalFormat df = new DecimalFormat("0.00%");
     private final String BASE_DIR = GlobalSettings.baseDir;
 
+    @Enhance(FileUploadTimeCount.class)
     @Override
     public void client(ISocket socket, Message message) {
         FileInfo info = message.get(Constant.FILE_INFO);

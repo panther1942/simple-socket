@@ -35,11 +35,14 @@ public class Constant {
     public static final String RESULT = "result";
     public static final String LEN = "len";
     public static final String EXIT = "exit";
+    public static final String PWD = "pwd";
+    public static final String PROMPT = "prompt";
 
     public static final String FILENAME = "filename";
     public static final String FILEPATH = "filepath";
     public static final String FILE_POS = "filePos";
     public static final String FILE_INFO = "fileInfo";
+    public static final String FILE_ATTR = "fileAttr";
     public static final String SEND_STATUS = "sendStatus";
     public static final String RECEIVE_STATUS = "receiveStatus";
 
@@ -56,7 +59,8 @@ public class Constant {
     public static final String SRV_EXCHANGE_TOKEN = "srv_exchange_token";
     public static final String SRV_ACCOUNT_AUTH = "srv_account_auth";
 
-    public static final String SRV_FILE_LIST = "srv_file_list";
+    public static final String SRV_LIST = "srv_list";
+    public static final String SRV_CD = "srv_cd";
 
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";

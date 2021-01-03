@@ -79,6 +79,7 @@ public class SocketApplication extends Application {
                 default:
                     throw new BeanException("不支持的模式: " + GlobalSettings.type);
             }
+            beanFactory.addBean(IServer.class, server);
             server.listen();
             log.info("服务器开始运行");
         } catch (BindException e) {

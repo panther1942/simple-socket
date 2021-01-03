@@ -1,4 +1,4 @@
-package cn.erika.cli.services.client;
+package cn.erika.cli.services.client.basic;
 
 import cn.erika.cli.services.ICliService;
 import cn.erika.context.annotation.Component;

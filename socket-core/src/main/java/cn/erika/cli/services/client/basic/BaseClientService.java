@@ -1,4 +1,4 @@
-package cn.erika.cli.services.client;
+package cn.erika.cli.services.client.basic;
 
 import cn.erika.cli.exception.ClosedClientException;
 import cn.erika.context.BaseService;

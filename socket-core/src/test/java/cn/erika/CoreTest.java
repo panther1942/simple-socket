@@ -148,14 +148,6 @@ public class CoreTest {
     }
 
     @Test
-    public void printProvider() {
-        Provider provider = new org.bouncycastle.jce.provider.BouncyCastleProvider();
-        for (Provider.Service service : provider.getServices()) {
-            System.out.println(String.format("%s: %s", service.getType(), service.getAlgorithm()));
-        }
-    }
-
-    @Test
     public void testRandomString() {
         for (int i = 0; i < 50; i++) {
 //            System.out.println(StringUtils.randomString(32));

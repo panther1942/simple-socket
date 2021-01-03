@@ -1,6 +1,7 @@
-package cn.erika.cli.services.client;
+package cn.erika.cli.services.client.fileManager;
 
 import cn.erika.cli.services.ICliService;
+import cn.erika.cli.services.client.basic.BaseClientService;
 import cn.erika.config.Constant;
 import cn.erika.context.annotation.Component;
 import cn.erika.context.exception.BeanException;
