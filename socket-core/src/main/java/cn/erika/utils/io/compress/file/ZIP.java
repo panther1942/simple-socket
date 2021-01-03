@@ -1,7 +1,9 @@
-package cn.erika.utils.io.compress;
+package cn.erika.utils.io.compress.file;
 
 import cn.erika.utils.io.FileUtils;
 import cn.erika.utils.exception.CompressException;
+import cn.erika.utils.io.compress.CompressUtils;
+import cn.erika.utils.io.compress.stream.GZIP;
 import cn.erika.utils.log.Logger;
 import cn.erika.utils.log.LoggerFactory;
 
@@ -11,25 +13,26 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-public class ZIP {
+public class ZIP implements FileCompress {
     private Logger log = LoggerFactory.getLogger(this.getClass());
+    public static final String NAME = "ZIP";
+    public static final int CODE = 0x11;
 
-    public byte[] compressAsStream(File file) throws CompressException, FileNotFoundException {
-        if (file.length() > Integer.MAX_VALUE) {
-            throw new CompressException("文件过大: " + file.length());
-        }
-        try (FileInputStream fileReader = new FileInputStream(file);
-             ByteArrayOutputStream writer = new ByteArrayOutputStream();
-             ZipOutputStream zipWriter = new ZipOutputStream(writer)) {
-            zipWriter.putNextEntry(new ZipEntry(file.getName()));
-            zipWriter.setComment(file.getName());
-            FileUtils.copyStream(fileReader, zipWriter, 4 * 1024);
-            return writer.toByteArray();
-        } catch (IOException e) {
-            throw new CompressException(e.getMessage(), e);
-        }
+    static {
+        CompressUtils.register(new GZIP());
     }
 
+    @Override
+    public String getName() {
+        return NAME;
+    }
+
+    @Override
+    public int getCode() {
+        return CODE;
+    }
+
+    @Override
     public void compress(File src, File dest) throws IOException, CompressException {
         FileUtils.createFile(dest);
         try (FileInputStream fileReader = new FileInputStream(src);
@@ -43,6 +46,7 @@ public class ZIP {
         }
     }
 
+    @Override
     public void compressDir(File directory, File file) throws IOException, CompressException {
         if (!directory.isDirectory()) {
             throw new IOException("目标不是目录");
@@ -50,6 +54,7 @@ public class ZIP {
         compressFiles(directory.listFiles(), file);
     }
 
+    @Override
     public void compressFiles(File[] files, File archiveFile) throws IOException, CompressException {
         FileUtils.createFile(archiveFile);
         try (FileOutputStream fileWriter = new FileOutputStream(archiveFile);
@@ -68,6 +73,7 @@ public class ZIP {
         }
     }
 
+    @Override
     public void decompress(File archiveFile, File directory) throws CompressException {
         try (ZipFile zipFile = new ZipFile(archiveFile);
              FileInputStream zipStream = new FileInputStream(archiveFile);
