@@ -77,7 +77,7 @@ public abstract class BaseHandler implements Handler {
                 public void run() {
                     try {
                         beanFactory.execute(new ServiceSelector(socket), serviceName, socket, message);
-                    } catch (BeanException e) {
+                    } catch (Throwable e) {
                         onError(socket, e);
                     }
                 }

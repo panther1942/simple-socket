@@ -52,6 +52,9 @@ public class Constant {
     public static final String SRV_PRE_UPLOAD = "srv_pre_upload";
     public static final String SRV_POST_UPLOAD = "srv_post_upload";
     public static final String SRV_UPLOAD = "srv_upload";
+    public static final String SRV_PRE_DOWNLOAD = "srv_pre_download";
+    public static final String SRV_POST_DOWNLOAD = "srv_post_download";
+    public static final String SRV_DOWNLOAD = "srv_download";
 
     public static final String SRV_EXCHANGE_KEY = "srv_exchange_key";
     public static final String SRV_EXCHANGE_PASSWORD = "srv_exchange_password";

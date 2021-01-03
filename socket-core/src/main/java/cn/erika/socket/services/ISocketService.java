@@ -9,7 +9,7 @@ import cn.erika.socket.core.component.Message;
  */
 public interface ISocketService {
 
-    void client(ISocket socket, Message message);
+    void client(ISocket socket, Message message) throws Throwable;
 
-    void server(ISocket socket, Message message);
+    void server(ISocket socket, Message message) throws Throwable;
 }

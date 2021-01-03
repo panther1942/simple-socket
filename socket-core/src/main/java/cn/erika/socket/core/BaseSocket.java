@@ -211,7 +211,11 @@ public abstract class BaseSocket implements ISocket {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T remove(String k) {
-        return (T) this.attr.remove(k);
+        if (k != null) {
+            return (T) this.attr.remove(k);
+        } else {
+            return null;
+        }
     }
 
     @Override

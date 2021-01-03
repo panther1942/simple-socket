@@ -34,7 +34,6 @@ public class GlobalSettings {
     public static boolean enableCompress = true;
     public static int compressCode = GZIP.CODE;
 
-    public static String baseDir = "downloads/";
     public static String prompt = "> ";
 
 }

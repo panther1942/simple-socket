@@ -316,7 +316,7 @@ public class BeanFactory {
         }
     }
 
-    public Object execute(BeanSelector handler, String name, Object... args) throws BeanException {
+    public Object execute(BeanSelector handler, String name, Object... args) throws Throwable {
         Class<?> clazz = aliasList.get(name);
         if (clazz == null) {
             throw new BeanException("未知服务: " + name);
@@ -328,12 +328,7 @@ public class BeanFactory {
         } catch (NoSuchMethodException e) {
             throw new BeanException("目标方法不存在: " + name);
         }
-        try {
-            return Proxy.getInvocationHandler(object).invoke(object, method, args);
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-            throw new BeanException("内部错误: " + throwable.getMessage());
-        }
+        return Proxy.getInvocationHandler(object).invoke(object, method, args);
     }
 
     public Object execute(String name, Object... args) throws BeanException {

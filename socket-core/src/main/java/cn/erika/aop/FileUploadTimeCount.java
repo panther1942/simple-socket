@@ -1,4 +1,4 @@
-package cn.erika.socket.aop;
+package cn.erika.aop;
 
 import cn.erika.config.Constant;
 import cn.erika.context.annotation.Component;

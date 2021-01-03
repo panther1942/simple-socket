@@ -1,5 +1,10 @@
 package cn.erika.utils.io;
 
+import cn.erika.config.Constant;
+import cn.erika.socket.core.component.FileInfo;
+import cn.erika.socket.core.component.Message;
+import cn.erika.utils.security.MessageDigestUtils;
+
 import java.io.*;
 
 public class FileUtils {
@@ -55,5 +60,22 @@ public class FileUtils {
             copyStream(reader, writer);
             return writer.toByteArray();
         }
+    }
+
+    public static FileInfo getFileInfo(File file) throws IOException {
+        if (!file.exists()) {
+            throw new FileNotFoundException("文件不存在: " + file.getAbsolutePath());
+        }
+        long checkCode = MessageDigestUtils.crc32Sum(file);
+        FileInfo info = new FileInfo();
+        info.setFilename(file.getName());
+        info.setFileLength(file.length());
+        info.setCheckCode(checkCode);
+        return info;
+    }
+
+    public static FileInfo getFileInfo(String filename) throws IOException {
+        File file = new File(filename);
+        return getFileInfo(file);
     }
 }
