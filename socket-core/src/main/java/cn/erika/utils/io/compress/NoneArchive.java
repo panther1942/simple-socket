@@ -1,8 +1,9 @@
 package cn.erika.utils.io.compress;
 
 import cn.erika.utils.exception.CompressException;
+import cn.erika.utils.io.compress.stream.StreamCompress;
 
-public class NoneArchive implements CompressAlgorithm {
+public class NoneArchive implements StreamCompress {
     public static final String NAME = "NONE";
     public static final int CODE = 0x00;
 

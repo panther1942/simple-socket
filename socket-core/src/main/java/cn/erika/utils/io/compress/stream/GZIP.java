@@ -1,6 +1,7 @@
-package cn.erika.utils.io.compress;
+package cn.erika.utils.io.compress.stream;
 
 import cn.erika.utils.exception.CompressException;
+import cn.erika.utils.io.compress.CompressUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -8,7 +9,7 @@ import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-public class GZIP implements CompressAlgorithm {
+public class GZIP implements StreamCompress {
     public static final String NAME = "GZIP";
     public static final int CODE = 0x01;
 

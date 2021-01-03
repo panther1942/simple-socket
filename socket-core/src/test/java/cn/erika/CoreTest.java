@@ -7,7 +7,7 @@ import cn.erika.service.DemoServiceImpl;
 import cn.erika.service.IDemoService;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.exception.UnsupportedAlgorithmException;
-import cn.erika.utils.io.compress.ZIP;
+import cn.erika.utils.io.compress.file.ZIP;
 import cn.erika.utils.exception.CompressException;
 import cn.erika.utils.io.FileUtils;
 import cn.erika.utils.log.ConsoleLogger;

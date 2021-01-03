@@ -2,6 +2,8 @@ package cn.erika.utils.io.compress;
 
 import cn.erika.utils.exception.CompressException;
 import cn.erika.utils.exception.NoSuchCompressAlgorithm;
+import cn.erika.utils.io.compress.file.FileCompress;
+import cn.erika.utils.io.compress.stream.StreamCompress;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +22,7 @@ public class CompressUtils {
      */
     public static void register(CompressAlgorithm algorithm) {
         compressAlgorithmMap.put(algorithm.getCode(), algorithm);
+
     }
 
     /**
@@ -28,11 +31,21 @@ public class CompressUtils {
      * @param algorithmName 压缩算法名称
      * @return 压缩算法类
      */
-    public static CompressAlgorithm getByName(String algorithmName) {
+    public static StreamCompress getStreamCompressByName(String algorithmName) {
         for (int code : compressAlgorithmMap.keySet()) {
             CompressAlgorithm algorithm = getByCode(code);
-            if (algorithm.getName().equalsIgnoreCase(algorithmName)) {
-                return algorithm;
+            if (algorithm.getName().equalsIgnoreCase(algorithmName) && (algorithm.getCode() & 0x10) == 0) {
+                return (StreamCompress) algorithm;
+            }
+        }
+        return null;
+    }
+
+    public static FileCompress getFileCompressByName(String algorithmName) {
+        for (int code : compressAlgorithmMap.keySet()) {
+            CompressAlgorithm algorithm = getByCode(code);
+            if (algorithm.getName().equalsIgnoreCase(algorithmName) && (algorithm.getCode() & 0x10) != 0) {
+                return (FileCompress) algorithm;
             }
         }
         return null;
@@ -44,8 +57,13 @@ public class CompressUtils {
      * @param algorithmCode 压缩算法代号
      * @return 压缩算法
      */
-    public static CompressAlgorithm getByCode(int algorithmCode) {
-        return compressAlgorithmMap.get(algorithmCode);
+    public static <T> T getByCode(int algorithmCode) {
+        CompressAlgorithm algorithm = compressAlgorithmMap.get(algorithmCode);
+        if (algorithm != null) {
+            return (T) algorithm;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -58,7 +76,7 @@ public class CompressUtils {
      * @throws NoSuchCompressAlgorithm 如果不存在这样的压缩算法
      */
     public static byte[] compress(byte[] data, String algorithmName) throws CompressException, NoSuchCompressAlgorithm {
-        CompressAlgorithm algorithm = getByName(algorithmName);
+        StreamCompress algorithm = getStreamCompressByName(algorithmName);
         if (algorithm != null) {
             return algorithm.compress(data);
         } else {
@@ -76,7 +94,7 @@ public class CompressUtils {
      * @throws NoSuchCompressAlgorithm 如果不存在这样的压缩算法
      */
     public static byte[] uncompress(byte[] data, String algorithmName) throws CompressException, NoSuchCompressAlgorithm {
-        CompressAlgorithm algorithm = getByName(algorithmName);
+        StreamCompress algorithm = getStreamCompressByName(algorithmName);
         if (algorithm != null) {
             return algorithm.uncompress(data);
         } else {
@@ -94,7 +112,7 @@ public class CompressUtils {
      * @throws NoSuchCompressAlgorithm 如果不存在这样的压缩算法
      */
     public static byte[] compress(byte[] data, int algorithmCode) throws CompressException, NoSuchCompressAlgorithm {
-        CompressAlgorithm algorithm = getByCode(algorithmCode);
+        StreamCompress algorithm = getByCode(algorithmCode);
         if (algorithm != null) {
             return algorithm.compress(data);
         } else {
@@ -112,7 +130,7 @@ public class CompressUtils {
      * @throws NoSuchCompressAlgorithm 如果不存在这样的压缩算法
      */
     public static byte[] uncompress(byte[] data, int algorithmCode) throws CompressException, NoSuchCompressAlgorithm {
-        CompressAlgorithm algorithm = getByCode(algorithmCode);
+        StreamCompress algorithm = getByCode(algorithmCode);
         if (algorithm != null) {
             return algorithm.uncompress(data);
         } else {
