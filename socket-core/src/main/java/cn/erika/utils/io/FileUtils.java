@@ -1,8 +1,6 @@
 package cn.erika.utils.io;
 
-import cn.erika.config.Constant;
-import cn.erika.socket.core.component.FileInfo;
-import cn.erika.socket.core.component.Message;
+import cn.erika.socket.model.pto.FileInfo;
 import cn.erika.utils.security.MessageDigestUtils;
 
 import java.io.*;

@@ -7,7 +7,7 @@ import cn.erika.context.exception.BeanException;
 import cn.erika.context.exception.NoSuchBeanException;
 import cn.erika.context.exception.UndeclaredBeanException;
 import cn.erika.context.exception.UndeclaredMethodException;
-import cn.erika.socket.core.component.Task;
+import cn.erika.socket.core.Task;
 import cn.erika.utils.log.Logger;
 import cn.erika.utils.log.LoggerFactory;
 

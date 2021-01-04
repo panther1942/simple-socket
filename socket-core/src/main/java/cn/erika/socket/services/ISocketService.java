@@ -1,7 +1,7 @@
 package cn.erika.socket.services;
 
 import cn.erika.socket.core.ISocket;
-import cn.erika.socket.core.component.Message;
+import cn.erika.socket.model.pto.Message;
 
 /**
  * socket服务都必须实现这个接口

@@ -4,7 +4,7 @@ import cn.erika.context.bean.BeanFactory;
 import cn.erika.context.exception.BeanException;
 import cn.erika.utils.db.annotation.Column;
 import cn.erika.utils.db.annotation.Table;
-import cn.erika.utils.db.exception.EntryException;
+import cn.erika.utils.exception.EntryException;
 import cn.erika.utils.db.format.Format;
 import cn.erika.utils.log.Logger;
 import cn.erika.utils.log.LoggerFactory;

@@ -3,8 +3,8 @@ package cn.erika.socket.core;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
 import cn.erika.context.exception.BeanException;
-import cn.erika.socket.core.component.DataInfo;
-import cn.erika.socket.core.component.Message;
+import cn.erika.socket.model.pto.DataInfo;
+import cn.erika.socket.model.pto.Message;
 import cn.erika.utils.exception.UnsupportedAlgorithmException;
 import cn.erika.utils.io.compress.CompressUtils;
 import cn.erika.utils.exception.CompressException;
@@ -49,6 +49,7 @@ public abstract class BaseSocket implements ISocket {
     @Override
     public void send(Message message) {
 //        log.debug(message.toString());
+        set(Constant.LAST_TIME, new Date());
         try {
             boolean isEncrypt = get(Constant.ENCRYPT);
             message.del(Constant.DIGITAL_SIGNATURE);
@@ -109,6 +110,7 @@ public abstract class BaseSocket implements ISocket {
      * @param info 接收到的数据包 将解析成Message对象
      */
     public void receive(DataInfo info) {
+        set(Constant.LAST_TIME, new Date());
         try {
             boolean isEncrypt = get(Constant.ENCRYPT);
             byte[] data = info.getData();

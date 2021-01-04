@@ -4,17 +4,12 @@ import cn.erika.context.Application;
 import cn.erika.context.annotation.PackageScan;
 import cn.erika.context.bean.BeanFactory;
 import cn.erika.context.exception.BeanException;
-import cn.erika.jdbc.dao.AccountDao;
-import cn.erika.jdbc.model.Account;
-import cn.erika.utils.db.JdbcUtils;
 import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 @PackageScan("cn.erika")
 public class TestApplication extends Application {

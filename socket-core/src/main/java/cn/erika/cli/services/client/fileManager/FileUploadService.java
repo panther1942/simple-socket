@@ -5,7 +5,7 @@ import cn.erika.cli.services.client.basic.BaseClientService;
 import cn.erika.config.Constant;
 import cn.erika.context.annotation.Component;
 import cn.erika.context.exception.BeanException;
-import cn.erika.socket.core.component.Message;
+import cn.erika.socket.model.pto.Message;
 import cn.erika.socket.handler.IClient;
 
 @Component("upload")

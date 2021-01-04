@@ -4,15 +4,16 @@ import cn.erika.config.Constant;
 import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.BaseHandler;
 import cn.erika.socket.core.ISocket;
-import cn.erika.socket.core.component.LinkManager;
-import cn.erika.socket.core.component.Message;
-import cn.erika.socket.core.component.Task;
+import cn.erika.socket.core.LinkManager;
+import cn.erika.socket.model.pto.Message;
+import cn.erika.socket.core.Task;
 import cn.erika.socket.exception.AuthenticateException;
 import cn.erika.socket.exception.TokenException;
 import cn.erika.utils.security.MessageDigestUtils;
 
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,9 +74,13 @@ public abstract class BaseServer extends BaseHandler implements Runnable {
 
     public void status() {
         StringBuffer buffer = new StringBuffer();
+        Date now = new Date();
         for (String id : linkManager.getLinks().keySet()) {
-            SocketAddress address = linkManager.getLink(id).getRemoteAddress();
-            buffer.append("id: ").append(id).append(" From: ").append(address).append(System.lineSeparator());
+            ISocket socket = linkManager.getLink(id);
+            Date linkTime = socket.get(Constant.LINK_TIME);
+            SocketAddress address = socket.getRemoteAddress();
+            String line = String.format("[%d]id: %s From: %s", (now.getTime() - linkTime.getTime()) / 1000, id, address);
+            buffer.append(line).append(System.lineSeparator());
         }
         log.info(buffer.toString());
     }

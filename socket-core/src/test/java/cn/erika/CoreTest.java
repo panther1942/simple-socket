@@ -3,11 +3,10 @@ package cn.erika;
 import cn.erika.enumTest.Food;
 import cn.erika.enumTest.Fruit;
 import cn.erika.enumTest.Vegetables;
-import cn.erika.jdbc.model.Account;
+import cn.erika.socket.model.po.Account;
 import cn.erika.service.DemoServiceImpl;
 import cn.erika.service.IDemoService;
-import cn.erika.socket.core.component.Message;
-import cn.erika.utils.db.JdbcUtils;
+import cn.erika.socket.model.pto.Message;
 import cn.erika.utils.exception.UnsupportedAlgorithmException;
 import cn.erika.utils.io.compress.file.ZIP;
 import cn.erika.utils.exception.CompressException;
@@ -35,6 +34,8 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class CoreTest {
 
@@ -287,6 +288,24 @@ public class CoreTest {
         List<Account> list = Account.dao.select(sql);
         for (Account acc : list) {
             System.out.println(acc);
+        }
+    }
+
+    static class T1 {
+        public static void main(String[] args) {
+            Runnable r = new Runnable() {
+                @Override
+                public void run() {
+                    String sql = "SELECT * FROM tb_account";
+                    List<Account> list = Account.dao.select(sql);
+                    for (Account acc : list) {
+                        System.out.println(acc);
+                    }
+                }
+            };
+            for (int i = 0; i < 15; i++) {
+                new Thread(r).start();
+            }
         }
     }
 

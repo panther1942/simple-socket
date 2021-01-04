@@ -1,4 +1,4 @@
-package cn.erika.socket.core.component;
+package cn.erika.socket.core;
 
 import cn.erika.socket.core.ISocket;
 

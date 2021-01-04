@@ -1,4 +1,4 @@
-package cn.erika.utils.db.exception;
+package cn.erika.utils.exception;
 
 public class EntryException extends Exception {
     public EntryException() {

@@ -1,8 +1,9 @@
-package cn.erika.socket.core.component;
+package cn.erika.socket.model.pto;
 
 import java.io.Serializable;
 import java.util.Date;
 
+// 文件传输前发送需要的信息
 public class FileInfo implements Serializable {
     private static final long serialVersionUID = 1L;
 

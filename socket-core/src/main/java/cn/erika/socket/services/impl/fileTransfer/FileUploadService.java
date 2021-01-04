@@ -2,17 +2,15 @@ package cn.erika.socket.services.impl.fileTransfer;
 
 import cn.erika.aop.AuthenticatedCheck;
 import cn.erika.config.Constant;
-import cn.erika.config.GlobalSettings;
 import cn.erika.context.BaseService;
 import cn.erika.context.annotation.Component;
 import cn.erika.context.annotation.Enhance;
 import cn.erika.aop.FileUploadTimeCount;
 import cn.erika.socket.core.BaseSocket;
 import cn.erika.socket.core.ISocket;
-import cn.erika.socket.core.component.FileInfo;
-import cn.erika.socket.core.component.Message;
+import cn.erika.socket.model.pto.FileInfo;
+import cn.erika.socket.model.pto.Message;
 import cn.erika.socket.services.ISocketService;
-import cn.erika.utils.io.FileUtils;
 import cn.erika.utils.security.MessageDigestUtils;
 
 import java.io.File;
@@ -20,7 +18,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.DecimalFormat;
-import java.util.Date;
 
 @Component(Constant.SRV_UPLOAD)
 public class FileUploadService extends BaseService implements ISocketService {

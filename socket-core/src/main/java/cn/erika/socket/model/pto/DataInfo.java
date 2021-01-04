@@ -1,4 +1,4 @@
-package cn.erika.socket.core.component;
+package cn.erika.socket.model.pto;
 
 import java.io.Serializable;
 import java.util.Date;

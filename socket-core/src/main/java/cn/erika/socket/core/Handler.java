@@ -1,8 +1,7 @@
 package cn.erika.socket.core;
 
 import cn.erika.context.exception.BeanException;
-import cn.erika.socket.core.component.Message;
-import cn.erika.socket.core.component.Task;
+import cn.erika.socket.model.pto.Message;
 
 import java.util.List;
 

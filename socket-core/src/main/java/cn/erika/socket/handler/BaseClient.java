@@ -4,8 +4,8 @@ import cn.erika.config.Constant;
 import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.BaseHandler;
 import cn.erika.socket.core.ISocket;
-import cn.erika.socket.core.component.Message;
-import cn.erika.socket.core.component.Task;
+import cn.erika.socket.model.pto.Message;
+import cn.erika.socket.core.Task;
 
 import java.net.SocketAddress;
 import java.util.List;

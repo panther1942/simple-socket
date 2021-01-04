@@ -1,7 +1,7 @@
 package cn.erika.socket.core.tcp;
 
 import cn.erika.socket.core.ISocket;
-import cn.erika.socket.core.component.DataInfo;
+import cn.erika.socket.model.pto.DataInfo;
 import cn.erika.socket.exception.DataFormatException;
 import cn.erika.utils.log.Logger;
 import cn.erika.utils.log.LoggerFactory;

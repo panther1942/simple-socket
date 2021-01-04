@@ -1,4 +1,4 @@
-package cn.erika.jdbc.model;
+package cn.erika.socket.model.po;
 
 import cn.erika.utils.db.Entry;
 import cn.erika.utils.db.annotation.Column;

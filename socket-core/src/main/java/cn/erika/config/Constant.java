@@ -27,6 +27,7 @@ public class Constant {
     public static final String CLIENT = "client";
     public static final String SERVER = "server";
     public static final String LINK_TIME = "linkTime";
+    public static final String LAST_TIME = "lastTime";
     public static final String SERVICE_NAME = "serverName";
     public static final String TOKEN = "token";
     public static final String PARENT_SOCKET = "parentSocket";

@@ -9,67 +9,67 @@ import java.util.*;
 
 public class JdbcUtils {
     private Logger log = LoggerFactory.getLogger(this.getClass());
-    private static JdbcUtils utils = new JdbcUtils();
+    private static JdbcUtils utils;
+
+    private String driver;
+    //    private String url = "jdbc:sqlite:/home/erika/Workspaces/simple-socket/localStorage.db";
+    private String url = "jdbc:mysql://127.0.0.1:3306/db_development";
+    private String username = "test";
+    private String password = "test";
 
     // 自己写个简单的连接池
     private Vector<Connection> freePool = new Vector<>();
     private Vector<Connection> usedPool = new Vector<>();
+    private int maxConn = 10;
+    private int waitTime = 5 * 1000;
 
-    private static String[] driverList = {
-            "com.mysql.jdbc.Driver",
-            "com.mysql.cj.jdbc.Driver",
-            "org.sqlite.JDBC"
-    };
-
-    static {
-        for (String driver : driverList) {
-            try {
-                loadDriver(driver);
-            } catch (ClassNotFoundException e) {
-                System.err.println("忽略驱动: " + driver);
-            }
-        }
-    }
-
-    private static void loadDriver(String name) throws ClassNotFoundException {
+    private void loadDriver(String name) throws ClassNotFoundException {
         Class.forName(name);
     }
 
-    public static JdbcUtils getInstance(){
+    public static JdbcUtils getInstance() {
         if (utils == null) {
             utils = new JdbcUtils();
         }
         return utils;
     }
 
-    private JdbcUtils(){}
+    private JdbcUtils() {
+    }
+
+    private synchronized Connection getNewConn(String url, String username, String password) throws SQLException {
+        return DriverManager.getConnection(url, username, password);
+    }
 
     public Connection getConn(String url, String username, String password) throws SQLException {
-        Connection conn;
-        if (freePool.size() > 0) {
-            conn = freePool.lastElement();
-            freePool.remove(conn);
-            usedPool.add(conn);
-        } else {
-            conn = DriverManager.getConnection(url, username, password);
-            usedPool.add(conn);
+        Connection conn = null;
+        try {
+            while (conn == null) {
+                if (freePool.size() > 0) {
+                    conn = freePool.lastElement();
+                    freePool.remove(conn);
+                    usedPool.add(conn);
+                } else if (usedPool.size() < maxConn) {
+                    conn = getNewConn(url, username, password);
+                    usedPool.add(conn);
+                } else {
+                    Thread.sleep(waitTime);
+                }
+            }
+            return conn;
+        } catch (InterruptedException e) {
+            throw new SQLException("无法获取数据库连接");
         }
-        return conn;
     }
 
     public Connection getConn() throws SQLException {
-        String url = "jdbc:sqlite:/home/erika/Workspaces/simple-socket/localStorage.db";
-        String username = "";
-        String password = "";
         return getConn(url, username, password);
     }
 
-    public List<Map<String, Object>> select(String sql, Object... params) {
-        Connection conn = null;
+    public List<Map<String, Object>> select(Connection conn, String sql, Object... params) {
         PreparedStatement pStmt = null;
         ResultSet result = null;
-        try{
-            conn = getConn();
+        try {
             pStmt = conn.prepareStatement(sql);
             if (params != null) {
                 for (int i = 0; i < params.length; i++) {
@@ -78,7 +78,7 @@ public class JdbcUtils {
             }
             result = pStmt.executeQuery();
             ResultSetMetaData meta = result.getMetaData();
-            List<Map<String,Object>> resultList = new LinkedList<>();
+            List<Map<String, Object>> resultList = new LinkedList<>();
             int columnCount = meta.getColumnCount();
             String[] columnNames = new String[columnCount];
             for (int i = 0; i < columnCount; i++) {
@@ -100,15 +100,24 @@ public class JdbcUtils {
         return null;
     }
 
-    public int update(String sql, Object... params) {
+    public List<Map<String, Object>> select(String sql, Object... params) {
+        Connection conn = null;
+        try {
+            conn = getConn();
+            return select(conn, sql, params);
+        } catch (SQLException e) {
+            log.error("数据查询出错: " + e.getMessage(), e);
+        }
+        return null;
+    }
+
+    public int update(Connection conn, String sql, Object... params) {
+        PreparedStatement pStmt = null;
         log.debug(sql);
         if (params != null) {
             log.debug(StringUtils.join(",", params).toString());
         }
-        Connection conn = null;
-        PreparedStatement pStmt = null;
         try {
-            conn = getConn();
             pStmt = conn.prepareStatement(sql);
             if (params != null) {
                 for (int i = 0; i < params.length; i++) {
@@ -121,6 +130,17 @@ public class JdbcUtils {
             return 0;
         } finally {
             close(conn, pStmt);
+        }
+    }
+
+    public int update(String sql, Object... params) {
+        Connection conn = null;
+        try {
+            conn = getConn();
+            return update(conn, sql, params);
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+            return 0;
         }
     }
 

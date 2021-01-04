@@ -1,7 +1,7 @@
 package cn.erika.socket.core;
 
-import cn.erika.socket.core.component.DataInfo;
-import cn.erika.socket.core.component.Message;
+import cn.erika.socket.model.pto.DataInfo;
+import cn.erika.socket.model.pto.Message;
 
 import java.net.SocketAddress;
 
