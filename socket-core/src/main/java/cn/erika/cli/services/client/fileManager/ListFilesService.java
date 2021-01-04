@@ -24,6 +24,6 @@ public class ListFilesService extends BaseClientService implements ICliService {
             String target = args[1];
             data.add(Constant.FILEPATH, target);
         }
-        client.execute(Constant.SRV_LIST, data);
+        client.execute(Constant.SRV_LS, data);
     }
 }

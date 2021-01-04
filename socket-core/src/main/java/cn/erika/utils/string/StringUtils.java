@@ -112,4 +112,13 @@ public class StringUtils {
         }
         return '\0';
     }
+
+    public static StringBuffer join(CharSequence delimiter, Object[] array) {
+        StringBuffer buffer = new StringBuffer();
+        for (Object obj : array) {
+            buffer.append(String.valueOf(obj)).append(delimiter);
+        }
+        buffer.deleteCharAt(buffer.length() - 1);
+        return buffer;
+    }
 }

@@ -8,6 +8,8 @@ import cn.erika.context.exception.NoSuchBeanException;
 import cn.erika.context.exception.UndeclaredBeanException;
 import cn.erika.context.exception.UndeclaredMethodException;
 import cn.erika.socket.core.component.Task;
+import cn.erika.utils.log.Logger;
+import cn.erika.utils.log.LoggerFactory;
 
 import java.lang.reflect.*;
 import java.util.HashMap;
@@ -17,6 +19,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BeanFactory {
+    private Logger log = LoggerFactory.getLogger(this.getClass());
     // 单例工厂
     private static BeanFactory factory = new BeanFactory();
     // 存储单例对象
@@ -197,8 +200,41 @@ public class BeanFactory {
         } else if (src.isAssignableFrom(dest)) {
             // 如果参数类型匹配 或为其子类
             return true;
-        } else // 如果既不为空 且参数类型又不匹配
-            return src.isPrimitive() && src.getName().equals(dest.getCanonicalName());
+        } else if (src.isPrimitive()) {
+            String srcName;
+            switch (src.getName()) {
+                case "byte":
+                    srcName = Byte.class.getName();
+                    break;
+                case "short":
+                    srcName = Short.class.getName();
+                    break;
+                case "int":
+                    srcName = Integer.class.getName();
+                    break;
+                case "long":
+                    srcName = Long.class.getName();
+                    break;
+                case "float":
+                    srcName = Float.class.getName();
+                    break;
+                case "double":
+                    srcName = Double.class.getName();
+                    break;
+                case "boolean":
+                    srcName = Boolean.class.getName();
+                    break;
+                case "char":
+                    srcName = Character.class.getName();
+                    break;
+                default:
+                    return false;
+            }
+            return srcName.equals(dest.getName());
+        } else {
+            // 如果既不为空 且参数类型又不匹配
+            return false;
+        }
     }
 
     @SuppressWarnings("unchecked")

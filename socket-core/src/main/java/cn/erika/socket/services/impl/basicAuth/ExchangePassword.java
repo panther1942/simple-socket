@@ -9,7 +9,7 @@ import cn.erika.context.annotation.Enhance;
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.core.component.Message;
 import cn.erika.socket.exception.AuthenticateException;
-import cn.erika.socket.exception.UnsupportedAlgorithmException;
+import cn.erika.utils.exception.UnsupportedAlgorithmException;
 import cn.erika.socket.services.ISocketService;
 import cn.erika.utils.security.DigitalSignatureAlgorithm;
 import cn.erika.utils.security.SecurityUtils;

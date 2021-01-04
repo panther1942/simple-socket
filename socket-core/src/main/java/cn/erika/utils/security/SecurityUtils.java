@@ -1,8 +1,7 @@
 package cn.erika.utils.security;
 
-import cn.erika.socket.exception.UnsupportedAlgorithmException;
+import cn.erika.utils.exception.UnsupportedAlgorithmException;
 import cn.erika.utils.security.algorithm.BasicAsymmetricAlgorithm;
-import cn.erika.utils.string.Base64Utils;
 
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;

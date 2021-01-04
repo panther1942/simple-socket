@@ -13,7 +13,7 @@ import cn.erika.utils.string.StringUtils;
 import java.io.File;
 
 @Component(Constant.SRV_CD)
-public class ChangeDirectory extends BaseService implements ISocketService {
+public class SrvChangeDirectory extends BaseService implements ISocketService {
     @Override
     public void client(ISocket socket, Message message) {
         if (message != null) {

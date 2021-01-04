@@ -5,7 +5,7 @@ import cn.erika.config.GlobalSettings;
 import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.component.DataInfo;
 import cn.erika.socket.core.component.Message;
-import cn.erika.socket.exception.UnsupportedAlgorithmException;
+import cn.erika.utils.exception.UnsupportedAlgorithmException;
 import cn.erika.utils.io.compress.CompressUtils;
 import cn.erika.utils.exception.CompressException;
 import cn.erika.utils.exception.NoSuchCompressAlgorithm;

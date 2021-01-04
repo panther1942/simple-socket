@@ -20,8 +20,8 @@ import java.nio.file.attribute.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-@Component(Constant.SRV_LIST)
-public class List extends BaseService implements ISocketService {
+@Component(Constant.SRV_LS)
+public class SrvListDirectory extends BaseService implements ISocketService {
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Override
@@ -29,7 +29,7 @@ public class List extends BaseService implements ISocketService {
         if (message != null) {
             if (message.get(Constant.SERVICE_NAME) == null) {
                 String dir = message.get(Constant.FILEPATH);
-                Message request = new Message(Constant.SRV_LIST);
+                Message request = new Message(Constant.SRV_LS);
                 request.add(Constant.FILEPATH, dir);
                 socket.send(request);
             } else {
@@ -82,7 +82,7 @@ public class List extends BaseService implements ISocketService {
             target = new File(System.getProperty("user.dir"));
         }
 
-        Message reply = new Message(Constant.SRV_LIST);
+        Message reply = new Message(Constant.SRV_LS);
         if (!target.exists()) {
             reply.add(Constant.RESULT, false);
             reply.add(Constant.TEXT, "目录不存在");

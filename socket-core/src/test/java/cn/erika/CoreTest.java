@@ -3,10 +3,12 @@ package cn.erika;
 import cn.erika.enumTest.Food;
 import cn.erika.enumTest.Fruit;
 import cn.erika.enumTest.Vegetables;
+import cn.erika.jdbc.model.Account;
 import cn.erika.service.DemoServiceImpl;
 import cn.erika.service.IDemoService;
 import cn.erika.socket.core.component.Message;
-import cn.erika.socket.exception.UnsupportedAlgorithmException;
+import cn.erika.utils.db.JdbcUtils;
+import cn.erika.utils.exception.UnsupportedAlgorithmException;
 import cn.erika.utils.io.compress.file.ZIP;
 import cn.erika.utils.exception.CompressException;
 import cn.erika.utils.io.FileUtils;
@@ -31,6 +33,7 @@ import java.security.Provider;
 import java.security.Security;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CoreTest {
@@ -276,5 +279,48 @@ public class CoreTest {
         zip.decompress(new File(archiveName), new File(unarchiveDir));
         byte[] arr = FileUtils.readFile(unarchiveDir + "/" + srcFilename);
         System.out.println(new String(Base64Utils.decode(arr)));
+    }
+
+    @Test
+    public void testSelect() {
+        String sql = "SELECT * FROM tb_account";
+        List<Account> list = Account.dao.select(sql);
+        for (Account acc : list) {
+            System.out.println(acc);
+        }
+    }
+
+    @Test
+    public void testInsert() {
+        Account acc = new Account();
+        acc.setUsername("root");
+        acc.setPassword("root");
+        int count = acc.insert();
+        System.out.println(count);
+        testSelect();
+    }
+
+    @Test
+    public void testUpdate() {
+        String sql = "SELECT * FROM tb_account";
+        List<Account> list = Account.dao.select(sql);
+        if (list.size() > 0) {
+            Account account = list.get(0);
+            account.setPassword("123456");
+            int count = account.update();
+            System.out.println(count);
+        }
+        testSelect();
+    }
+
+    @Test
+    public void testDelete() {
+        String sql = "SELECT * FROM tb_account WHERE `username` = ?";
+        List<Account> list = Account.dao.select(sql, "root");
+        if (list.size() > 0) {
+            int count = list.get(0).delete();
+            System.out.println(count);
+        }
+        testSelect();
     }
 }

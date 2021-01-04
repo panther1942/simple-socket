@@ -1,6 +1,6 @@
 package cn.erika.utils.security;
 
-import cn.erika.socket.exception.UnsupportedAlgorithmException;
+import cn.erika.utils.exception.UnsupportedAlgorithmException;
 
 import java.io.File;
 import java.io.FileInputStream;
