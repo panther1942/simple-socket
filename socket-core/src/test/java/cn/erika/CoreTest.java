@@ -7,6 +7,8 @@ import cn.erika.socket.model.po.Account;
 import cn.erika.service.DemoServiceImpl;
 import cn.erika.service.IDemoService;
 import cn.erika.socket.model.pto.Message;
+import cn.erika.socket.orm.IAccountService;
+import cn.erika.socket.orm.impl.AccountServiceImpl;
 import cn.erika.utils.exception.UnsupportedAlgorithmException;
 import cn.erika.utils.io.compress.file.ZIP;
 import cn.erika.utils.exception.CompressException;
@@ -309,8 +311,10 @@ public class CoreTest {
     @Test
     public void testInsert() {
         Account acc = new Account();
-        acc.setUsername("root");
-        acc.setPassword("root");
+        acc.setUsername("admin");
+        acc.setPassword("admin");
+        acc.setCreateTime(new Date());
+        acc.setUpdateTime(new Date());
         int count = acc.insert();
         System.out.println(count);
         testSelect();
@@ -340,5 +344,24 @@ public class CoreTest {
             System.out.println(count);
         }
         testSelect();
+    }
+
+    @Test
+    public void testService() {
+        IAccountService accountService = new AccountServiceImpl();
+        List<Account> list = accountService.getAll();
+        for (Account acc : list) {
+            System.out.println(acc);
+        }
+        if (list.size() > 0) {
+            Account acc = list.get(0);
+            acc.setPassword("admin");
+            acc.update();
+            System.out.println(acc);
+        }
+        list = accountService.getAll();
+        for (Account acc : list) {
+            System.out.println(acc);
+        }
     }
 }

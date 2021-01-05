@@ -70,6 +70,19 @@ public class Account extends Entry<Account> {
     }
 
     @Override
+    public int insert() {
+        this.createTime = new Date();
+        this.updateTime = new Date();
+        return super.insert();
+    }
+
+    @Override
+    public int update() {
+        this.updateTime = new Date();
+        return super.update();
+    }
+
+    @Override
     public String toString() {
         return "Account{" +
                 "uuid='" + uuid + '\'' +

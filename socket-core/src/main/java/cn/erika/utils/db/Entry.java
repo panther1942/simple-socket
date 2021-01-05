@@ -21,7 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public abstract class Entry<T> implements Serializable {
+public class Entry<T> implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private BeanFactory beanFactory = BeanFactory.getInstance();
@@ -104,7 +104,7 @@ public abstract class Entry<T> implements Serializable {
         }
     }
 
-    public final int insert() {
+    public int insert() {
         JdbcUtils utils = JdbcUtils.getInstance();
         try {
             Table table = this.getClass().getAnnotation(Table.class);
@@ -146,7 +146,7 @@ public abstract class Entry<T> implements Serializable {
         return 0;
     }
 
-    public final int update() {
+    public int update() {
         JdbcUtils utils = JdbcUtils.getInstance();
         try {
             Table table = this.getClass().getAnnotation(Table.class);
@@ -188,7 +188,7 @@ public abstract class Entry<T> implements Serializable {
         return 0;
     }
 
-    public final int delete() {
+    public int delete() {
         JdbcUtils utils = JdbcUtils.getInstance();
         try {
             Table table = this.getClass().getAnnotation(Table.class);
