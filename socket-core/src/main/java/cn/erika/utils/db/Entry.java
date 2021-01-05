@@ -23,11 +23,11 @@ import java.util.Map;
 public abstract class Entry<T> implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private JdbcUtils utils = JdbcUtils.getInstance();
     private BeanFactory beanFactory = BeanFactory.getInstance();
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     public final List<T> select(String sql, Object... params) {
+        JdbcUtils utils = JdbcUtils.getInstance();
         Connection conn = null;
         PreparedStatement pStmt = null;
         ResultSet result = null;
@@ -102,6 +102,7 @@ public abstract class Entry<T> implements Serializable {
     }
 
     public final int insert() {
+        JdbcUtils utils = JdbcUtils.getInstance();
         try {
             Table table = this.getClass().getAnnotation(Table.class);
             if (StringUtils.isEmpty(table.value())) {
@@ -143,6 +144,7 @@ public abstract class Entry<T> implements Serializable {
     }
 
     public final int update() {
+        JdbcUtils utils = JdbcUtils.getInstance();
         try {
             Table table = this.getClass().getAnnotation(Table.class);
             if (StringUtils.isEmpty(table.value())) {
@@ -184,6 +186,7 @@ public abstract class Entry<T> implements Serializable {
     }
 
     public final int delete() {
+        JdbcUtils utils = JdbcUtils.getInstance();
         try {
             Table table = this.getClass().getAnnotation(Table.class);
             if (StringUtils.isEmpty(table.value())) {

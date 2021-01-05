@@ -9,6 +9,7 @@ import cn.erika.socket.model.pto.Message;
 import cn.erika.socket.core.Task;
 import cn.erika.socket.exception.AuthenticateException;
 import cn.erika.socket.exception.TokenException;
+import cn.erika.utils.db.JdbcUtils;
 import cn.erika.utils.security.MessageDigestUtils;
 
 import java.net.SocketAddress;
@@ -24,7 +25,10 @@ public abstract class BaseServer extends BaseHandler implements Runnable {
     // 运行时数据存放区 可以用redis代替
     private Map<String, Object> storage = new ConcurrentHashMap<>();
 
+
     public BaseServer() {
+        // 测试数据库连接
+        JdbcUtils.getInstance();
         List<Task> taskList = beanFactory.getTasks(Constant.SERVER);
         addTasks(taskList);
     }

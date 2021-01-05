@@ -1,5 +1,6 @@
 package cn.erika.utils.db;
 
+import cn.erika.config.GlobalSettings;
 import cn.erika.utils.log.Logger;
 import cn.erika.utils.log.LoggerFactory;
 import cn.erika.utils.string.StringUtils;
@@ -11,11 +12,11 @@ public class JdbcUtils {
     private Logger log = LoggerFactory.getLogger(this.getClass());
     private static JdbcUtils utils;
 
-    private String driver;
-    //    private String url = "jdbc:sqlite:/home/erika/Workspaces/simple-socket/localStorage.db";
-    private String url = "jdbc:mysql://127.0.0.1:3306/db_development";
-    private String username = "test";
-    private String password = "test";
+    private String driver = GlobalSettings.dbDriver;
+    private String url = GlobalSettings.dbUrl;
+    private String username = GlobalSettings.dbUsername;
+    private String password = GlobalSettings.dbPassword;
+    private String testSql = GlobalSettings.dbTestSql;
 
     // 自己写个简单的连接池
     private Vector<Connection> freePool = new Vector<>();
@@ -35,6 +36,17 @@ public class JdbcUtils {
     }
 
     private JdbcUtils() {
+        try {
+            loadDriver(driver);
+        } catch (ClassNotFoundException e) {
+            log.error("找不到指定的驱动: " + driver);
+            System.exit(1);
+        }
+        if (select(testSql).size() > 0) {
+            log.info("数据库连接成功");
+        }else{
+            log.warn("无法连接到数据库");
+        }
     }
 
     private synchronized Connection getNewConn(String url, String username, String password) throws SQLException {
