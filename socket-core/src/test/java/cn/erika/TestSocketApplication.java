@@ -9,7 +9,7 @@ import cn.erika.socket.model.pto.Message;
 import cn.erika.socket.core.Task;
 import cn.erika.utils.security.algorithm.BasicSecurityAlgorithm;
 
-@PackageScan("cn.erika")
+@PackageScan({"cn.erika.aop", "cn.erika.socket", "cn.erika.service"})
 public class TestSocketApplication extends SocketApplication {
 
     public static void main(String[] args) {

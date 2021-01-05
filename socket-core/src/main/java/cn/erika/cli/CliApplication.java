@@ -25,7 +25,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-@PackageScan("cn.erika")
+@PackageScan({"cn.erika.aop", "cn.erika.cli", "cn.erika.socket"})
 public class CliApplication extends SocketApplication implements Runnable {
     private Logger log = LoggerFactory.getLogger(this.getClass());
     private KeyboardReader reader = KeyboardReader.getInstance();

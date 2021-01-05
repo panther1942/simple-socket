@@ -11,7 +11,7 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 
-@PackageScan("cn.erika")
+@PackageScan({"cn.erika.aop", "cn.erika.service"})
 public class TestApplication extends Application {
     private BeanFactory beanFactory = BeanFactory.getInstance();
 
