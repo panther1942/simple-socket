@@ -54,7 +54,9 @@ public class CliApplication extends SocketApplication implements Runnable {
             public void deal(Class<?> clazz) {
                 if (ICliService.class.isAssignableFrom(clazz)) {
                     Component component = clazz.getAnnotation(Component.class);
-                    beanFactory.addBean(component.value(), clazz);
+                    if (!StringUtils.isEmpty(component.value())) {
+                        beanFactory.addBean(component.value(), clazz);
+                    }
                 }
             }
         });

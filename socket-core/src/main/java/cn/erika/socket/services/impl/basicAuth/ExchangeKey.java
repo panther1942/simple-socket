@@ -47,6 +47,7 @@ public class ExchangeKey extends BaseService implements ISocketService {
         // 1024 / 8 - 11 = 117 字节 RSA1024公钥 216字节
         // 2048 / 8 - 11 = 245 字节 RSA2048公钥 392字节
         Message reply = new Message(Constant.SRV_EXCHANGE_PASSWORD);
+        reply.add(Constant.UID, socket.get(Constant.UID));
         reply.add(Constant.PUBLIC_KEY,
                 encoder.encode(GlobalSettings.publicKey));
         reply.add(Constant.DIGITAL_SIGNATURE_ALGORITHM,

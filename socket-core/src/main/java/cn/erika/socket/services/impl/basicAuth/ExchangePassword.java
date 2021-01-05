@@ -49,6 +49,7 @@ public class ExchangePassword extends BaseService implements ISocketService {
         }
 
         // 设置连接的服务器公钥和数字加密信息
+        socket.set(Constant.UID, message.get(Constant.UID));
         socket.set(Constant.DIGITAL_SIGNATURE_ALGORITHM, digitalSignatureAlgorithm);
         socket.set(Constant.PUBLIC_KEY, serverPublicKey);
 

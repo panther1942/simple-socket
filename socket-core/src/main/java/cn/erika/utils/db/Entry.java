@@ -27,10 +27,11 @@ public abstract class Entry<T> implements Serializable {
     private BeanFactory beanFactory = BeanFactory.getInstance();
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
-    public List<T> select(String sql, Object... params) {
+    public final List<T> select(String sql, Object... params) {
         Connection conn = null;
         PreparedStatement pStmt = null;
         ResultSet result = null;
+        List<T> resultList = new LinkedList<>();
         try {
             conn = utils.getConn();
             pStmt = conn.prepareStatement(sql);
@@ -41,7 +42,6 @@ public abstract class Entry<T> implements Serializable {
             }
             result = pStmt.executeQuery();
             ResultSetMetaData meta = result.getMetaData();
-            List<T> resultList = new LinkedList<>();
             int columnCount = meta.getColumnCount();
             String[] columnNames = new String[columnCount];
             for (int i = 0; i < columnCount; i++) {
@@ -54,7 +54,6 @@ public abstract class Entry<T> implements Serializable {
                 }
                 resultList.add(convertArray2Entry(columnNames, dataArray));
             }
-            return resultList;
         } catch (SQLException e) {
             log.error("数据查询出错: " + e.getMessage(), e);
         } catch (EntryException e) {
@@ -62,10 +61,47 @@ public abstract class Entry<T> implements Serializable {
         } finally {
             utils.close(conn, pStmt, result);
         }
+        return resultList;
+    }
+
+    public final T selectOne(String sql, Object... params) {
+        List<T> list = select(sql, params);
+        if (list.size() > 0) {
+            return list.get(0);
+        }
         return null;
     }
 
-    public int insert() {
+    private T select() {
+        try {
+            Table table = this.getClass().getAnnotation(Table.class);
+            if (table == null || StringUtils.isEmpty(table.value())) {
+                throw new EntryException("缺少表名");
+            }
+            StringBuffer buffer = new StringBuffer("SELECT * FROM ");
+            buffer.append(table.value()).append(" WHERE ");
+            Map<String, Object> fields = convertEntry2Map(this);
+            List<Object> params = new LinkedList<>();
+            String primary = (String) fields.get("primary");
+            for (String key : fields.keySet()) {
+                if (key.equals("primary") || key.equals(primary)) {
+                    continue;
+                }
+                if (fields.get(key) == null) {
+                    continue;
+                }
+                buffer.append("`").append(key).append("`=?,");
+                params.add(fields.get(key));
+            }
+            buffer.deleteCharAt(buffer.length() - 1);
+            return selectOne(buffer.toString(), params.toArray());
+        } catch (EntryException e) {
+            log.error(e.getMessage());
+            return null;
+        }
+    }
+
+    public final int insert() {
         try {
             Table table = this.getClass().getAnnotation(Table.class);
             if (StringUtils.isEmpty(table.value())) {
@@ -95,14 +131,18 @@ public abstract class Entry<T> implements Serializable {
             }
             buffer.deleteCharAt(buffer.length() - 1);
             buffer.append(")");
-            return utils.update(buffer.toString(), dataArray);
+            int result = utils.update(buffer.toString(), dataArray);
+            if (result > 0) {
+                flushFields(select());
+                return result;
+            }
         } catch (EntryException e) {
             log.error(e.getMessage());
-            return 0;
         }
+        return 0;
     }
 
-    public int update() {
+    public final int update() {
         try {
             Table table = this.getClass().getAnnotation(Table.class);
             if (StringUtils.isEmpty(table.value())) {
@@ -132,29 +172,38 @@ public abstract class Entry<T> implements Serializable {
             buffer.deleteCharAt(buffer.length() - 1);
             buffer.append(" WHERE ");
             buffer.append("`").append(primary).append("`='").append(params.get(primary)).append("'");
-            return utils.update(buffer.toString(), dataArray);
+            int result = utils.update(buffer.toString(), dataArray);
+            if (result > 0) {
+                flushFields(select());
+                return result;
+            }
         } catch (EntryException e) {
             log.error(e.getMessage());
-            return 0;
         }
+        return 0;
     }
 
-    public int delete() {
+    public final int delete() {
         try {
             Table table = this.getClass().getAnnotation(Table.class);
             if (StringUtils.isEmpty(table.value())) {
                 throw new EntryException("无法确定表名");
             }
+            T target = select();
             Map<String, Object> params = convertEntry2Map(this);
             String primary = (String) params.get("primary");
             StringBuffer buffer = new StringBuffer("DELETE FROM ");
             buffer.append(table.value()).append(" WHERE `");
             buffer.append(primary).append("`=?");
-            return utils.update(buffer.toString(), params.get(primary));
+            int result = utils.update(buffer.toString(), params.get(primary));
+            if (result > 0) {
+                flushFields(target);
+                return result;
+            }
         } catch (EntryException e) {
             log.error(e.getMessage());
-            return 0;
         }
+        return 0;
     }
 
     private Map<String, Object> convertEntry2Map(Object obj) throws EntryException {
@@ -261,5 +310,21 @@ public abstract class Entry<T> implements Serializable {
             }
         }
         return -1;
+    }
+
+    private void flushFields(T data) throws EntryException {
+        if (!this.getClass().isInstance(data)) {
+            throw new EntryException("不匹配的类型");
+        }
+        try {
+            Field[] fields = this.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                field.setAccessible(true);
+                Object value = field.get(data);
+                field.set(this, value);
+            }
+        } catch (IllegalAccessException e) {
+            throw new EntryException("刷新数据失败");
+        }
     }
 }

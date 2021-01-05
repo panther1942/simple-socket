@@ -16,6 +16,7 @@ import cn.erika.utils.log.ConsoleLogger;
 import cn.erika.utils.log.FileLogger;
 import cn.erika.utils.log.Logger;
 import cn.erika.utils.log.LoggerFactory;
+import cn.erika.utils.string.StringUtils;
 
 import java.io.IOException;
 import java.net.BindException;
@@ -50,8 +51,8 @@ public class SocketApplication extends Application {
 
             @Override
             public void deal(Class<?> clazz) {
-                if (ISocketService.class.isAssignableFrom(clazz)) {
-                    Component component = clazz.getAnnotation(Component.class);
+                Component component = clazz.getAnnotation(Component.class);
+                if (!StringUtils.isEmpty(component.value())) {
                     beanFactory.addBean(component.value(), clazz);
                 }
             }

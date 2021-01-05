@@ -4,8 +4,10 @@ import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
 import cn.erika.context.BaseService;
 import cn.erika.context.annotation.Component;
+import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.model.pto.Message;
+import cn.erika.socket.orm.IAccountService;
 import cn.erika.socket.services.ISocketService;
 
 /**
@@ -15,6 +17,12 @@ import cn.erika.socket.services.ISocketService;
  */
 @Component(Constant.SRV_ACCOUNT_AUTH)
 public class AccountAuth extends BaseService implements ISocketService {
+    private IAccountService accountService;
+
+    public AccountAuth() throws BeanException {
+        this.accountService = getBean("accountService");
+    }
+
     @Override
     public void client(ISocket socket, Message message) {
         if (message != null) {
@@ -53,7 +61,7 @@ public class AccountAuth extends BaseService implements ISocketService {
 
         Message reply = new Message(Constant.SRV_ACCOUNT_AUTH);
         // 这里只简单的判断一下 以后会加入更复杂的判断 等加入数据库再说
-        if ("admin".equals(username) && "admin".equals(password)) {
+        if (accountService.get4Auth(username, password) != null) {
             socket.set(Constant.AUTHENTICATED, true);
             socket.set(Constant.PWD, System.getProperty("user.dir"));
             reply.add(Constant.PROMPT, socket.get(Constant.PWD));

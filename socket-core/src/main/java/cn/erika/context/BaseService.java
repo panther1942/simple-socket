@@ -21,6 +21,10 @@ public abstract class BaseService {
         return beanFactory.getBean(clazz);
     }
 
+    protected <T> T getBean(String beanName) throws BeanException {
+        return beanFactory.getBean(beanName);
+    }
+
     protected void addBean(Class<?> clazz, Object object) {
         beanFactory.addBean(clazz, object);
     }

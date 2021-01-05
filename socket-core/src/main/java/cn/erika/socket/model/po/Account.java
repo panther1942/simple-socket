@@ -10,10 +10,12 @@ import java.util.Date;
 @Table("tb_account")
 public class Account extends Entry<Account> {
     public static final Account dao = new Account();
+
     @Column(primary = true)
     private String uuid;
     private String username;
     private String password;
+    private boolean enabled;
     @Column(value = "create_time", format = DateFormat.class)
     private Date createTime;
 
@@ -41,6 +43,14 @@ public class Account extends Entry<Account> {
         this.password = password;
     }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
     public Date getCreateTime() {
         return createTime;
     }
@@ -55,6 +65,7 @@ public class Account extends Entry<Account> {
                 "uuid='" + uuid + '\'' +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
+                ", enabled=" + enabled +
                 ", createTime=" + createTime +
                 '}';
     }
