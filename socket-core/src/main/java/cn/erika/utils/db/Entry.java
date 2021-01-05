@@ -14,6 +14,7 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -27,6 +28,8 @@ public abstract class Entry<T> implements Serializable {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     public final List<T> select(String sql, Object... params) {
+        log.debug(sql);
+        log.debug(StringUtils.join(",", params).toString());
         JdbcUtils utils = JdbcUtils.getInstance();
         Connection conn = null;
         PreparedStatement pStmt = null;
@@ -90,13 +93,13 @@ public abstract class Entry<T> implements Serializable {
                 if (fields.get(key) == null) {
                     continue;
                 }
-                buffer.append("`").append(key).append("`=?,");
+                buffer.append("`").append(key).append("`=? AND");
                 params.add(fields.get(key));
             }
-            buffer.deleteCharAt(buffer.length() - 1);
+            buffer.delete(buffer.length() - 4, buffer.length());
             return selectOne(buffer.toString(), params.toArray());
         } catch (EntryException e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             return null;
         }
     }
@@ -138,7 +141,7 @@ public abstract class Entry<T> implements Serializable {
                 return result;
             }
         } catch (EntryException e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
         }
         return 0;
     }
@@ -180,7 +183,7 @@ public abstract class Entry<T> implements Serializable {
                 return result;
             }
         } catch (EntryException e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
         }
         return 0;
     }
@@ -204,7 +207,7 @@ public abstract class Entry<T> implements Serializable {
                 return result;
             }
         } catch (EntryException e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
         }
         return 0;
     }
@@ -322,12 +325,15 @@ public abstract class Entry<T> implements Serializable {
         try {
             Field[] fields = this.getClass().getDeclaredFields();
             for (Field field : fields) {
+                if (Modifier.isStatic(field.getModifiers())) {
+                    continue;
+                }
                 field.setAccessible(true);
                 Object value = field.get(data);
                 field.set(this, value);
             }
         } catch (IllegalAccessException e) {
-            throw new EntryException("刷新数据失败");
+            throw new EntryException("刷新数据失败", e);
         }
     }
 }

@@ -115,6 +115,9 @@ public class StringUtils {
 
     public static StringBuffer join(CharSequence delimiter, Object[] array) {
         StringBuffer buffer = new StringBuffer();
+        if (array == null || array.length == 0) {
+            return buffer;
+        }
         for (Object obj : array) {
             buffer.append(String.valueOf(obj)).append(delimiter);
         }

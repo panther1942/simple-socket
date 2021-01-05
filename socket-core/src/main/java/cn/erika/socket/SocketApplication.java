@@ -27,7 +27,7 @@ import java.net.SocketAddress;
  * 适配Socket通信的Application的直接子类
  * 注册了Socket相关服务的扫描处理器
  */
-@PackageScan({"cn.erika.aop", "cn.erika.socket"})
+@PackageScan({"cn.erika.aop", "cn.erika.socket", "cn.erika.utils"})
 public class SocketApplication extends Application {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 

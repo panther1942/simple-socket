@@ -18,6 +18,8 @@ public class Account extends Entry<Account> {
     private boolean enabled;
     @Column(value = "create_time", format = DateFormat.class)
     private Date createTime;
+    @Column(value = "update_time", format = DateFormat.class)
+    private Date updateTime;
 
     public String getUuid() {
         return uuid;
@@ -59,6 +61,14 @@ public class Account extends Entry<Account> {
         this.createTime = createTime;
     }
 
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+    }
+
     @Override
     public String toString() {
         return "Account{" +
@@ -67,6 +77,7 @@ public class Account extends Entry<Account> {
                 ", password='" + password + '\'' +
                 ", enabled=" + enabled +
                 ", createTime=" + createTime +
+                ", updateTime=" + updateTime +
                 '}';
     }
 }

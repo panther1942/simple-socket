@@ -22,7 +22,6 @@ public class CompressUtils {
      */
     public static void register(CompressAlgorithm algorithm) {
         compressAlgorithmMap.put(algorithm.getCode(), algorithm);
-
     }
 
     /**

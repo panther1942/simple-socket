@@ -30,10 +30,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Security;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -321,11 +318,13 @@ public class CoreTest {
 
     @Test
     public void testUpdate() {
+        LoggerFactory.register(new ConsoleLogger());
         String sql = "SELECT * FROM tb_account";
         List<Account> list = Account.dao.select(sql);
         if (list.size() > 0) {
             Account account = list.get(0);
             account.setPassword("123456");
+            account.setUpdateTime(new Date());
             int count = account.update();
             System.out.println(count);
         }
