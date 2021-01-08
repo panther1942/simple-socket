@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS tb_file_trans (
   `threads`     INTEGER                  NOT NULL  DEFAULT '1',
   `sender`      VARCHAR(255)             NOT NULL,
   `receiver`    VARCHAR(255)             NOT NULL,
+  `status`      INTEGER                  NOT NULL  DEFAULT '0',
   `create_time` LONG                     NOT NULL,
   `update_time` LONG                     NOT NULL
 );
