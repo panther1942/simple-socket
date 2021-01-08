@@ -41,7 +41,7 @@ public class GZIP implements StreamCompress {
             writer.close();
             return writer.toByteArray();
         } catch (IOException e) {
-            throw new CompressException("压缩过程中发生异常", e);
+            throw new CompressException("压缩过程中发生异常: " + e.getMessage(), e);
         }
     }
 
@@ -64,7 +64,7 @@ public class GZIP implements StreamCompress {
             writer.close();
             return writer.toByteArray();
         } catch (IOException e) {
-            throw new CompressException("解压过程中发生异常", e);
+            throw new CompressException("解压过程中发生异常: " + e.getMessage(), e);
         }
     }
 

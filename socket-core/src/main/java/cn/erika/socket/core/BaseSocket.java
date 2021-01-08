@@ -19,7 +19,6 @@ import cn.erika.utils.security.SecurityUtils;
 import cn.erika.utils.security.algorithm.BasicMessageDigestAlgorithm;
 import cn.erika.utils.io.SerialUtils;
 import cn.erika.utils.string.StringUtils;
-import com.alibaba.fastjson.JSON;
 
 import java.io.IOException;
 import java.net.SocketException;
@@ -48,9 +47,10 @@ public abstract class BaseSocket implements ISocket {
      * @param message 需要发送的消息需要包裹在Message对象中以识别服务名称
      */
     @Override
-    public void send(Message message) {
-        add(Constant.LAST_TIME, new Date());
+    public synchronized void send(Message message) {
+        set(Constant.LAST_TIME, new Date());
         try {
+            Date now = new Date();
             boolean isEncrypt = get(Constant.ENCRYPT);
             message.del(Constant.DIGITAL_SIGNATURE);
             if (isEncrypt) {
@@ -62,7 +62,7 @@ public abstract class BaseSocket implements ISocket {
                 message.add(Constant.DIGITAL_SIGNATURE, rsaSign);
             }
             byte[] data = SerialUtils.serialObject(message);
-//            log.debug(JSON.toJSONString(message));
+//            log.debug(now.getTime() + " | " + JSON.toJSONString(message));
             if (isEncrypt) {
                 SecurityAlgorithm securityAlgorithm = get(Constant.SECURITY_ALGORITHM);
                 String securityKey = get(Constant.SECURITY_KEY);
@@ -70,9 +70,8 @@ public abstract class BaseSocket implements ISocket {
                 data = SecurityUtils.encrypt(data, securityKey, securityAlgorithm, securityIv);
             }
             DataInfo info = new DataInfo();
-            info.setTimestamp(new Date());
+            info.setTimestamp(now);
             if (GlobalSettings.enableCompress) {
-//                log.debug("压缩算法: "+CompressUtils.getByCode(GlobalSettings.compressCode).getName());
                 int compressCode = GlobalSettings.compressCode;
                 info.setCompress(compressCode);
                 data = CompressUtils.compress(data, compressCode);
@@ -81,14 +80,16 @@ public abstract class BaseSocket implements ISocket {
             info.setPos(0);
             info.setLen(data.length);
             info.setData(data);
-            String sign = StringUtils.byte2HexString(MessageDigestUtils.sum(info.getData(), BasicMessageDigestAlgorithm.MD5));
+//            log.error(StringUtils.byte2HexString(info.getData()));
+            String sign = StringUtils.byte2HexString(
+                    MessageDigestUtils.sum(info.getData(), BasicMessageDigestAlgorithm.MD5));
             info.setSign(sign);
 //            log.debug("计算数据签名: " + sign);
             send(info);
         } catch (CompressException | NoSuchCompressAlgorithm e) {
             log.error("压缩时出现错误: " + e.getMessage(), e);
         } catch (SerialException e) {
-            log.error("序列化出现错误: " + e.getMessage());
+            log.error("序列化出现错误: " + e.getMessage(), e);
         } catch (InvalidKeyException e) {
             log.error("公钥无效");
             close();
@@ -110,18 +111,19 @@ public abstract class BaseSocket implements ISocket {
      *
      * @param info 接收到的数据包 将解析成Message对象
      */
-    public void receive(DataInfo info) {
-        add(Constant.LAST_TIME, new Date());
+    public synchronized void receive(DataInfo info) {
+        set(Constant.LAST_TIME, new Date());
         try {
             boolean isEncrypt = get(Constant.ENCRYPT);
             byte[] data = info.getData();
             String sign = info.getSign();
 //            log.debug("数据长度: " + info.getLen());
             String targetSign = StringUtils.byte2HexString(MessageDigestUtils.sum(data, BasicMessageDigestAlgorithm.MD5));
-//            log.debug("原始数据签名: " + sign);
-//            log.debug("计算数据签名: " + targetSign);
             if (!sign.equalsIgnoreCase(targetSign)) {
-                log.error("警告！ 签名不正确");
+                log.error(this.get(Constant.UID) + "| 警告！ 签名不正确: " + info.toString());
+                log.error(StringUtils.byte2HexString(info.getData()));
+                log.error("原始数据签名: " + sign);
+                log.error("计算数据签名: " + targetSign);
             }
             int compressCode = info.getCompress();
             data = CompressUtils.uncompress(data, compressCode);
@@ -132,7 +134,10 @@ public abstract class BaseSocket implements ISocket {
                 data = SecurityUtils.decrypt(data, securityKey, securityAlgorithm, securityIv);
             }
             Message message = SerialUtils.serialObject(data, Message.class);
-            log.debug(JSON.toJSONString(message));
+            if (message == null) {
+                log.error(info.getTimestamp().getTime() + " | Message is null");
+                return;
+            }
             if (isEncrypt) {
                 byte[] publicKey = get(Constant.PUBLIC_KEY);
                 DigitalSignatureAlgorithm digitalSignatureAlgorithm = get(Constant.DIGITAL_SIGNATURE_ALGORITHM);
@@ -146,9 +151,9 @@ public abstract class BaseSocket implements ISocket {
             }
             receive(message);
         } catch (CompressException | NoSuchCompressAlgorithm e) {
-            log.error("解压缩时出现错误: " + e.getMessage());
+            log.error("解压缩时出现错误: " + e.getMessage(), e);
         } catch (SerialException e) {
-            log.error("反序列化出现错误: " + e.getMessage());
+            log.error("反序列化出现错误: " + e.getMessage(), e);
         } catch (InvalidKeyException e) {
             log.error("签名验证失败", e);
             close();
@@ -163,7 +168,7 @@ public abstract class BaseSocket implements ISocket {
      *
      * @param info 要发送的数据包 要经过send(Message)包装
      */
-    private void send(DataInfo info) {
+    private synchronized void send(DataInfo info) {
         try {
             send(info.toString().getBytes(charset));
             send(info.getData());
@@ -180,7 +185,7 @@ public abstract class BaseSocket implements ISocket {
      *
      * @param message 收到的消息内容 已经解压缩和解密
      */
-    private void receive(Message message) {
+    private synchronized void receive(Message message) {
         try {
             handler.onMessage(this, message);
         } catch (BeanException e) {
@@ -199,7 +204,7 @@ public abstract class BaseSocket implements ISocket {
     // 设置连接额外属性
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T add(String k, Object v) {
+    public <T> T set(String k, Object v) {
         return (T) this.attr.put(k, v);
     }
 

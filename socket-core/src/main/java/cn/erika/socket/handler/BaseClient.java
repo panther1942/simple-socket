@@ -71,7 +71,7 @@ public abstract class BaseClient extends BaseHandler {
 
     @Override
     public void add(String key, Object value) {
-        socket.add(key, value);
+        socket.set(key, value);
     }
 
     @Override

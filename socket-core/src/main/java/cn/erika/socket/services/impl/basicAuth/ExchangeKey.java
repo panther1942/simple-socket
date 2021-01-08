@@ -39,9 +39,9 @@ public class ExchangeKey extends BaseService implements ISocketService {
             throw new AuthenticateException("缺少公钥信息");
         }
         // 客户端的公钥
-        socket.add(Constant.PUBLIC_KEY, clientPublicKey);
+        socket.set(Constant.PUBLIC_KEY, clientPublicKey);
         // 数字签名算法由服务器定
-        socket.add(Constant.DIGITAL_SIGNATURE_ALGORITHM, GlobalSettings.signAlgorithm);
+        socket.set(Constant.DIGITAL_SIGNATURE_ALGORITHM, GlobalSettings.signAlgorithm);
         // 回应服务器的公钥和数字签名算法
         // 因为不对称加密长度限制 因此明文传输
         // 1024 / 8 - 11 = 117 字节 RSA1024公钥 216字节

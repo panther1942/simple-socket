@@ -31,8 +31,8 @@ public class AccountAuth extends BaseService implements ISocketService {
                 String username = message.get(Constant.USERNAME);
                 String password = message.get(Constant.PASSWORD);
                 // 同时向socket连接设置用户名和密码
-                socket.add(Constant.USERNAME, username);
-                socket.add(Constant.PASSWORD, password);
+                socket.set(Constant.USERNAME, username);
+                socket.set(Constant.PASSWORD, password);
                 // 向服务器发送认证请求
                 Message request = new Message(Constant.SRV_ACCOUNT_AUTH);
                 request.add(Constant.USERNAME, username);
@@ -43,12 +43,12 @@ public class AccountAuth extends BaseService implements ISocketService {
                 Boolean result = message.get(Constant.RESULT);
                 if (result != null && result) {
                     log.info("认证成功");
-                    socket.add(Constant.AUTHENTICATED, true);
-                    socket.add(Constant.PROMPT, message.get(Constant.PROMPT));
+                    socket.set(Constant.AUTHENTICATED, true);
+                    socket.set(Constant.PROMPT, message.get(Constant.PROMPT));
                     GlobalSettings.prompt = message.get(Constant.PROMPT);
                 } else {
                     log.warn("认证失败");
-                    socket.add(Constant.AUTHENTICATED, false);
+                    socket.set(Constant.AUTHENTICATED, false);
                 }
             }
         }
@@ -62,13 +62,13 @@ public class AccountAuth extends BaseService implements ISocketService {
         Message reply = new Message(Constant.SRV_ACCOUNT_AUTH);
         // 这里只简单的判断一下 以后会加入更复杂的判断 等加入数据库再说
         if (accountService.get4Auth(username, password) != null) {
-            socket.add(Constant.AUTHENTICATED, true);
-            socket.add(Constant.USERNAME, username);
-            socket.add(Constant.PWD, System.getProperty("user.dir"));
+            socket.set(Constant.AUTHENTICATED, true);
+            socket.set(Constant.USERNAME, username);
+            socket.set(Constant.PWD, System.getProperty("user.dir"));
             reply.add(Constant.PROMPT, socket.get(Constant.PWD));
             reply.add(Constant.RESULT, true);
         } else {
-            socket.add(Constant.AUTHENTICATED, false);
+            socket.set(Constant.AUTHENTICATED, false);
             reply.add(Constant.RESULT, false);
         }
         socket.send(reply);

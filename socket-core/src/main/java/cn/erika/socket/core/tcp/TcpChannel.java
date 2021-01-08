@@ -22,7 +22,7 @@ public class TcpChannel extends BaseSocket {
     private Selector selector;
 
     public TcpChannel(SocketChannel channel, Handler handler, Selector selector) throws IOException {
-        add(Constant.TYPE, Constant.SERVER);
+        set(Constant.TYPE, Constant.SERVER);
         this.handler = handler;
         this.selector = selector;
         this.channel = channel;
@@ -32,8 +32,8 @@ public class TcpChannel extends BaseSocket {
     }
 
     public TcpChannel(ISocket socket, Handler handler, Selector selector) throws IOException {
-        add(Constant.TYPE, Constant.CLIENT);
-        add(Constant.PARENT_SOCKET, socket);
+        set(Constant.TYPE, Constant.CLIENT);
+        set(Constant.PARENT_SOCKET, socket);
         this.handler = handler;
         this.charset = GlobalSettings.charset;
         this.channel = SocketChannel.open();
@@ -44,7 +44,7 @@ public class TcpChannel extends BaseSocket {
     }
 
     public TcpChannel(SocketAddress address, Handler handler, Selector selector) throws IOException {
-        add(Constant.TYPE, Constant.CLIENT);
+        set(Constant.TYPE, Constant.CLIENT);
         this.handler = handler;
         this.selector = selector;
         this.channel = SocketChannel.open();
@@ -55,7 +55,7 @@ public class TcpChannel extends BaseSocket {
     }
 
     private void init() throws IOException {
-        add(Constant.LINK_TIME, new Date());
+        set(Constant.LINK_TIME, new Date());
         this.charset = GlobalSettings.charset;
         this.reader = new TcpReader(charset);
 

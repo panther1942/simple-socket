@@ -39,8 +39,8 @@ public class GlobalSettings {
 
     // 测试中发现只要只要提供了驱动 就算不写驱动名也没问题
     public static String dbDriver = "com.mysql.jdbc.Driver";
-    //    public static String dbUrl = "jdbc:mysql://127.0.0.1:3306/db_development";
-    public static String dbUrl = "jdbc:sqlite:/home/erika/Workspaces/simple-socket/localStorage.db";
+        public static String dbUrl = "jdbc:mysql://127.0.0.1:3306/db_development";
+//    public static String dbUrl = "jdbc:sqlite:/home/erika/Workspaces/simple-socket/localStorage.db";
     public static String dbUsername = "test"; // sqlite不需要
     public static String dbPassword = "test"; // sqlite不需要
     // 用于测试连通性的语句

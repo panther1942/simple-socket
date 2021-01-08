@@ -75,7 +75,7 @@ public class SrvChangeDirectory extends BaseService implements ISocketService {
         } else {
             reply.add(Constant.RESULT, true);
             reply.add(Constant.TEXT, file.getAbsolutePath());
-            socket.add(Constant.PWD, file.getAbsolutePath());
+            socket.set(Constant.PWD, file.getAbsolutePath());
         }
         socket.send(reply);
     }

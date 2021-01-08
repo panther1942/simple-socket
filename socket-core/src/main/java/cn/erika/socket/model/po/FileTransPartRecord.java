@@ -1,5 +1,6 @@
 package cn.erika.socket.model.po;
 
+import cn.erika.socket.model.pto.FileInfo;
 import cn.erika.utils.db.Entry;
 import cn.erika.utils.db.annotation.Column;
 import cn.erika.utils.db.annotation.Table;
@@ -24,6 +25,18 @@ public class FileTransPartRecord extends Entry<FileTransPartRecord> {
     private Date createTime;
     @Column(value = "update_time", format = DateFormat.class)
     private Date updateTime;
+
+    public FileTransPartRecord() {
+    }
+
+    public FileTransPartRecord(String taskId, FileInfo fileInfo) {
+        this.taskId = taskId;
+        this.filename = fileInfo.getFilename();
+        this.length = fileInfo.getLength();
+        this.pos = fileInfo.getPos();
+        this.crc = fileInfo.getCrc();
+        this.status = 0;
+    }
 
     public String getUuid() {
         return uuid;

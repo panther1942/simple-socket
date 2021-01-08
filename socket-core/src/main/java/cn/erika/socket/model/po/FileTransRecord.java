@@ -15,12 +15,13 @@ public class FileTransRecord extends Entry<FileTransRecord> {
     private String uuid;
     private String filename;
     private String filepath;
-    private Long length;
+    private Long length = 0L;
     private String sign;
     private String algorithm;
-    private Integer threads;
+    private Integer threads = 0;
     private String sender;
     private String receiver;
+    private Integer status = 0;
     @Column(value = "create_time", format = DateFormat.class)
     private Date createTime;
     @Column(value = "update_time", format = DateFormat.class)
@@ -98,6 +99,14 @@ public class FileTransRecord extends Entry<FileTransRecord> {
         this.receiver = receiver;
     }
 
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
     public Date getCreateTime() {
         return createTime;
     }
@@ -139,6 +148,7 @@ public class FileTransRecord extends Entry<FileTransRecord> {
                 ", threads=" + threads +
                 ", sender='" + sender + '\'' +
                 ", receiver='" + receiver + '\'' +
+                ", status=" + status +
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
                 '}';

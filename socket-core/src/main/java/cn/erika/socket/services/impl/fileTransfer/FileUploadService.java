@@ -36,21 +36,21 @@ public class FileUploadService extends BaseService implements ISocketService {
     private static int blockSize = 4 * 1024 * 1024;
 
     private IFileTransInfoService fileTransInfoService;
-    private IFileTransRecordService fileTransRecordService;
     private IFileTransPartRecordService fileTransPartRecordService;
 
     public FileUploadService() throws BeanException {
         this.fileTransInfoService = getBean("fileTransInfoService");
-        this.fileTransRecordService = getBean("fileTransRecordService");
         this.fileTransPartRecordService = getBean("fileTransPartRecordService");
     }
 
     @Enhance(FileUploadTimeCount.class)
     @Override
-    public void client(ISocket socket, Message message) {
+    public void client(ISocket socket, Message message) throws IOException {
+        // 发送文件仅由发送端自己发起 不接受远端发起
         if (message.get(Constant.SERVICE_NAME) == null) {
-            FileInfo info = message.get(Constant.FILE_INFO);
+            String filename = message.get(Constant.FILENAME);
             String filepath = message.get(Constant.FILEPATH);
+            FileInfo info = message.get(Constant.FILE_INFO);
             long skip = info.getPos();
             long partLength = info.getLength();
 
@@ -60,15 +60,18 @@ public class FileUploadService extends BaseService implements ISocketService {
                 long pos = 0;
                 int len;
                 byte[] data = new byte[blockSize];
-                log.info("发送文件: " + info.getFilename());
+                log.info("发送文件: " + filename);
 
                 while ((len = in.read(data)) > -1) {
+                    // 如果读取的数据累计超过片段长度 则截取至片段长度
                     if (pos + len > partLength) {
                         len = (int) (partLength - pos);
                     }
+                    // 复制为新数组 删除掉空白部分
                     byte[] tmp = new byte[len];
                     System.arraycopy(data, 0, tmp, 0, len);
                     Message msg = new Message(Constant.SRV_UPLOAD);
+                    // 为了避免序列化和反序列化出现错误 数据使用BASE64编码
                     msg.add(Constant.FILE_POS, pos);
                     msg.add(Constant.BIN, encoder.encodeToString(tmp));
                     msg.add(Constant.LEN, tmp.length);
@@ -79,15 +82,11 @@ public class FileUploadService extends BaseService implements ISocketService {
                         break;
                     }
                 }
-                log.info("发送完成: " + info.getFilename());
+                log.info("发送完成: " + filename);
                 Message request = new Message(Constant.SRV_POST_UPLOAD);
-                request.add(Constant.SEND_STATUS, "发送完成: " + info.getFilename());
+                request.add(Constant.SEND_STATUS, "发送完成: " + filename);
                 request.add(Constant.UID, info.getUuid());
                 socket.send(request);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }
     }
@@ -100,16 +99,16 @@ public class FileUploadService extends BaseService implements ISocketService {
         String filename = info.getFilename();
         long partLength = info.getLength();
         long filePos = message.get(Constant.FILE_POS);
-        Integer len = message.get(Constant.LEN);
+        int len = message.get(Constant.LEN);
         String data = message.get(Constant.BIN);
-        File file = new File(filename);
 
+        File file = new File(filename);
         try (RandomAccessFile out = new RandomAccessFile(file, "rwd")) {
             log.info("当前进度: " + df.format((filePos + len) / (double) partLength) + ": " + file.getName());
             out.seek(filePos);
             out.write(decoder.decode(data), 0, len);
         } catch (IOException e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             Message error = new Message(Constant.SRV_TEXT);
             error.add(Constant.TEXT, e.getMessage());
             socket.send(error);
@@ -120,69 +119,31 @@ public class FileUploadService extends BaseService implements ISocketService {
         try {
             if (filePos + len >= partLength) {
                 log.info("传输完成 正在进行数据校验: " + file.getName());
-                check(socket, info, file);
+                check(socket, info);
             }
         } catch (IOException e) {
-            log.error("校验出错: " + e.getMessage());
+            log.error("校验出错: " + e.getMessage(), e);
         } catch (UnsupportedAlgorithmException e) {
             e.printStackTrace();
         }
     }
 
-    private void check(ISocket socket, FileInfo info, File file) throws IOException, UnsupportedAlgorithmException {
-        long checkCode = info.getCrc();
-        log.info("文件位置: " + file.getAbsolutePath());
+    private void check(ISocket socket, FileInfo fileInfo) throws IOException, UnsupportedAlgorithmException {
+        File file = new File(fileInfo.getFilename());
+        String filepath = file.getAbsolutePath();
+        log.info("文件位置: " + filepath);
         BaseSocket parent = socket.get(Constant.PARENT_SOCKET);
-        long targetCode = MessageDigestUtils.crc32Sum(file);
-        System.out.println("文件校验码: " + targetCode);
-        if (checkCode == targetCode) {
-            log.info("数据完整: " + file.getAbsolutePath());
-            parent.send(new Message(Constant.SRV_POST_UPLOAD,
-                    "接收完成: " + file.getAbsolutePath()));
-
-            FileTransPartRecord part = fileTransPartRecordService.getByUuid(info.getUuid());
-            part.setStatus(1);
-            part.update();
-            FileTransInfo transInfo = fileTransInfoService.getTransInfoByRecordUid(part.getTaskId());
-            FileTransRecord transRecord = transInfo.getRecord();
-            boolean status = false;
-            for (FileTransPartRecord partRecord : transInfo.getParts()) {
-                if (partRecord.getStatus() == 1) {
-                    status = true;
-                } else {
-                    status = false;
-                    break;
-                }
-            }
-            if (status) {
-                File target = new File(transRecord.getFilepath());
-                try (RandomAccessFile writer = new RandomAccessFile(target, "rw")) {
-                    for (FileTransPartRecord partRecord : transInfo.getParts()) {
-                        File partFile = new File(partRecord.getFilename());
-                        long pos = partRecord.getPos();
-                        writer.seek(pos);
-                        try (FileInputStream reader = new FileInputStream(partFile)) {
-                            int len = 0;
-                            byte[] data = new byte[4 * 1024 * 1024];
-                            while ((len = reader.read(data)) > -1) {
-                                writer.write(data, 0, len);
-                            }
-                        }
-                    }
-                }
-                byte[] sign = MessageDigestUtils.sum(target, SecurityUtils.getMessageDigestAlgorithmByValue(transRecord.getAlgorithm()));
-                String strSign = StringUtils.byte2HexString(Base64Utils.encode(sign));
-                if (strSign.equalsIgnoreCase(transInfo.getRecord().getSign())) {
-                    log.info("文件完整: " + target.getAbsolutePath());
-                } else {
-                    log.error("文件不完整: " + target.getAbsolutePath());
-                }
-            }
+        long crc = MessageDigestUtils.crc32Sum(file);
+        if (fileInfo.getCrc() == crc) {
+            log.info("数据完整: " + filepath);
+            parent.send(new Message(Constant.SRV_POST_UPLOAD, "接收完成: " + filepath));
+            FileTransPartRecord filePart = fileTransPartRecordService.getByUuid(fileInfo.getUuid());
+            filePart.setStatus(1);
+            filePart.update();
+            fileTransInfoService.mergeFile(filePart.getTaskId());
         } else {
-            log.warn("数据不完整: " + file.getAbsolutePath());
-            parent.send(new Message(Constant.SRV_POST_UPLOAD,
-                    "接收失败: " + file.getAbsolutePath()));
+            log.warn("数据不完整: " + filepath);
+            parent.send(new Message(Constant.SRV_POST_UPLOAD, "接收失败: " + filepath));
         }
-
     }
 }

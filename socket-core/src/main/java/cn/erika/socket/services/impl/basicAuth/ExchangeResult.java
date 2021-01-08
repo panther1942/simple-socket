@@ -41,8 +41,8 @@ public class ExchangeResult extends BaseService implements ISocketService {
         String msg = message.get(Constant.TEXT);
         if (result != null && result) {
             // 协商成功则设置连接的加密flag
+            socket.set(Constant.ENCRYPT, true);
             log.info(msg);
-            socket.add(Constant.ENCRYPT, true);
             return true;
         } else {
             // 协商失败 则关闭连接

@@ -9,20 +9,25 @@ import cn.erika.service.DemoServiceImpl;
 import cn.erika.service.IDemoService;
 import cn.erika.socket.model.po.FileTransPartRecord;
 import cn.erika.socket.model.po.FileTransRecord;
+import cn.erika.socket.model.pto.DataInfo;
 import cn.erika.socket.model.pto.Message;
 import cn.erika.socket.model.vo.FileTransInfo;
 import cn.erika.socket.orm.IAccountService;
 import cn.erika.socket.orm.impl.AccountServiceImpl;
+import cn.erika.utils.exception.NoSuchCompressAlgorithm;
 import cn.erika.utils.exception.UnsupportedAlgorithmException;
+import cn.erika.utils.io.compress.CompressUtils;
 import cn.erika.utils.io.compress.file.ZIP;
 import cn.erika.utils.exception.CompressException;
 import cn.erika.utils.io.FileUtils;
+import cn.erika.utils.io.compress.stream.GZIP;
 import cn.erika.utils.log.ConsoleLogger;
 import cn.erika.utils.log.Logger;
 import cn.erika.utils.log.LoggerFactory;
 import cn.erika.utils.security.MessageDigestUtils;
 import cn.erika.utils.security.SecurityUtils;
 import cn.erika.utils.security.algorithm.BasicAsymmetricAlgorithm;
+import cn.erika.utils.security.algorithm.BasicMessageDigestAlgorithm;
 import cn.erika.utils.string.Base64Utils;
 import cn.erika.utils.io.SerialUtils;
 import cn.erika.utils.string.StringUtils;
@@ -369,7 +374,7 @@ public class CoreTest {
     }
 
     @Test
-    public void testModel(){
+    public void testModel() {
         FileTransInfo info = new FileTransInfo();
         FileTransRecord recode = new FileTransRecord();
         recode.setFilename("123.txt");
@@ -389,7 +394,7 @@ public class CoreTest {
     }
 
     @Test
-    public void testArraySerial(){
+    public void testArraySerial() {
         Message message = new Message();
         String[] array = {
                 "a", "b", "c"
@@ -399,8 +404,27 @@ public class CoreTest {
     }
 
     @Test
-    public void testNumber(){
-        Integer a = 1234567;
-        Number number = a;
+    public void testMessageSerial() {
+        String string = "{\"payload\":{\"filePos\":0,\"len\":268,\"bin\":\"b2NvbCI6ICJmcmVlZG9tIiwKICAgICJzZXR0aW5ncyI6IHt9CiAgfSx7CiAgICAicHJvdG9jb2wiOiAiYmxhY2tob2xlIiwKICAgICJzZXR0aW5ncyI6IHt9LAogICAgInRhZyI6ICJibG9ja2VkIgogIH1dLAogICJyb3V0aW5nIjogewogICAgInJ1bGVzIjogWwogICAgICB7CiAgICAgICAgInR5cGUiOiAiZmllbGQiLAogICAgICAgICJpcCI6IFsiZ2VvaXA6cHJpdmF0ZSJdLAogICAgICAgICJvdXRib3VuZFRhZyI6ICJibG9ja2VkIgogICAgICB9CiAgICBdCiAgfQp9Cg==\",\"sign\":\"ZvZ8/lCwvURVslwJ6NzXECV+kByHLJLPPUxLO+T/ykKFTEOjfNv1lSXTOrrq8IWqomtqrcsvkEtXwCTgg43O/sqgBVAKe1y0jnwGf7NrB+zkKYKb2q1qQLUOQ14pL/Kkc96H1kj/A4DREbpmV7+90Q0VkimIIrQnSssuynBuic9h8s3Mpcv9bkWHoNct9pu776gOvwVpYfKpM3YzIYpUlB7anqQ/gmy/IaDBsa6ZkQvQt8zHGULCQkQN+lJ678TJhPOvz9a5pSd4vPdsfeD1F5okcciGC1q432RkTpGJbNw8woz5EEvADBnDOuLOCiGUq/1U62UqilP+G2xDSmmB4Q==\",\"serverName\":\"srv_upload\"}}";
+        Message message = JSON.parseObject(string, Message.class);
+        System.out.println(message);
+    }
+
+    @Test
+    public void testMessageCompress() throws NoSuchCompressAlgorithm, CompressException, UnsupportedAlgorithmException {
+        CompressUtils.register(new GZIP());
+        String string = "{\"payload\":{\"sign\":\"k75xFMNIxFB3geDkwRoJMeTqrvp10QxFYWFbRwvNpmR/acYvZ58m4GO4BHNqOps4ptTPi0TmfzlUFPrwmM9Z5f6ynH1MRdRBncCu5IdMn7C+sLsu9UofsCBP+4QBXNIyoJUGq6CsGm9rHW8IZQYU9xRUb8fhcv+FwNO9Ty4gEgOZyYfhQKocu0h6aTE3RSNi2U+EoPFc2QMm1lBLJt218qzJrHulIGVTC5FeSDZ/Mg3V3HwwRIxUtdILS/AFb6drE3ucpKeXD60nvnnBtlh9nZnTK5Gb2RY5OXD1PgnvuX6ECwTawE/ViD9MkHypsRHDnEeI1gVC5I2wqIn0/iX29w==\",\"serverName\":\"srv_post_upload\",\"text\":\"接收完成: /home/erika/Workspaces/simple-socket/config123.json.part0\"}}";
+        byte[] data1 = CompressUtils.compress(string.getBytes(), GZIP.CODE);
+        DataInfo info = new DataInfo();
+        info.setCompress(1);
+        info.setData(data1);
+        info.setPos(0);
+        info.setLen(data1.length);
+        info.setTimestamp(new Date());
+        String targetSign = StringUtils.byte2HexString(MessageDigestUtils.sum(data1, BasicMessageDigestAlgorithm.MD5));
+        info.setSign(targetSign);
+        System.out.println(info);
+        byte[] data2 = CompressUtils.uncompress(data1, GZIP.CODE);
+        System.out.println(new String(data2));
     }
 }

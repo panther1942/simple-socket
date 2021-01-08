@@ -195,7 +195,6 @@ public class Entry<T> implements Serializable {
             if (StringUtils.isEmpty(table.value())) {
                 throw new EntryException("无法确定表名");
             }
-            T target = select();
             Map<String, Object> params = convertEntry2Map(this);
             String primary = (String) params.get("primary");
             StringBuffer buffer = new StringBuffer("DELETE FROM ");
@@ -203,7 +202,6 @@ public class Entry<T> implements Serializable {
             buffer.append(primary).append("`=?");
             int result = utils.update(buffer.toString(), params.get(primary));
             if (result > 0) {
-                flushFields(target);
                 return result;
             }
         } catch (EntryException e) {

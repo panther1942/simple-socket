@@ -8,6 +8,7 @@ import cn.erika.context.annotation.Component;
 import cn.erika.context.annotation.Enhance;
 import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.ISocket;
+import cn.erika.socket.exception.LimitThreadException;
 import cn.erika.socket.handler.IServer;
 import cn.erika.socket.handler.bio.FileSender;
 import cn.erika.socket.model.po.FileTransPartRecord;
@@ -19,10 +20,13 @@ import cn.erika.socket.orm.IFileTransInfoService;
 import cn.erika.socket.orm.IFileTransPartRecordService;
 import cn.erika.socket.orm.IFileTransRecordService;
 import cn.erika.socket.services.ISocketService;
+import cn.erika.utils.exception.UnsupportedAlgorithmException;
 import cn.erika.utils.io.FileUtils;
 import cn.erika.utils.log.Logger;
 import cn.erika.utils.log.LoggerFactory;
 import cn.erika.utils.security.MessageDigestUtils;
+import cn.erika.utils.security.SecurityUtils;
+import cn.erika.utils.string.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,16 +67,6 @@ public class FileUploadPreService extends BaseService implements ISocketService 
             String filename = message.get(Constant.FILENAME);
             // 文件基本信息
             FileInfo fileInfo = message.get(Constant.FILE_INFO);
-            // 文件分片信息
-            List<FileInfo> filePartInfo = message.get(Constant.FILE_PART_INFO);
-            // 并发数量
-            Integer threads = message.get(Constant.THREADS);
-            if (threads == null || threads < 1) {
-                threads = 1;
-            }
-            if (threads > GlobalSettings.threadsLimit) {
-                threads = GlobalSettings.threadsLimit;
-            }
             // 签名信息
             String sign = fileInfo.getSign();
             // 签名算法
@@ -81,6 +75,19 @@ public class FileUploadPreService extends BaseService implements ISocketService 
             String pwd = socket.get(Constant.PWD);
             // 最终文件保存路径
             File file = new File(pwd + FileUtils.SYS_FILE_SEPARATOR + filename);
+            if (file.exists() && checkFile(file, fileInfo)) {
+                throw new IOException("文件完整 不需要重传");
+            }
+            // 文件分片信息
+            List<FileInfo> fileInfoList = message.get(Constant.FILE_PART_INFO);
+            // 并发数量
+            Integer threads = message.get(Constant.THREADS);
+            if (threads == null || threads < 1) {
+                throw new LimitThreadException("错误的线程数");
+            }
+            if (threads > GlobalSettings.threadsLimit) {
+                throw new LimitThreadException("线程数超出服务器限制");
+            }
             IServer server = getBean(IServer.class);
 
             // 从数据库根据签名和签名算法读取记录
@@ -90,15 +97,19 @@ public class FileUploadPreService extends BaseService implements ISocketService 
             // 如果数据库存在传输记录 而且存在分片信息 则读取已经保存的分片信息
             if (transInfo != null && transInfo.getParts() != null) {
                 infoList = getFileInfoList(transInfo);
-                if (!checkPartInfo(infoList, filePartInfo)) {
-                    // 如果和数据库里面不一致 则更新记录的信息
+                // 如果和数据库里面不一致 则更新记录的信息
+                if (!checkPartInfo(infoList, fileInfoList)) {
+                    // 删除存储的相关信息
                     for (FileTransPartRecord record : transInfo.getParts()) {
                         record.delete();
                     }
-                    infoList = filePartInfo;
+                    // 将列表替换为客户端发来的列表
+                    infoList = fileInfoList;
+                    // 更新最终存储的文件名
                     for (FileInfo info : infoList) {
                         info.setFilename(pwd + info.getFilename());
                     }
+                    // 更新文件记录
                     FileTransRecord record = transInfo.getRecord();
                     record.setFilename(filename);
                     record.setFilepath(file.getAbsolutePath());
@@ -106,53 +117,82 @@ public class FileUploadPreService extends BaseService implements ISocketService 
                     record.setThreads(threads);
                     record.setSign(sign);
                     record.setAlgorithm(algorithm);
-                    record.update();
-                    List<FileTransPartRecord> partList = createPartInfo(infoList, record);
-                    for (int i = 0; i < partList.size(); i++) {
-                        infoList.get(i).setUuid(partList.get(i).getUuid());
-                    }
-                } else {
-                    for (int i = 0; i < transInfo.getParts().size(); i++) {
-                        infoList.get(i).setUuid(transInfo.getParts().get(i).getUuid());
+                    if (record.update() > 0) {
+                        // 更新文件片段记录 同时给infoList添加uuid
+                        transInfo.setParts(createPartInfo(infoList, record));
+                    } else {
+                        throw new IOException("更新文件记录失败");
                     }
                 }
             } else {
+                transInfo = new FileTransInfo();
                 // 不存在则需要创建分片信息 并记录数据库
-                infoList = filePartInfo;
+                infoList = fileInfoList;
+                // 更新最终存储的文件名
                 for (FileInfo info : infoList) {
                     info.setFilename(pwd + info.getFilename());
                 }
+                // 添加文件记录
                 FileTransRecord record = fileTransRecordService.createTransRecord(
                         filename, file.getAbsolutePath(), threads, fileInfo, socket.get(Constant.USERNAME), "SERVER");
+                // 插入数据 如果大于0说明插入成功
                 if (record.insert() > 0) {
-                    List<FileTransPartRecord> partList = createPartInfo(infoList, record);
-                    for (int i = 0; i < partList.size(); i++) {
-                        infoList.get(i).setUuid(partList.get(i).getUuid());
-                    }
+                    transInfo.setRecord(record);
+                    // 更新文件片段记录 同时给infoList添加uuid
+                    transInfo.setParts(createPartInfo(infoList, record));
                 } else {
-                    log.error("无法写入数据库");
-                    throw new IOException("服务器错误");
+                    throw new IOException("新增文件记录失败");
                 }
             }
+            // 检查已经传传输的文件
+            int flag = 0;
             for (FileInfo info : infoList) {
                 File partFile = new File(info.getFilename());
+                // 如果文件存在则进行crc32校验
                 if (partFile.exists()) {
                     long crc = MessageDigestUtils.crc32Sum(partFile);
-                    if (crc != info.getCrc() && !partFile.delete()) {
-                        throw new IOException("无法删除未完成的文件: " + partFile.getAbsolutePath());
+                    // 校验错误则删除不完整的文件
+                    if (crc != info.getCrc()) {
+                        if (!partFile.delete()) {
+                            throw new IOException("无法删除未完成的文件: " + partFile.getAbsolutePath());
+                        }
+                    } else {
+                        // 如果完整就设置状态位=1 表示片段文件完整
+                        flag++;
+                        info.setStatus(1);
+                        FileTransPartRecord part = fileTransPartRecordService.getByUuid(info.getUuid());
+                        part.setStatus(1);
+                        part.update();
                     }
                 }
+                log.info("准备接收文件: " + info.getFilename());
+                // 并设置片段文件的token用于新连接授权
                 String partToken = UUID.randomUUID().toString();
                 server.addToken(socket, partToken);
                 socket.getHandler().add(partToken, info);
                 info.setPartToken(partToken);
             }
-
+            if (flag == threads) {
+                transInfoService.mergeFile(transInfo.getRecord().getUuid());
+            } else {
+                FileTransRecord record = transInfo.getRecord();
+                record.setStatus(0);
+                record.update();
+            }
             message.add(Constant.FILE_PART_INFO, infoList);
             message.add(Constant.RECEIVE_STATUS, true);
             socket.send(message);
+        } catch (LimitThreadException e) {
+            // 如果是线程数量错误 则将服务器设置的线程数返回给客户端
+            // 让客户端使用服务器配置重发请求（分段文件的CRC只能是在发送端进行校验）
+            log.warn(e.getMessage());
+            message.add(Constant.THREADS, GlobalSettings.threads);
+            message.add(Constant.RECEIVE_STATUS, false);
+            message.add(Constant.TEXT, e.getMessage());
+            socket.send(message);
         } catch (Exception e) {
             log.warn(e.getMessage());
+            message.del(Constant.THREADS);
             message.add(Constant.RECEIVE_STATUS, false);
             message.add(Constant.TEXT, e.getMessage());
             socket.send(message);
@@ -175,13 +215,14 @@ public class FileUploadPreService extends BaseService implements ISocketService 
             // 文件的基本信息
             request.add(Constant.FILE_INFO, info);
             // 文件的分片信息
-            request.add(Constant.FILE_PART_INFO, getFileInfoList(info, file, threads));
+            request.add(Constant.FILE_PART_INFO, getFileInfoList(file, filename, threads));
             // 文件的令牌 代替文件的绝对路径
             String fileToken = UUID.randomUUID().toString();
-            socket.add(fileToken, filepath);
+            socket.set(fileToken, filepath);
             request.add(Constant.TOKEN, fileToken);
             // 并发线程数
             request.add(Constant.THREADS, threads);
+            log.info("请求发送文件: " + filename);
             socket.send(request);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
@@ -192,47 +233,55 @@ public class FileUploadPreService extends BaseService implements ISocketService 
         Boolean status = message.get(Constant.RECEIVE_STATUS);
         try {
             if (status != null && status) {
+                List<FileInfo> infoList = message.get(Constant.FILE_PART_INFO);
                 String fileToken = message.get(Constant.TOKEN);
                 String filepath = socket.get(fileToken);
-                List<FileInfo> infoList = message.get(Constant.FILE_PART_INFO);
+                boolean flag = false;
                 for (FileInfo info : infoList) {
-                    new FileSender(socket, filepath, info);
+                    if (info.getStatus() == 0) {
+                        flag = true;
+                        new FileSender(socket, info.getFilename(), filepath, info);
+                    }
+                }
+                if (!flag) {
+                    log.info("文件完整 无需传输");
                 }
             } else {
+                String msg = message.get(Constant.TEXT);
                 Integer threads = message.get(Constant.THREADS);
                 if (threads != null) {
+                    log.warn("使用服务器建议的线程数重试");
                     preUpload(socket, message, threads);
+                } else {
+                    String fileToken = message.get(Constant.TOKEN);
+                    socket.remove(fileToken);
+                    log.error(msg);
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (BeanException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 
     // 读取分片信息
-    private List<FileInfo> getFileInfoList(FileTransInfo transInfo) {
+    private List<FileInfo> getFileInfoList(FileTransInfo info) {
+        if (info == null || info.getParts() == null) {
+            return null;
+        }
         List<FileInfo> fileInfoList = new LinkedList<>();
-        List<FileTransPartRecord> parts = transInfo.getParts();
-        for (FileTransPartRecord part : parts) {
-            FileInfo fileInfo = new FileInfo();
-            fileInfo.setFilename(part.getFilename());
-            fileInfo.setLength(part.getLength());
-            fileInfo.setPos(part.getPos());
-            fileInfo.setCrc(part.getCrc());
-            fileInfoList.add(fileInfo);
+        for (FileTransPartRecord part : info.getParts()) {
+            fileInfoList.add(new FileInfo(part));
         }
         return fileInfoList;
     }
 
     // 创建分片信息
-    private List<FileInfo> getFileInfoList(FileInfo fileInfo, File file, int threads) throws IOException {
+    private List<FileInfo> getFileInfoList(File file, String filename, int threads) throws IOException {
         List<FileInfo> fileInfoList = new LinkedList<>();
         // 分片的保存文件名
-        String filename = FileUtils.SYS_FILE_SEPARATOR + fileInfo.getFilename() + Constant.FILE_PART_POSTFIX;
+        filename = FileUtils.SYS_FILE_SEPARATOR + filename + Constant.FILE_PART_POSTFIX;
         // 文件长度
-        long fileLength = fileInfo.getLength();
+        long fileLength = file.length();
         // 分片长度
         long partLength = fileLength / threads;
         // 创建分片信息
@@ -262,13 +311,7 @@ public class FileUploadPreService extends BaseService implements ISocketService 
             return false;
         }
         for (int i = 0; i < src.size(); i++) {
-            if (Long.compare(src.get(i).getCrc(), dest.get(i).getCrc()) != 0) {
-                return false;
-            }
-            if (src.get(i).getPos() != dest.get(i).getPos()) {
-                return false;
-            }
-            if (src.get(i).getLength() != dest.get(i).getLength()) {
+            if (!src.get(i).equals(dest.get(i))) {
                 return false;
             }
         }
@@ -276,12 +319,28 @@ public class FileUploadPreService extends BaseService implements ISocketService 
     }
 
     // 不存在则需要创建分片信息 并记录数据库
-    private List<FileTransPartRecord> createPartInfo(List<FileInfo> partInfo, FileTransRecord record) {
+    private List<FileTransPartRecord> createPartInfo(List<FileInfo> fileInfoList, FileTransRecord record) throws IOException {
         List<FileTransPartRecord> parts = new LinkedList<>();
-        for (int i = 0; i < partInfo.size(); i++) {
-            FileTransPartRecord partRecord = fileTransPartRecordService.addFileTransPartRecord(partInfo.get(i), record);
-            parts.add(partRecord);
+        for (FileInfo fileInfo : fileInfoList) {
+            FileTransPartRecord part = new FileTransPartRecord(record.getUuid(), fileInfo);
+            if (part.insert() > 0) {
+                fileInfo.setUuid(part.getUuid());
+                parts.add(part);
+            } else {
+                throw new IOException("新增文件片段记录失败");
+            }
         }
         return parts;
+    }
+
+    private boolean checkFile(File file, FileInfo fileInfo) throws IOException, UnsupportedAlgorithmException {
+        String sign = fileInfo.getSign();
+        String algorithm = fileInfo.getAlgorithm();
+        byte[] reSign = MessageDigestUtils.sum(file, SecurityUtils.getMessageDigestAlgorithmByValue(algorithm));
+        if (StringUtils.byte2HexString(reSign).equalsIgnoreCase(sign)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

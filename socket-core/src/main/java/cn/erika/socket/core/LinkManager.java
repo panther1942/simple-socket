@@ -47,7 +47,7 @@ public class LinkManager {
 
     public ISocket addLink(ISocket socket) {
         String uid = UUID.randomUUID().toString();
-        socket.add(Constant.UID, uid);
+        socket.set(Constant.UID, uid);
         linkList.put(uid, socket);
         return socket;
     }

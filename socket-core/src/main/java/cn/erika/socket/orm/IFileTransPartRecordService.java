@@ -10,5 +10,4 @@ import java.util.List;
 public interface IFileTransPartRecordService extends ICommonService<FileTransPartRecord> {
     public List<FileTransPartRecord> getPartsByTaskId(String taskId);
 
-    public FileTransPartRecord addFileTransPartRecord(FileInfo fileInfo, FileTransRecord taskRecode);
 }

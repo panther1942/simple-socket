@@ -76,7 +76,7 @@ public class FileUtils {
             FileInfo info = new FileInfo();
             info.setFilename(file.getName());
             info.setLength(file.length());
-            info.setSign(StringUtils.byte2HexString(Base64Utils.encode(sign)));
+            info.setSign(StringUtils.byte2HexString(sign));
             info.setAlgorithm(algorithm.getValue());
             return info;
         } catch (UnsupportedAlgorithmException e) {

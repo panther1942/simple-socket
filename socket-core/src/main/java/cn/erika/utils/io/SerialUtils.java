@@ -38,7 +38,11 @@ public class SerialUtils {
      * @throws SerialException 不知道 先写上 万一用得到
      */
     public static <T> T serialObject(byte[] data, Class<T> clazz) throws SerialException {
-        return JSON.parseObject(data, clazz);
+        T object = JSON.parseObject(data, clazz);
+        if (object == null) {
+            throw new SerialException("反序列化异常: " + new String(data));
+        }
+        return object;
     }
 
     /**

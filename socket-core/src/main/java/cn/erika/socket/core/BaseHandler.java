@@ -40,9 +40,9 @@ public abstract class BaseHandler implements Handler {
     public void init(ISocket socket) {
         // 创建连接或者接入连接的时候初始化参数
         // 刚开始肯定是没有加密的明文传输
-        socket.add(Constant.ENCRYPT, false);
+        socket.set(Constant.ENCRYPT, false);
         // 认证标识
-        socket.add(Constant.AUTHENTICATED, false);
+        socket.set(Constant.AUTHENTICATED, false);
     }
 
     @Override
@@ -66,6 +66,7 @@ public abstract class BaseHandler implements Handler {
     @Override
     public void onError(ISocket socket, Throwable throwable) {
         log.error(throwable.getMessage());
+        throwable.printStackTrace();
     }
 
     protected void execute(ISocket socket, String serviceName, Message message) throws BeanException {

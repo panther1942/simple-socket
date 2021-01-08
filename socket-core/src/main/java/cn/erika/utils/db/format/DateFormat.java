@@ -1,6 +1,7 @@
 package cn.erika.utils.db.format;
 
 import cn.erika.context.annotation.Component;
+import cn.erika.utils.exception.EntryException;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -11,7 +12,15 @@ public class DateFormat implements Format {
     @Override
     public <T> T format(Object obj) throws Throwable {
         if (obj != null) {
-            return (T) new Date((long) obj);
+            if (obj instanceof java.sql.Timestamp || obj instanceof java.sql.Date) {
+                return (T) obj;
+            } else if (obj instanceof Long) {
+                return (T) new Date((long) obj);
+            } else if (obj instanceof String) {
+                return (T) new Date(Long.parseLong((String) obj));
+            }else{
+                throw new EntryException("无法转换的数据类型: " + obj.getClass().getName() + ":" + String.valueOf(obj));
+            }
         }
         return null;
     }
