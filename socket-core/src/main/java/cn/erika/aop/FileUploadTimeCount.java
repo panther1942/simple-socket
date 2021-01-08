@@ -31,7 +31,7 @@ public class FileUploadTimeCount implements Advise {
         FileInfo fileInfo = message.get(Constant.FILE_INFO);
         Date start = fileInfoMap.get(fileInfo);
         Date end = new Date();
-        long len = fileInfo.getFileLength();
+        long len = fileInfo.getLength();
 
         double time = ((double) end.getTime() - start.getTime()) / 1000;
         double speed = len / time / 1024;

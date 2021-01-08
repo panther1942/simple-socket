@@ -23,15 +23,15 @@ public class TcpSocket extends BaseSocket implements Runnable {
     private OutputStream out;
 
     public TcpSocket(Socket socket, Handler handler) throws IOException {
-        set(Constant.TYPE, Constant.SERVER);
+        add(Constant.TYPE, Constant.SERVER);
         this.socket = socket;
         this.handler = handler;
         init();
     }
 
     public TcpSocket(ISocket socket, Handler handler) throws IOException {
-        set(Constant.TYPE, Constant.CLIENT);
-        set(Constant.PARENT_SOCKET, socket);
+        add(Constant.TYPE, Constant.CLIENT);
+        add(Constant.PARENT_SOCKET, socket);
         this.socket = new Socket();
         this.handler = handler;
         this.socket.setReuseAddress(true);
@@ -44,7 +44,7 @@ public class TcpSocket extends BaseSocket implements Runnable {
     }
 
     public TcpSocket(SocketAddress address, Handler handler) throws IOException {
-        set(Constant.TYPE, Constant.CLIENT);
+        add(Constant.TYPE, Constant.CLIENT);
         this.socket = new Socket();
         this.handler = handler;
         this.socket.setReuseAddress(true);
@@ -57,7 +57,7 @@ public class TcpSocket extends BaseSocket implements Runnable {
     }
 
     private void init() throws IOException {
-        set(Constant.LINK_TIME, new Date());
+        add(Constant.LINK_TIME, new Date());
         this.socket.setTcpNoDelay(true);
         this.charset = GlobalSettings.charset;
         this.reader = new TcpReader(charset);

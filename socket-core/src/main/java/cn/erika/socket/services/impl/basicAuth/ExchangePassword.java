@@ -49,16 +49,16 @@ public class ExchangePassword extends BaseService implements ISocketService {
         }
 
         // 设置连接的服务器公钥和数字加密信息
-        socket.set(Constant.UID, message.get(Constant.UID));
-        socket.set(Constant.DIGITAL_SIGNATURE_ALGORITHM, digitalSignatureAlgorithm);
-        socket.set(Constant.PUBLIC_KEY, serverPublicKey);
+        socket.add(Constant.UID, message.get(Constant.UID));
+        socket.add(Constant.DIGITAL_SIGNATURE_ALGORITHM, digitalSignatureAlgorithm);
+        socket.add(Constant.PUBLIC_KEY, serverPublicKey);
 
         // 对称加密算法和密钥由客户端定
         SecurityAlgorithm securityAlgorithm = GlobalSettings.securityAlgorithm;
         String securityKey = StringUtils.randomString(GlobalSettings.securityLength);
 
-        socket.set(Constant.SECURITY_ALGORITHM, securityAlgorithm);
-        socket.set(Constant.SECURITY_KEY, securityKey);
+        socket.add(Constant.SECURITY_ALGORITHM, securityAlgorithm);
+        socket.add(Constant.SECURITY_KEY, securityKey);
 
         log.debug("发送会话密钥，类型:" + securityAlgorithm.getValue() + ", 密钥:" + securityKey);
         // 向服务器发送会话密钥和算法信息 用服务器公钥分别加密
@@ -68,7 +68,7 @@ public class ExchangePassword extends BaseService implements ISocketService {
         // 如果该算法需要向量 则生成向量
         if (securityAlgorithm.isNeedIv()) {
             byte[] securityIv = StringUtils.randomString(securityAlgorithm.getIvLength()).getBytes(charset);
-            socket.set(Constant.SECURITY_IV, securityIv);
+            socket.add(Constant.SECURITY_IV, securityIv);
             request.add(Constant.SECURITY_IV, encryptWithRsa(securityIv, serverPublicKey));
         }
         socket.send(request);
@@ -94,8 +94,8 @@ public class ExchangePassword extends BaseService implements ISocketService {
         // 密钥
         String securityKey = decryptWithRsaToString(bSecurityKey, GlobalSettings.privateKey);
 
-        socket.set(Constant.SECURITY_ALGORITHM, securityAlgorithm);
-        socket.set(Constant.SECURITY_KEY, securityKey);
+        socket.add(Constant.SECURITY_ALGORITHM, securityAlgorithm);
+        socket.add(Constant.SECURITY_KEY, securityKey);
 
         // 向量
         if (securityAlgorithm.isNeedIv()) {
@@ -103,7 +103,7 @@ public class ExchangePassword extends BaseService implements ISocketService {
                 throw new AuthenticateException("加密方式缺少向量");
             }
             byte[] securityIv = decryptWithRsa(bSecurityIv, GlobalSettings.privateKey);
-            socket.set(Constant.SECURITY_IV, securityIv);
+            socket.add(Constant.SECURITY_IV, securityIv);
         }
         log.debug("收到会话密钥，类型:" + securityAlgorithm + ", 密钥:" + securityKey);
         log.debug("加密协商完成");
@@ -114,7 +114,7 @@ public class ExchangePassword extends BaseService implements ISocketService {
         reply.add(Constant.TEXT, "加密协商成功");
         socket.send(reply);
         // 发送完消息再设置加密flag
-        socket.set(Constant.ENCRYPT, true);
+        socket.add(Constant.ENCRYPT, true);
         // 服务器执行任务队列
         socket.getHandler().onReady(socket);
     }

@@ -1,7 +1,13 @@
 package cn.erika.utils.io;
 
+import cn.erika.config.GlobalSettings;
 import cn.erika.socket.model.pto.FileInfo;
+import cn.erika.utils.exception.UnsupportedAlgorithmException;
+import cn.erika.utils.security.MessageDigestAlgorithm;
 import cn.erika.utils.security.MessageDigestUtils;
+import cn.erika.utils.security.SecurityUtils;
+import cn.erika.utils.string.Base64Utils;
+import cn.erika.utils.string.StringUtils;
 
 import java.io.*;
 
@@ -64,12 +70,18 @@ public class FileUtils {
         if (!file.exists()) {
             throw new FileNotFoundException("文件不存在: " + file.getAbsolutePath());
         }
-        long checkCode = MessageDigestUtils.crc32Sum(file);
-        FileInfo info = new FileInfo();
-        info.setFilename(file.getName());
-        info.setFileLength(file.length());
-        info.setCheckCode(checkCode);
-        return info;
+        try {
+            MessageDigestAlgorithm algorithm = SecurityUtils.getMessageDigestAlgorithmByValue(GlobalSettings.fileSignAlgorithm);
+            byte[] sign = MessageDigestUtils.sum(file, algorithm);
+            FileInfo info = new FileInfo();
+            info.setFilename(file.getName());
+            info.setLength(file.length());
+            info.setSign(StringUtils.byte2HexString(Base64Utils.encode(sign)));
+            info.setAlgorithm(algorithm.getValue());
+            return info;
+        } catch (UnsupportedAlgorithmException e) {
+            throw new IOException(e.getMessage());
+        }
     }
 
     public static FileInfo getFileInfo(String filename) throws IOException {

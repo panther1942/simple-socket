@@ -125,10 +125,10 @@ public class JdbcUtils {
 
     public int update(Connection conn, String sql, Object... params) {
         PreparedStatement pStmt = null;
-        log.debug(sql);
-        if (params != null) {
-            log.debug(StringUtils.join(",", params).toString());
-        }
+//        log.debug(sql);
+//        if (params != null) {
+//            log.debug(StringUtils.join(",", params).toString());
+//        }
         try {
             pStmt = conn.prepareStatement(sql);
             if (params != null) {

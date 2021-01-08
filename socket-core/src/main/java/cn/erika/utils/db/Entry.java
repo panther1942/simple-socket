@@ -28,8 +28,8 @@ public class Entry<T> implements Serializable {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     public final List<T> select(String sql, Object... params) {
-        log.debug(sql);
-        log.debug(StringUtils.join(",", params).toString());
+//        log.debug(sql);
+//        log.debug(StringUtils.join(",", params).toString());
         JdbcUtils utils = JdbcUtils.getInstance();
         Connection conn = null;
         PreparedStatement pStmt = null;
@@ -293,7 +293,24 @@ public class Entry<T> implements Serializable {
                     if (field.getType().equals(String.class)) {
                         field.set(t, String.valueOf(dataList[index]));
                     } else {
-                        field.set(t, dataList[index]);
+                        Class<?> type = field.getType();
+                        String strObject = String.valueOf(dataList[index]);
+                        switch (type.getSimpleName()) {
+                            case "Byte":
+                                field.set(t, Byte.parseByte(strObject));
+                                break;
+                            case "Short":
+                                field.set(t, Short.parseShort(strObject));
+                                break;
+                            case "Integer":
+                                field.set(t, Integer.parseInt(strObject));
+                                break;
+                            case "Long":
+                                field.set(t, Long.parseLong(strObject));
+                                break;
+                            default:
+                                field.set(t, dataList[index]);
+                        }
                     }
                 }
             }

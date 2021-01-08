@@ -44,7 +44,7 @@ public class FileDownloadPreService extends BaseService implements ISocketServic
             request.add(Constant.FILE_INFO, info);
             request.add(Constant.TOKEN, token);
             request.add(Constant.SEND_STATUS, true);
-            socket.getHandler().set(token, file.getAbsoluteFile());
+            socket.getHandler().add(token, file.getAbsoluteFile());
             log.debug("发送预请求");
             socket.send(request);
         } catch (IOException e) {

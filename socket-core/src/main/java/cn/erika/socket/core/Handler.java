@@ -30,7 +30,7 @@ public interface Handler {
 
     public void emptyTasks();
 
-    public void set(String key, Object value);
+    public void add(String key, Object value);
 
     public <T> T get(String key);
 

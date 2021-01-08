@@ -17,8 +17,9 @@ import cn.erika.utils.security.MessageDigestUtils;
 import cn.erika.utils.security.SecurityAlgorithm;
 import cn.erika.utils.security.SecurityUtils;
 import cn.erika.utils.security.algorithm.BasicMessageDigestAlgorithm;
-import cn.erika.utils.string.SerialUtils;
+import cn.erika.utils.io.SerialUtils;
 import cn.erika.utils.string.StringUtils;
+import com.alibaba.fastjson.JSON;
 
 import java.io.IOException;
 import java.net.SocketException;
@@ -48,8 +49,7 @@ public abstract class BaseSocket implements ISocket {
      */
     @Override
     public void send(Message message) {
-//        log.debug(message.toString());
-        set(Constant.LAST_TIME, new Date());
+        add(Constant.LAST_TIME, new Date());
         try {
             boolean isEncrypt = get(Constant.ENCRYPT);
             message.del(Constant.DIGITAL_SIGNATURE);
@@ -62,6 +62,7 @@ public abstract class BaseSocket implements ISocket {
                 message.add(Constant.DIGITAL_SIGNATURE, rsaSign);
             }
             byte[] data = SerialUtils.serialObject(message);
+//            log.debug(JSON.toJSONString(message));
             if (isEncrypt) {
                 SecurityAlgorithm securityAlgorithm = get(Constant.SECURITY_ALGORITHM);
                 String securityKey = get(Constant.SECURITY_KEY);
@@ -110,7 +111,7 @@ public abstract class BaseSocket implements ISocket {
      * @param info 接收到的数据包 将解析成Message对象
      */
     public void receive(DataInfo info) {
-        set(Constant.LAST_TIME, new Date());
+        add(Constant.LAST_TIME, new Date());
         try {
             boolean isEncrypt = get(Constant.ENCRYPT);
             byte[] data = info.getData();
@@ -131,7 +132,7 @@ public abstract class BaseSocket implements ISocket {
                 data = SecurityUtils.decrypt(data, securityKey, securityAlgorithm, securityIv);
             }
             Message message = SerialUtils.serialObject(data, Message.class);
-//            log.debug(message.toString());
+            log.debug(JSON.toJSONString(message));
             if (isEncrypt) {
                 byte[] publicKey = get(Constant.PUBLIC_KEY);
                 DigitalSignatureAlgorithm digitalSignatureAlgorithm = get(Constant.DIGITAL_SIGNATURE_ALGORITHM);
@@ -198,7 +199,7 @@ public abstract class BaseSocket implements ISocket {
     // 设置连接额外属性
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T set(String k, Object v) {
+    public <T> T add(String k, Object v) {
         return (T) this.attr.put(k, v);
     }
 

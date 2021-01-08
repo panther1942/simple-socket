@@ -42,7 +42,7 @@ public class ExchangeResult extends BaseService implements ISocketService {
         if (result != null && result) {
             // 协商成功则设置连接的加密flag
             log.info(msg);
-            socket.set(Constant.ENCRYPT, true);
+            socket.add(Constant.ENCRYPT, true);
             return true;
         } else {
             // 协商失败 则关闭连接

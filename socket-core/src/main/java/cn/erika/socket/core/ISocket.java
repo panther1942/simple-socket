@@ -18,7 +18,7 @@ public interface ISocket {
 
     SocketAddress getLocalAddress();
 
-    <T> T set(String k, Object v);
+    <T> T add(String k, Object v);
 
     <T> T get(String k);
 

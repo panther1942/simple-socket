@@ -109,7 +109,7 @@ public abstract class BaseServer extends BaseHandler implements Runnable {
     }
 
 
-    public void set(String key, Object value) {
+    public void add(String key, Object value) {
         storage.put(key, value);
     }
 

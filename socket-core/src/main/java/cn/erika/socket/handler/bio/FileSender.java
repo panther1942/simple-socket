@@ -3,6 +3,7 @@ package cn.erika.socket.handler.bio;
 import cn.erika.config.Constant;
 import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.ISocket;
+import cn.erika.socket.model.pto.FileInfo;
 import cn.erika.socket.model.pto.Message;
 import cn.erika.socket.core.Task;
 import cn.erika.socket.core.tcp.TcpSocket;
@@ -18,11 +19,13 @@ import java.io.IOException;
 // 安全性由FileUploadPreService去做 只要保证父连接的的身份可靠这里就不需要处理
 public class FileSender extends BaseClient {
     private Logger log = LoggerFactory.getLogger(this.getClass());
-    private Message message;
+    private String filepath;
+    private FileInfo fileInfo;
 
-    public FileSender(ISocket socket, Message message) throws IOException, BeanException {
+    public FileSender(ISocket socket, String filepath, FileInfo fileInfo) throws IOException, BeanException {
         super();
-        this.message = message;
+        this.filepath = filepath;
+        this.fileInfo = fileInfo;
         new TcpSocket(socket, this);
     }
 
@@ -34,6 +37,9 @@ public class FileSender extends BaseClient {
             @Override
             public void run() {
                 try {
+                    Message message = new Message();
+                    message.add(Constant.FILEPATH, filepath);
+                    message.add(Constant.FILE_INFO, fileInfo);
                     execute(socket, Constant.SRV_UPLOAD, message);
                 } catch (BeanException e) {
                     onError(socket, e);
@@ -44,12 +50,10 @@ public class FileSender extends BaseClient {
 
         try {
             ISocket parent = socket.get(Constant.PARENT_SOCKET);
-            String token = message.get(Constant.TOKEN);
-            socket.set(Constant.TOKEN, token);
-            socket.set(Constant.FILEPATH, parent.get(token));
-            parent.remove(token);
-            socket.set(Constant.PUBLIC_KEY, parent.get(Constant.PUBLIC_KEY));
-            socket.set(Constant.DIGITAL_SIGNATURE_ALGORITHM, parent.get(Constant.DIGITAL_SIGNATURE_ALGORITHM));
+            String token = fileInfo.getPartToken();
+            socket.add(Constant.TOKEN, token);
+            socket.add(Constant.PUBLIC_KEY, parent.get(Constant.PUBLIC_KEY));
+            socket.add(Constant.DIGITAL_SIGNATURE_ALGORITHM, parent.get(Constant.DIGITAL_SIGNATURE_ALGORITHM));
             onConnected(socket);
         } catch (BeanException e) {
             onError(socket, e);

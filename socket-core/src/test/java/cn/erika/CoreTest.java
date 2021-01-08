@@ -1,12 +1,16 @@
 package cn.erika;
 
+import cn.erika.config.Constant;
 import cn.erika.enumTest.Food;
 import cn.erika.enumTest.Fruit;
 import cn.erika.enumTest.Vegetables;
 import cn.erika.socket.model.po.Account;
 import cn.erika.service.DemoServiceImpl;
 import cn.erika.service.IDemoService;
+import cn.erika.socket.model.po.FileTransPartRecord;
+import cn.erika.socket.model.po.FileTransRecord;
 import cn.erika.socket.model.pto.Message;
+import cn.erika.socket.model.vo.FileTransInfo;
 import cn.erika.socket.orm.IAccountService;
 import cn.erika.socket.orm.impl.AccountServiceImpl;
 import cn.erika.utils.exception.UnsupportedAlgorithmException;
@@ -20,8 +24,9 @@ import cn.erika.utils.security.MessageDigestUtils;
 import cn.erika.utils.security.SecurityUtils;
 import cn.erika.utils.security.algorithm.BasicAsymmetricAlgorithm;
 import cn.erika.utils.string.Base64Utils;
-import cn.erika.utils.string.SerialUtils;
+import cn.erika.utils.io.SerialUtils;
 import cn.erika.utils.string.StringUtils;
+import com.alibaba.fastjson.JSON;
 import org.junit.Test;
 
 import java.io.File;
@@ -33,8 +38,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Security;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class CoreTest {
 
@@ -363,5 +366,41 @@ public class CoreTest {
         for (Account acc : list) {
             System.out.println(acc);
         }
+    }
+
+    @Test
+    public void testModel(){
+        FileTransInfo info = new FileTransInfo();
+        FileTransRecord recode = new FileTransRecord();
+        recode.setFilename("123.txt");
+        recode.setFilepath("~/123.txt");
+        recode.setLength(10000000L);
+        recode.setThreads(4);
+        info.setRecord(recode);
+        List<FileTransPartRecord> parts = new LinkedList<>();
+        for (int i = 0; i < 4; i++) {
+            FileTransPartRecord part = new FileTransPartRecord();
+            part.setFilename(recode.getFilename() + Constant.FILE_PART_POSTFIX);
+            part.setCreateTime(new Date());
+            parts.add(part);
+        }
+        info.setParts(parts);
+        System.out.println(info);
+    }
+
+    @Test
+    public void testArraySerial(){
+        Message message = new Message();
+        String[] array = {
+                "a", "b", "c"
+        };
+        message.add("arr", array);
+        System.out.println(JSON.toJSONString(message));
+    }
+
+    @Test
+    public void testNumber(){
+        Integer a = 1234567;
+        Number number = a;
     }
 }

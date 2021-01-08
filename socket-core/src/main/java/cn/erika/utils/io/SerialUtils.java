@@ -1,4 +1,4 @@
-package cn.erika.utils.string;
+package cn.erika.utils.io;
 
 import cn.erika.utils.exception.SerialException;
 import com.alibaba.fastjson.JSON;

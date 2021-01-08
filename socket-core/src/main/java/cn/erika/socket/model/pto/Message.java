@@ -1,6 +1,8 @@
 package cn.erika.socket.model.pto;
 
 import cn.erika.config.Constant;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -50,8 +52,9 @@ public class Message implements Serializable {
 
     @Override
     public String toString() {
-        return "Message{" +
-                "payload=" + payload +
-                '}';
+        return JSON.toJSONString(this,
+                SerializerFeature.WriteClassName,
+                SerializerFeature.WriteMapNullValue,
+                SerializerFeature.SortField);
     }
 }

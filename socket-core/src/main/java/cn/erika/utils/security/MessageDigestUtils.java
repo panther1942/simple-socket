@@ -130,4 +130,26 @@ public class MessageDigestUtils {
             return crc.getValue();
         }
     }
+
+    public static long crc32Sum(File file, long pos, long length) throws IOException {
+        try (RandomAccessFile in = new RandomAccessFile(file, "r")) {
+            in.seek(pos);
+            int len = 0;
+            long readCount = 0;
+            byte[] data = new byte[4096];
+            CRC32 crc = new CRC32();
+            while ((len = in.read(data)) != -1) {
+                if (readCount + len > length) {
+                    crc.update(data, 0, (int) (length - readCount));
+                } else {
+                    crc.update(data, 0, len);
+                }
+                readCount += len;
+                if (readCount > length) {
+                    break;
+                }
+            }
+            return crc.getValue();
+        }
+    }
 }

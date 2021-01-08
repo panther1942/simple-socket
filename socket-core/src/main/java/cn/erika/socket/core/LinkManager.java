@@ -1,7 +1,7 @@
 package cn.erika.socket.core;
 
 import cn.erika.config.Constant;
-import cn.erika.socket.core.ISocket;
+import cn.erika.config.GlobalSettings;
 import cn.erika.utils.log.Logger;
 import cn.erika.utils.log.LoggerFactory;
 
@@ -14,8 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class LinkManager {
     private Logger log = LoggerFactory.getLogger(this.getClass());
     private Map<String, ISocket> linkList = new ConcurrentHashMap<>();
-    private long cleanInterval = 30 * 1000;
-    private long invalidInterval = 60 * 1000;
+    private long cleanInterval = GlobalSettings.cleanInterval;
+    private long invalidInterval = GlobalSettings.invalidInterval;
 
     public LinkManager() {
         log.info("启动定时清理器 清理间隔: " + cleanInterval / 1000 + "/" + invalidInterval / 1000);
@@ -47,7 +47,7 @@ public class LinkManager {
 
     public ISocket addLink(ISocket socket) {
         String uid = UUID.randomUUID().toString();
-        socket.set(Constant.UID, uid);
+        socket.add(Constant.UID, uid);
         linkList.put(uid, socket);
         return socket;
     }

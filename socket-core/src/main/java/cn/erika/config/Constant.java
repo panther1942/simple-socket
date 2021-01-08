@@ -30,6 +30,7 @@ public class Constant {
     public static final String LAST_TIME = "lastTime";
     public static final String SERVICE_NAME = "serverName";
     public static final String TOKEN = "token";
+    public static final String THREADS = "thread";
     public static final String PARENT_SOCKET = "parentSocket";
     public static final String TEXT = "text";
     public static final String BIN = "bin";
@@ -43,9 +44,11 @@ public class Constant {
     public static final String FILEPATH = "filepath";
     public static final String FILE_POS = "filePos";
     public static final String FILE_INFO = "fileInfo";
+    public static final String FILE_PART_INFO = "filePartInfo";
     public static final String FILE_ATTR = "fileAttr";
     public static final String SEND_STATUS = "sendStatus";
     public static final String RECEIVE_STATUS = "receiveStatus";
+    public static final String FILE_PART_POSTFIX = ".part";
 
     public static final String SRV_TEXT = "srv_text";
     public static final String SRV_EXIT = "srv_exit";

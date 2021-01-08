@@ -8,18 +8,17 @@ import cn.erika.utils.db.format.DateFormat;
 import java.util.Date;
 
 @Table("tb_file_trans")
-public class FileTransRecode extends Entry<FileTransRecode> {
-    public static FileTransRecode dao = new FileTransRecode();
+public class FileTransRecord extends Entry<FileTransRecord> {
+    public static final FileTransRecord dao = new FileTransRecord();
 
     @Column(primary = true)
     private String uuid;
     private String filename;
     private String filepath;
-    @Column("file_length")
-    private Long fileLength;
-    @Column("file_pos")
-    private Long filePos;
-    private Long crc;
+    private Long length;
+    private String sign;
+    private String algorithm;
+    private Integer threads;
     private String sender;
     private String receiver;
     @Column(value = "create_time", format = DateFormat.class)
@@ -51,28 +50,36 @@ public class FileTransRecode extends Entry<FileTransRecode> {
         this.filepath = filepath;
     }
 
-    public long getFileLength() {
-        return fileLength;
+    public Long getLength() {
+        return length;
     }
 
-    public void setFileLength(long fileLength) {
-        this.fileLength = fileLength;
+    public void setLength(Long length) {
+        this.length = length;
     }
 
-    public long getFilePos() {
-        return filePos;
+    public String getSign() {
+        return sign;
     }
 
-    public void setFilePos(long filePos) {
-        this.filePos = filePos;
+    public void setSign(String sign) {
+        this.sign = sign;
     }
 
-    public Long getCrc() {
-        return crc;
+    public String getAlgorithm() {
+        return algorithm;
     }
 
-    public void setCrc(Long crc) {
-        this.crc = crc;
+    public void setAlgorithm(String algorithm) {
+        this.algorithm = algorithm;
+    }
+
+    public Integer getThreads() {
+        return threads;
+    }
+
+    public void setThreads(Integer threads) {
+        this.threads = threads;
     }
 
     public String getSender() {
@@ -105,5 +112,35 @@ public class FileTransRecode extends Entry<FileTransRecode> {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    @Override
+    public int insert() {
+        this.createTime = new Date();
+        this.updateTime = new Date();
+        return super.insert();
+    }
+
+    @Override
+    public int update() {
+        this.updateTime = new Date();
+        return super.update();
+    }
+
+    @Override
+    public String toString() {
+        return "FileTransRecord{" +
+                "uuid='" + uuid + '\'' +
+                ", filename='" + filename + '\'' +
+                ", filepath='" + filepath + '\'' +
+                ", length=" + length +
+                ", sign='" + sign + '\'' +
+                ", algorithm='" + algorithm + '\'' +
+                ", threads=" + threads +
+                ", sender='" + sender + '\'' +
+                ", receiver='" + receiver + '\'' +
+                ", createTime=" + createTime +
+                ", updateTime=" + updateTime +
+                '}';
     }
 }

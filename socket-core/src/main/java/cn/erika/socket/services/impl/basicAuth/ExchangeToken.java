@@ -51,8 +51,8 @@ public class ExchangeToken extends BaseService implements ISocketService {
             // 密钥
             String securityKey = decryptWithRsaToString(bSecurityKey, privateKey);
 
-            socket.set(Constant.SECURITY_ALGORITHM, securityAlgorithm);
-            socket.set(Constant.SECURITY_KEY, securityKey);
+            socket.add(Constant.SECURITY_ALGORITHM, securityAlgorithm);
+            socket.add(Constant.SECURITY_KEY, securityKey);
 
             // 向量
             if (securityAlgorithm.isNeedIv()) {
@@ -60,7 +60,7 @@ public class ExchangeToken extends BaseService implements ISocketService {
                     throw new AuthenticateException("加密方式缺少向量");
                 }
                 byte[] securityIv = decryptWithRsa(bSecurityIv, privateKey);
-                socket.set(Constant.SECURITY_IV, securityIv);
+                socket.add(Constant.SECURITY_IV, securityIv);
             }
 
             // 告知协商结果
@@ -70,7 +70,7 @@ public class ExchangeToken extends BaseService implements ISocketService {
             socket.send(reply);
 
             // 设置连接的加密flag
-            socket.set(Constant.ENCRYPT, true);
+            socket.add(Constant.ENCRYPT, true);
             // 客户端执行任务队列
             socket.getHandler().onReady(socket);
         }
@@ -90,17 +90,17 @@ public class ExchangeToken extends BaseService implements ISocketService {
                     throw new AuthenticateException("未经认证的连接");
                 }
                 log.debug("认证通过");
-                socket.set(Constant.PARENT_SOCKET, parent);
-                socket.set(Constant.PUBLIC_KEY, publicKey);
-                socket.set(Constant.DIGITAL_SIGNATURE_ALGORITHM, parent.get(Constant.DIGITAL_SIGNATURE_ALGORITHM));
-                socket.set(Constant.TOKEN, token);
+                socket.add(Constant.PARENT_SOCKET, parent);
+                socket.add(Constant.PUBLIC_KEY, publicKey);
+                socket.add(Constant.DIGITAL_SIGNATURE_ALGORITHM, parent.get(Constant.DIGITAL_SIGNATURE_ALGORITHM));
+                socket.add(Constant.TOKEN, token);
 
                 SecurityAlgorithm securityAlgorithm = GlobalSettings.securityAlgorithm;
                 String securityKey = StringUtils.randomString(GlobalSettings.securityLength);
                 byte[] securityIv;
 
-                socket.set(Constant.SECURITY_ALGORITHM, securityAlgorithm);
-                socket.set(Constant.SECURITY_KEY, securityKey);
+                socket.add(Constant.SECURITY_ALGORITHM, securityAlgorithm);
+                socket.add(Constant.SECURITY_KEY, securityKey);
 
                 Message reply = new Message(Constant.SRV_EXCHANGE_TOKEN);
                 reply.add(Constant.SECURITY_ALGORITHM, encryptWithRsa(securityAlgorithm.getValue(), publicKey));
@@ -108,7 +108,7 @@ public class ExchangeToken extends BaseService implements ISocketService {
 
                 if (securityAlgorithm.isNeedIv()) {
                     securityIv = StringUtils.randomString(securityAlgorithm.getIvLength()).getBytes(charset);
-                    socket.set(Constant.SECURITY_IV, securityIv);
+                    socket.add(Constant.SECURITY_IV, securityIv);
                     reply.add(Constant.SECURITY_IV, encryptWithRsa(securityIv, publicKey));
                 }
                 socket.send(reply);
