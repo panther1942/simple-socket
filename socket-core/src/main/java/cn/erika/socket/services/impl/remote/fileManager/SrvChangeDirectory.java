@@ -18,9 +18,9 @@ public class SrvChangeDirectory extends BaseService implements ISocketService {
     public void client(ISocket socket, Message message) {
         if (message != null) {
             if (message.get(Constant.SERVICE_NAME) == null) {
-                String dir = message.get(Constant.FILEPATH);
+                String remoteDir = message.get(Constant.REMOTE_FILE);
                 Message request = new Message(Constant.SRV_CD);
-                request.add(Constant.FILEPATH, dir);
+                request.add(Constant.REMOTE_FILE, remoteDir);
                 socket.send(request);
             } else {
                 Boolean result = message.get(Constant.RESULT);
@@ -36,14 +36,14 @@ public class SrvChangeDirectory extends BaseService implements ISocketService {
     @Enhance(AuthenticatedCheck.class)
     @Override
     public void server(ISocket socket, Message message) {
-        String dir = message.get(Constant.FILEPATH);
+        String remoteDir = message.get(Constant.REMOTE_FILE);
         String pwd = socket.get(Constant.PWD);
-        if (StringUtils.isEmpty(dir)) {
-            dir = pwd;
-        } else if (!dir.startsWith("/")) {
-            dir = pwd + "/" + dir;
+        if (StringUtils.isEmpty(remoteDir)) {
+            remoteDir = pwd;
+        } else if (!remoteDir.startsWith("/")) {
+            remoteDir = pwd + "/" + remoteDir;
         }
-        String[] dirs = dir.split("/");
+        String[] dirs = remoteDir.split("/");
         int count = 0;
         String[] targetDirs = new String[dirs.length];
         for (int i = 0; i < dirs.length; i++, count++) {
@@ -59,13 +59,13 @@ public class SrvChangeDirectory extends BaseService implements ISocketService {
         for (int i = 0; i < count; i++) {
             buffer.append(targetDirs[i]).append("/");
         }
-        dir = buffer.toString();
+        remoteDir = buffer.toString();
 
         Message reply = new Message(Constant.SRV_CD);
-        File file = new File(dir);
+        File file = new File(remoteDir);
         if (!file.exists()) {
             reply.add(Constant.RESULT, false);
-            reply.add(Constant.TEXT, "目标路径不存在: " + dir);
+            reply.add(Constant.TEXT, "目标路径不存在: " + remoteDir);
         } else if (!file.isDirectory()) {
             reply.add(Constant.RESULT, false);
             reply.add(Constant.TEXT, "目标路径不是目录: " + file.getAbsolutePath());

@@ -40,8 +40,8 @@ public class Constant {
     public static final String PWD = "pwd";
     public static final String PROMPT = "prompt";
 
-    public static final String FILENAME = "filename";
-    public static final String FILEPATH = "filepath";
+    public static final String LOCAL_FILE = "localFile";
+    public static final String REMOTE_FILE = "remoteFile";
     public static final String FILE_POS = "filePos";
     public static final String FILE_INFO = "fileInfo";
     public static final String FILE_PART_INFO = "filePartInfo";

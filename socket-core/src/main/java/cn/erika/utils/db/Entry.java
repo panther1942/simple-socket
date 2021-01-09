@@ -69,7 +69,7 @@ public class Entry<T> implements Serializable {
 
     public final T selectOne(String sql, Object... params) {
         List<T> list = select(sql, params);
-        if (list.size() > 0) {
+        if (list != null && list.size() > 0) {
             return list.get(0);
         }
         return null;

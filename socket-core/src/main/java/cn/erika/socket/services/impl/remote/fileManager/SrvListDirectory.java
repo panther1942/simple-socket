@@ -28,9 +28,9 @@ public class SrvListDirectory extends BaseService implements ISocketService {
     public void client(ISocket socket, Message message) {
         if (message != null) {
             if (message.get(Constant.SERVICE_NAME) == null) {
-                String dir = message.get(Constant.FILEPATH);
+                String remoteDir = message.get(Constant.REMOTE_FILE);
                 Message request = new Message(Constant.SRV_LS);
-                request.add(Constant.FILEPATH, dir);
+                request.add(Constant.REMOTE_FILE, remoteDir);
                 socket.send(request);
             } else {
                 Boolean result = message.get(Constant.RESULT);
@@ -71,11 +71,11 @@ public class SrvListDirectory extends BaseService implements ISocketService {
     @Enhance(AuthenticatedCheck.class)
     @Override
     public void server(ISocket socket, Message message) {
-        String dir = message.get(Constant.FILEPATH);
+        String remoteDir = message.get(Constant.REMOTE_FILE);
         String pwd = socket.get(Constant.PWD);
         File target = null;
-        if (!StringUtils.isEmpty(dir)) {
-            target = new File(dir);
+        if (!StringUtils.isEmpty(remoteDir)) {
+            target = new File(remoteDir);
         } else if (!StringUtils.isEmpty(pwd)) {
             target = new File(pwd);
         } else {

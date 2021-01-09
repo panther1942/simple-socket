@@ -22,7 +22,7 @@ public class ChangeDirectoryService extends BaseClientService implements ICliSer
         Message data = new Message();
         if (args.length > 1) {
             String target = args[1];
-            data.add(Constant.FILEPATH, target);
+            data.add(Constant.REMOTE_FILE, target);
         }
         client.execute(Constant.SRV_CD, data);
     }

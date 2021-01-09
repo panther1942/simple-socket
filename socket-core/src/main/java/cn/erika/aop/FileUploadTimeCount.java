@@ -32,10 +32,10 @@ public class FileUploadTimeCount implements Advise {
         Date start = fileInfoMap.get(fileInfo);
         Date end = new Date();
         long len = fileInfo.getLength();
-        String filename = message.get(Constant.FILENAME);
+        String remoteFile = message.get(Constant.REMOTE_FILE);
         double time = ((double) end.getTime() - start.getTime()) / 1000;
         double speed = len / time / 1024;
-        log.info(String.format("%s传输用时: %f 秒, 平均速率: %f kb/s", filename, time, speed));
+        log.info(String.format("%s传输用时: %f 秒, 平均速率: %f kb/s", remoteFile, time, speed));
     }
 
     @Override

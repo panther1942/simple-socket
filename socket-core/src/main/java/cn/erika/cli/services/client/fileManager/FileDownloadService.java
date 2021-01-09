@@ -5,16 +5,15 @@ import cn.erika.cli.services.client.basic.BaseClientService;
 import cn.erika.config.Constant;
 import cn.erika.context.annotation.Component;
 import cn.erika.context.exception.BeanException;
-import cn.erika.socket.model.pto.Message;
 import cn.erika.socket.handler.IClient;
+import cn.erika.socket.model.pto.Message;
 
-@Component("upload")
-public class FileUploadService extends BaseClientService implements ICliService {
+@Component("download")
+public class FileDownloadService extends BaseClientService implements ICliService {
     @Override
     public String info() {
-        return "上传文件到服务器\n" +
-                "\t例如 upload /var/log/message.log message_20201225.log\n" +
-                "\t将上传文件至服务器程序工作目录的downloads目录下";
+        return "从服务器下载文件\n" +
+                "\t例如 download /var/log/message.log message_20201225.log\n";
     }
 
     @Override
@@ -24,8 +23,8 @@ public class FileUploadService extends BaseClientService implements ICliService 
         String filepath = args[1];
         String filename = args[2];
         Message message = new Message();
-        message.add(Constant.LOCAL_FILE, filepath);
-        message.add(Constant.REMOTE_FILE, filename);
-        client.execute(Constant.SRV_PRE_UPLOAD, message);
+        message.add(Constant.REMOTE_FILE, filepath);
+        message.add(Constant.LOCAL_FILE, filename);
+        client.execute(Constant.SRV_PRE_DOWNLOAD, message);
     }
 }

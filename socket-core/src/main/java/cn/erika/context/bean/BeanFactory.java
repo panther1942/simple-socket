@@ -162,12 +162,12 @@ public class BeanFactory {
             }
             return getProxy(obj);
         } catch (NoSuchMethodException | InstantiationException e) {
-            throw new BeanException("不存在这样的构造函数");
+            throw new BeanException("不存在这样的构造函数: " + e.getMessage());
         } catch (IllegalAccessException e) {
-            throw new BeanException("构造函数无法访问");
+            throw new BeanException("构造函数无法访问: " + e.getMessage());
         } catch (InvocationTargetException e) {
             e.printStackTrace();
-            throw new BeanException("底层构造方法抛出异常");
+            throw new BeanException("底层构造方法抛出异常: " + e.getMessage());
         }
     }
 

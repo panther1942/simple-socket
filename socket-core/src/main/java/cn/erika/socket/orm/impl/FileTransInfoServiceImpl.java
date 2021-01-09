@@ -10,6 +10,7 @@ import cn.erika.socket.orm.IFileTransInfoService;
 import cn.erika.socket.orm.IFileTransPartRecordService;
 import cn.erika.socket.orm.IFileTransRecordService;
 import cn.erika.utils.exception.UnsupportedAlgorithmException;
+import cn.erika.utils.io.FileUtils;
 import cn.erika.utils.security.MessageDigestUtils;
 import cn.erika.utils.security.SecurityUtils;
 import cn.erika.utils.string.Base64Utils;
@@ -63,20 +64,7 @@ public class FileTransInfoServiceImpl extends BaseService implements IFileTransI
         // 如果传输完成 则合并文件
         if (status) {
             File target = new File(transRecord.getFilepath());
-            try (RandomAccessFile writer = new RandomAccessFile(target, "rw")) {
-                for (FileTransPartRecord partRecord : transInfo.getParts()) {
-                    File partFile = new File(partRecord.getFilename());
-                    long pos = partRecord.getPos();
-                    writer.seek(pos);
-                    try (FileInputStream reader = new FileInputStream(partFile)) {
-                        int len = 0;
-                        byte[] data = new byte[4 * 1024 * 1024];
-                        while ((len = reader.read(data)) > -1) {
-                            writer.write(data, 0, len);
-                        }
-                    }
-                }
-            }
+            FileUtils.mergeFile(target, fileTransPartRecordService.getFileInfoList(transInfo.getParts()));
             // 对文件签名
             byte[] sign = MessageDigestUtils.sum(target, SecurityUtils.getMessageDigestAlgorithmByValue(transRecord.getAlgorithm()));
             String strSign = StringUtils.byte2HexString(sign);

@@ -19,14 +19,14 @@ import java.io.IOException;
 // 安全性由FileUploadPreService去做 只要保证父连接的的身份可靠这里就不需要处理
 public class FileSender extends BaseClient {
     private Logger log = LoggerFactory.getLogger(this.getClass());
-    private String filename;
-    private String filepath;
+    private String localFile;
+    private String remoteFile;
     private FileInfo fileInfo;
 
-    public FileSender(ISocket socket, String filename, String filepath, FileInfo fileInfo) throws IOException {
+    public FileSender(ISocket socket, String localFile, String remoteFile, FileInfo fileInfo) throws IOException {
         super();
-        this.filename = filename;
-        this.filepath = filepath;
+        this.localFile = localFile;
+        this.remoteFile = remoteFile;
         this.fileInfo = fileInfo;
         new TcpSocket(socket, this);
     }
@@ -40,8 +40,8 @@ public class FileSender extends BaseClient {
             public void run() {
                 try {
                     Message message = new Message();
-                    message.add(Constant.FILENAME, filename);
-                    message.add(Constant.FILEPATH, filepath);
+                    message.add(Constant.LOCAL_FILE, localFile);
+                    message.add(Constant.REMOTE_FILE, remoteFile);
                     message.add(Constant.FILE_INFO, fileInfo);
                     execute(socket, Constant.SRV_UPLOAD, message);
                 } catch (BeanException e) {
