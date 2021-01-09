@@ -69,7 +69,8 @@ public class CoreTest {
     @Test
     public void testCrc() throws IOException {
 //        System.out.println(MessageDigestUtils.crc32Sum("admin".getBytes()));
-        File file = new File("/home/erika/Downloads/phpMyAdmin-5.0.4-all-languages.zip");
+        File file = new File("/var/lib/libvirt/images/cn_windows_7_ultimate_with_sp1_x64_dvd_u_677408.iso");
+//        File file = new File("/home/erika/Downloads/phpMyAdmin-5.0.4-all-languages.zip");
 //        File file = new File("/home/erika/IdeaProjects/simple-socket/downloads/phpMyAdmin.zip");
         long checkCode = MessageDigestUtils.crc32Sum(file);
         System.out.println(checkCode);
@@ -335,7 +336,7 @@ public class CoreTest {
         List<Account> list = Account.dao.select(sql);
         if (list.size() > 0) {
             Account account = list.get(0);
-            account.setPassword("123456");
+            account.setPassword("admin");
             account.setUpdateTime(new Date());
             int count = account.update();
             System.out.println(count);
@@ -346,7 +347,7 @@ public class CoreTest {
     @Test
     public void testDelete() {
         String sql = "SELECT * FROM tb_account WHERE `username` = ?";
-        List<Account> list = Account.dao.select(sql, "root");
+        List<Account> list = Account.dao.select(sql, "admin");
         if (list.size() > 0) {
             int count = list.get(0).delete();
             System.out.println(count);
@@ -411,20 +412,13 @@ public class CoreTest {
     }
 
     @Test
-    public void testMessageCompress() throws NoSuchCompressAlgorithm, CompressException, UnsupportedAlgorithmException {
-        CompressUtils.register(new GZIP());
-        String string = "{\"payload\":{\"sign\":\"k75xFMNIxFB3geDkwRoJMeTqrvp10QxFYWFbRwvNpmR/acYvZ58m4GO4BHNqOps4ptTPi0TmfzlUFPrwmM9Z5f6ynH1MRdRBncCu5IdMn7C+sLsu9UofsCBP+4QBXNIyoJUGq6CsGm9rHW8IZQYU9xRUb8fhcv+FwNO9Ty4gEgOZyYfhQKocu0h6aTE3RSNi2U+EoPFc2QMm1lBLJt218qzJrHulIGVTC5FeSDZ/Mg3V3HwwRIxUtdILS/AFb6drE3ucpKeXD60nvnnBtlh9nZnTK5Gb2RY5OXD1PgnvuX6ECwTawE/ViD9MkHypsRHDnEeI1gVC5I2wqIn0/iX29w==\",\"serverName\":\"srv_post_upload\",\"text\":\"接收完成: /home/erika/Workspaces/simple-socket/config123.json.part0\"}}";
-        byte[] data1 = CompressUtils.compress(string.getBytes(), GZIP.CODE);
-        DataInfo info = new DataInfo();
-        info.setCompress(1);
-        info.setData(data1);
-        info.setPos(0);
-        info.setLen(data1.length);
-        info.setTimestamp(new Date());
-        String targetSign = StringUtils.byte2HexString(MessageDigestUtils.sum(data1, BasicMessageDigestAlgorithm.MD5));
-        info.setSign(targetSign);
-        System.out.println(info);
-        byte[] data2 = CompressUtils.uncompress(data1, GZIP.CODE);
-        System.out.println(new String(data2));
+    public void testUUID() throws ClassNotFoundException {
+        Class.forName("cn.erika.utils.security.algorithm.BasicMessageDigestAlgorithm");
+        String uuid = UUID.randomUUID().toString();
+        System.out.println(uuid + " " + uuid.length());
+        System.out.println(String.valueOf(Integer.MAX_VALUE).length());
+        System.out.println(String.valueOf(Long.MAX_VALUE).length());
+        long crc = MessageDigestUtils.crc32Sum(uuid.getBytes());
+        System.out.println(crc + " " + String.valueOf(crc).length());
     }
 }

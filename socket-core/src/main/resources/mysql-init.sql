@@ -4,11 +4,13 @@ CREATE USER 'test'@'localhost'
 GRANT ALL PRIVILEGES ON db_development.* TO 'test'@'localhost';
 FLUSH PRIVILEGES;
 USE db_development;
+DROP TABLE IF EXISTS tb_account;
 CREATE TABLE tb_account (
   `uuid`        VARCHAR(50) PRIMARY KEY NOT NULL DEFAULT uuid(),
   `username`    VARCHAR(50) UNIQUE KEY  NOT NULL,
   `password`    VARCHAR(255)            NOT NULL,
-  `create_time` DATETIME                NOT NULL DEFAULT current_timestamp()
+  `create_time` DATETIME                NOT NULL DEFAULT current_timestamp(),
+  `update_time` DATETIME                NOT NULL DEFAULT current_timestamp()
 );
 INSERT INTO tb_account (`username`, `password`)
 VALUES ('admin', 'admin');

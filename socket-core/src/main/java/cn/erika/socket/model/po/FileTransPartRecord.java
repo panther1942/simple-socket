@@ -4,7 +4,7 @@ import cn.erika.socket.model.pto.FileInfo;
 import cn.erika.utils.db.Entry;
 import cn.erika.utils.db.annotation.Column;
 import cn.erika.utils.db.annotation.Table;
-import cn.erika.utils.db.format.DateFormat;
+import cn.erika.utils.db.format.MySQLDateFormat;
 
 import java.util.Date;
 
@@ -21,9 +21,9 @@ public class FileTransPartRecord extends Entry<FileTransPartRecord> {
     private Long pos;
     private Long crc;
     private Integer status;
-    @Column(value = "create_time", format = DateFormat.class)
+    @Column(value = "create_time", format = MySQLDateFormat.class)
     private Date createTime;
-    @Column(value = "update_time", format = DateFormat.class)
+    @Column(value = "update_time", format = MySQLDateFormat.class)
     private Date updateTime;
 
     public FileTransPartRecord() {

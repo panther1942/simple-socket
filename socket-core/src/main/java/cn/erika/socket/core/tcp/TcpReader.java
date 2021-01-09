@@ -76,17 +76,18 @@ class TcpReader {
         String strHead = new String(bHead, charset);
         try {
             info = new DataInfo();
+            // uuid 36字节
+            info.setUuid(strHead.substring(0, 36));
             // 时间戳 13字节
-            info.setTimestamp(new Date(Long.parseLong(strHead.substring(0, 13))));
+            info.setTimestamp(new Date(Long.parseLong(strHead.substring(36, 49))));
             // 压缩 2字节
-            info.setCompress(Integer.parseInt(strHead.substring(13, 15), 16));
+            info.setCompress(Integer.parseInt(strHead.substring(49, 51), 16));
             // 偏移量 10字节
-            info.setPos(Long.parseLong(strHead.substring(15, 25)));
-            // 长度 10字节
-            info.setLen(Integer.parseInt(strHead.substring(25, 35)));
-            // 签名 32
-            info.setSign(strHead.substring(35, 67));
-//            log.debug(info.toString());
+            info.setPos(Long.parseLong(strHead.substring(51, 61)));
+            // 长度 19字节
+            info.setLen(Integer.parseInt(strHead.substring(61, 80)));
+            // 签名 19
+            info.setCrc(Long.parseLong(strHead.substring(80, 99)));
             byte[] tmp = new byte[len - DataInfo.LEN];
             System.arraycopy(data, DataInfo.LEN, tmp, 0, len - DataInfo.LEN);
             return tmp;

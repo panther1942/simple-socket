@@ -3,7 +3,7 @@ package cn.erika.socket.model.po;
 import cn.erika.utils.db.Entry;
 import cn.erika.utils.db.annotation.Column;
 import cn.erika.utils.db.annotation.Table;
-import cn.erika.utils.db.format.DateFormat;
+import cn.erika.utils.db.format.MySQLDateFormat;
 
 import java.util.Date;
 
@@ -22,9 +22,9 @@ public class FileTransRecord extends Entry<FileTransRecord> {
     private String sender;
     private String receiver;
     private Integer status = 0;
-    @Column(value = "create_time", format = DateFormat.class)
+    @Column(value = "create_time", format = MySQLDateFormat.class)
     private Date createTime;
-    @Column(value = "update_time", format = DateFormat.class)
+    @Column(value = "update_time", format = MySQLDateFormat.class)
     private Date updateTime;
 
     public String getUuid() {

@@ -28,14 +28,14 @@ public class JdbcUtils {
         Class.forName(name);
     }
 
-    public static JdbcUtils getInstance() {
+    public static JdbcUtils getInstance() throws SQLException {
         if (utils == null) {
             utils = new JdbcUtils();
         }
         return utils;
     }
 
-    private JdbcUtils() {
+    private JdbcUtils() throws SQLException {
         try {
             loadDriver(driver);
         } catch (ClassNotFoundException e) {
@@ -44,7 +44,7 @@ public class JdbcUtils {
         }
         if (select(testSql).size() > 0) {
             log.info("数据库连接成功");
-        }else{
+        } else {
             log.warn("无法连接到数据库");
         }
     }
@@ -78,7 +78,7 @@ public class JdbcUtils {
         return getConn(url, username, password);
     }
 
-    public List<Map<String, Object>> select(Connection conn, String sql, Object... params) {
+    public List<Map<String, Object>> select(Connection conn, String sql, Object... params) throws SQLException {
         PreparedStatement pStmt = null;
         ResultSet result = null;
         try {
@@ -104,31 +104,18 @@ public class JdbcUtils {
                 resultList.add(entry);
             }
             return resultList;
-        } catch (SQLException e) {
-            log.error("数据查询出错: " + e.getMessage(), e);
         } finally {
             close(conn, pStmt, result);
         }
-        return null;
     }
 
-    public List<Map<String, Object>> select(String sql, Object... params) {
-        Connection conn = null;
-        try {
-            conn = getConn();
-            return select(conn, sql, params);
-        } catch (SQLException e) {
-            log.error("数据查询出错: " + e.getMessage(), e);
-        }
-        return null;
+    public List<Map<String, Object>> select(String sql, Object... params) throws SQLException {
+        Connection conn = getConn();
+        return select(conn, sql, params);
     }
 
-    public int update(Connection conn, String sql, Object... params) {
+    public int update(Connection conn, String sql, Object... params) throws SQLException {
         PreparedStatement pStmt = null;
-//        log.debug(sql);
-//        if (params != null) {
-//            log.debug(StringUtils.join(",", params).toString());
-//        }
         try {
             pStmt = conn.prepareStatement(sql);
             if (params != null) {
@@ -137,23 +124,14 @@ public class JdbcUtils {
                 }
             }
             return pStmt.executeUpdate();
-        } catch (SQLException e) {
-            log.error(e.getMessage());
-            return 0;
         } finally {
             close(conn, pStmt);
         }
     }
 
-    public int update(String sql, Object... params) {
-        Connection conn = null;
-        try {
-            conn = getConn();
-            return update(conn, sql, params);
-        } catch (SQLException e) {
-            log.error(e.getMessage());
-            return 0;
-        }
+    public int update(String sql, Object... params) throws SQLException {
+        Connection conn = getConn();
+        return update(conn, sql, params);
     }
 
     public void close(Connection conn, Statement stmt) {

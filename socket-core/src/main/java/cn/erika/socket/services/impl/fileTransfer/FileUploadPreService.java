@@ -18,7 +18,6 @@ import cn.erika.socket.model.pto.Message;
 import cn.erika.socket.model.vo.FileTransInfo;
 import cn.erika.socket.orm.IFileTransInfoService;
 import cn.erika.socket.orm.IFileTransPartRecordService;
-import cn.erika.socket.orm.IFileTransRecordService;
 import cn.erika.socket.services.ISocketService;
 import cn.erika.utils.io.FileUtils;
 import cn.erika.utils.security.MessageDigestUtils;
@@ -33,12 +32,10 @@ import java.util.UUID;
 public class FileUploadPreService extends BaseService implements ISocketService {
 
     private IFileTransInfoService transInfoService;
-    private IFileTransRecordService transRecordService;
     private IFileTransPartRecordService transPartService;
 
     public FileUploadPreService() throws BeanException {
         this.transInfoService = getBean("fileTransInfoService");
-        this.transRecordService = getBean("fileTransRecordService");
         this.transPartService = getBean("fileTransPartRecordService");
     }
 
@@ -67,7 +64,12 @@ public class FileUploadPreService extends BaseService implements ISocketService 
             // 当前目录
             String pwd = socket.get(Constant.PWD);
             // 最终文件保存路径
-            File file = new File(pwd + FileUtils.SYS_FILE_SEPARATOR + remoteFile);
+            File file = null;
+            if (remoteFile.startsWith(FileUtils.SYS_FILE_SEPARATOR)) {
+                file = new File(remoteFile);
+            } else {
+                file = new File(pwd + FileUtils.SYS_FILE_SEPARATOR + remoteFile);
+            }
             if (file.exists() && FileUtils.checkFile(file, fileInfo)) {
                 throw new IOException("文件完整 不需要重传");
             }
@@ -127,8 +129,15 @@ public class FileUploadPreService extends BaseService implements ISocketService 
                     info.setFilename(pwd + info.getFilename());
                 }
                 // 添加文件记录
-                FileTransRecord record = transRecordService.createTransRecord(
-                        remoteFile, file.getAbsolutePath(), threads, fileInfo, socket.get(Constant.USERNAME), "SERVER");
+                FileTransRecord record = new FileTransRecord();
+                record.setFilename(remoteFile);
+                record.setFilepath(file.getAbsolutePath());
+                record.setLength(fileInfo.getLength());
+                record.setSign(fileInfo.getSign());
+                record.setAlgorithm(fileInfo.getAlgorithm());
+                record.setThreads(threads);
+                record.setSender(socket.get(Constant.USERNAME));
+                record.setReceiver("SERVER");
                 // 插入数据 如果大于0说明插入成功
                 if (record.insert() > 0) {
                     transInfo.setRecord(record);

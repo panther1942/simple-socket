@@ -3,6 +3,7 @@ package cn.erika.socket.core;
 import cn.erika.config.Constant;
 import cn.erika.config.GlobalSettings;
 import cn.erika.context.exception.BeanException;
+import cn.erika.socket.exception.DataException;
 import cn.erika.socket.model.pto.DataInfo;
 import cn.erika.socket.model.pto.Message;
 import cn.erika.utils.exception.UnsupportedAlgorithmException;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
+import java.security.SignatureException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,12 +50,16 @@ public abstract class BaseSocket implements ISocket {
      */
     @Override
     public synchronized void send(Message message) {
-        set(Constant.LAST_TIME, new Date());
+        // 先刷新连接最后通信时间
+        Date now = new Date();
+        set(Constant.LAST_TIME, now);
         try {
-            Date now = new Date();
             boolean isEncrypt = get(Constant.ENCRYPT);
+            // 因为可能复用Message 所以需要先去除上次的签名信息
             message.del(Constant.DIGITAL_SIGNATURE);
+            // 如果加密通信已启用
             if (isEncrypt) {
+                // 根据协商的签名进行数字签名
                 DigitalSignatureAlgorithm digitalSignatureAlgorithm = get(Constant.DIGITAL_SIGNATURE_ALGORITHM);
                 byte[] rsaSign = SecurityUtils.sign(
                         message.toString().getBytes(charset),
@@ -61,14 +67,17 @@ public abstract class BaseSocket implements ISocket {
                         digitalSignatureAlgorithm);
                 message.add(Constant.DIGITAL_SIGNATURE, rsaSign);
             }
+            // 序列化Message
             byte[] data = SerialUtils.serialObject(message);
-//            log.debug(now.getTime() + " | " + JSON.toJSONString(message));
+            // 如果加密通信已启用
             if (isEncrypt) {
+                // 根据协商的加密算法进行数据加密
                 SecurityAlgorithm securityAlgorithm = get(Constant.SECURITY_ALGORITHM);
                 String securityKey = get(Constant.SECURITY_KEY);
-                byte[] securityIv = get(Constant.SECURITY_IV);
+                byte[] securityIv = get(Constant.SECURITY_IV); // 向量会根据算法需要使用或者忽略
                 data = SecurityUtils.encrypt(data, securityKey, securityAlgorithm, securityIv);
             }
+            // 创建数据包
             DataInfo info = new DataInfo();
             info.setTimestamp(now);
             if (GlobalSettings.enableCompress) {
@@ -76,20 +85,17 @@ public abstract class BaseSocket implements ISocket {
                 info.setCompress(compressCode);
                 data = CompressUtils.compress(data, compressCode);
             }
-//            log.debug("数据长度: " + data.length);
             info.setPos(0);
             info.setLen(data.length);
             info.setData(data);
-//            log.error(StringUtils.byte2HexString(info.getData()));
-            String sign = StringUtils.byte2HexString(
-                    MessageDigestUtils.sum(info.getData(), BasicMessageDigestAlgorithm.MD5));
-            info.setSign(sign);
-//            log.debug("计算数据签名: " + sign);
+            info.setCrc(MessageDigestUtils.crc32Sum(data));
             send(info);
         } catch (CompressException | NoSuchCompressAlgorithm e) {
             log.error("压缩时出现错误: " + e.getMessage(), e);
+            close();
         } catch (SerialException e) {
             log.error("序列化出现错误: " + e.getMessage(), e);
+            close();
         } catch (InvalidKeyException e) {
             log.error("公钥无效");
             close();
@@ -116,14 +122,10 @@ public abstract class BaseSocket implements ISocket {
         try {
             boolean isEncrypt = get(Constant.ENCRYPT);
             byte[] data = info.getData();
-            String sign = info.getSign();
-//            log.debug("数据长度: " + info.getLen());
-            String targetSign = StringUtils.byte2HexString(MessageDigestUtils.sum(data, BasicMessageDigestAlgorithm.MD5));
-            if (!sign.equalsIgnoreCase(targetSign)) {
-                log.error(this.get(Constant.UID) + "| 警告！ 签名不正确: " + info.toString());
-                log.error(StringUtils.byte2HexString(info.getData()));
-                log.error("原始数据签名: " + sign);
-                log.error("计算数据签名: " + targetSign);
+            long crc = MessageDigestUtils.crc32Sum(data);
+            if (crc != info.getCrc()) {
+                System.err.printf("[%s] 警告！ 校验码错误: %s", this.get(Constant.UID), info.toString());
+                throw new DataException("校验码错误");
             }
             int compressCode = info.getCompress();
             data = CompressUtils.uncompress(data, compressCode);
@@ -135,8 +137,8 @@ public abstract class BaseSocket implements ISocket {
             }
             Message message = SerialUtils.serialObject(data, Message.class);
             if (message == null) {
-                log.error(info.getTimestamp().getTime() + " | Message is null");
-                return;
+                System.err.printf("[%d] Message is null", info.getTimestamp().getTime());
+                throw new DataException("数据为空");
             }
             if (isEncrypt) {
                 byte[] publicKey = get(Constant.PUBLIC_KEY);
@@ -157,7 +159,7 @@ public abstract class BaseSocket implements ISocket {
         } catch (InvalidKeyException e) {
             log.error("签名验证失败", e);
             close();
-        } catch (UnsupportedAlgorithmException e) {
+        } catch (UnsupportedAlgorithmException | DataException e) {
             log.error(e.getMessage(), e);
             close();
         }

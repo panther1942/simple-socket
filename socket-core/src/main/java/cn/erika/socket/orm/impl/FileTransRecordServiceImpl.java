@@ -21,18 +21,4 @@ public class FileTransRecordServiceImpl extends CommonServiceImpl<FileTransRecor
         String sql = "SELECT * FROM tb_file_trans WHERE `filepath`=?";
         return dao.selectOne(sql, filepath);
     }
-
-    @Override
-    public FileTransRecord createTransRecord(String filename, String filepath, int threads, FileInfo fileInfo, String sender, String receiver) {
-        FileTransRecord record = new FileTransRecord();
-        record.setFilename(filename);
-        record.setFilepath(filepath);
-        record.setLength(fileInfo.getLength());
-        record.setSign(fileInfo.getSign());
-        record.setAlgorithm(fileInfo.getAlgorithm());
-        record.setThreads(threads);
-        record.setSender(sender);
-        record.setReceiver(receiver);
-        return record;
-    }
 }

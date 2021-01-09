@@ -14,6 +14,7 @@ import cn.erika.utils.security.MessageDigestUtils;
 
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,11 @@ public abstract class BaseServer extends BaseHandler implements Runnable {
 
     public BaseServer() {
         // 测试数据库连接
-        JdbcUtils.getInstance();
+        try {
+            JdbcUtils.getInstance();
+        } catch (SQLException e) {
+            log.error("无法连接到数据库: " + e.getMessage());
+        }
         List<Task> taskList = beanFactory.getTasks(Constant.SERVER);
         addTasks(taskList);
     }

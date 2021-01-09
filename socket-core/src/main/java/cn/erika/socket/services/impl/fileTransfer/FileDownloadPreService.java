@@ -34,13 +34,9 @@ import java.util.UUID;
 public class FileDownloadPreService extends BaseService implements ISocketService {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
-    private IFileTransInfoService transInfoService;
-    private IFileTransRecordService transRecordService;
     private IFileTransPartRecordService transPartService;
 
     public FileDownloadPreService() throws BeanException {
-        this.transInfoService = getBean("fileTransInfoService");
-        this.transRecordService = getBean("fileTransRecordService");
         this.transPartService = getBean("fileTransPartRecordService");
     }
 
@@ -62,7 +58,12 @@ public class FileDownloadPreService extends BaseService implements ISocketServic
         // 当前目录
         String pwd = socket.get(Constant.PWD);
         // 最终文件保存路径
-        File file = new File(pwd + FileUtils.SYS_FILE_SEPARATOR + remoteFile);
+        File file = null;
+        if (remoteFile.startsWith(FileUtils.SYS_FILE_SEPARATOR)) {
+            file = new File(remoteFile);
+        } else {
+            file = new File(pwd + FileUtils.SYS_FILE_SEPARATOR + remoteFile);
+        }
         try {
             if (!file.exists()) {
                 throw new IOException("文件不存在: "+file.getAbsolutePath());

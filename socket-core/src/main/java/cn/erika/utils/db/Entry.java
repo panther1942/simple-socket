@@ -10,6 +10,7 @@ import cn.erika.utils.log.Logger;
 import cn.erika.utils.log.LoggerFactory;
 import cn.erika.utils.string.StringUtils;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -28,43 +29,46 @@ public class Entry<T> implements Serializable {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     public final List<T> select(String sql, Object... params) {
-//        log.debug(sql);
-//        log.debug(StringUtils.join(",", params).toString());
-        JdbcUtils utils = JdbcUtils.getInstance();
-        Connection conn = null;
-        PreparedStatement pStmt = null;
-        ResultSet result = null;
-        List<T> resultList = new LinkedList<>();
         try {
-            conn = utils.getConn();
-            pStmt = conn.prepareStatement(sql);
-            if (params != null) {
-                for (int i = 0; i < params.length; i++) {
-                    pStmt.setObject(i + 1, params[i]);
+            JdbcUtils utils = JdbcUtils.getInstance();
+            Connection conn = null;
+            PreparedStatement pStmt = null;
+            ResultSet result = null;
+            List<T> resultList = new LinkedList<>();
+            try {
+                conn = utils.getConn();
+                pStmt = conn.prepareStatement(sql);
+                if (params != null) {
+                    for (int i = 0; i < params.length; i++) {
+                        pStmt.setObject(i + 1, params[i]);
+                    }
                 }
-            }
-            result = pStmt.executeQuery();
-            ResultSetMetaData meta = result.getMetaData();
-            int columnCount = meta.getColumnCount();
-            String[] columnNames = new String[columnCount];
-            for (int i = 0; i < columnCount; i++) {
-                columnNames[i] = meta.getColumnName(i + 1);
-            }
-            while (result.next()) {
-                Object[] dataArray = new Object[columnCount];
+                result = pStmt.executeQuery();
+                ResultSetMetaData meta = result.getMetaData();
+                int columnCount = meta.getColumnCount();
+                String[] columnNames = new String[columnCount];
                 for (int i = 0; i < columnCount; i++) {
-                    dataArray[i] = result.getObject(i + 1);
+                    columnNames[i] = meta.getColumnName(i + 1);
                 }
-                resultList.add(convertArray2Entry(columnNames, dataArray));
+                while (result.next()) {
+                    Object[] dataArray = new Object[columnCount];
+                    for (int i = 0; i < columnCount; i++) {
+                        dataArray[i] = result.getObject(i + 1);
+                    }
+                    resultList.add(convertArray2Entry(columnNames, dataArray));
+                }
+            } catch (SQLException e) {
+                log.error("数据查询出错: " + e.getMessage(), e);
+            } catch (EntryException e) {
+                log.error(e.getMessage());
+            } finally {
+                utils.close(conn, pStmt, result);
             }
+            return resultList;
         } catch (SQLException e) {
-            log.error("数据查询出错: " + e.getMessage(), e);
-        } catch (EntryException e) {
-            log.error(e.getMessage());
-        } finally {
-            utils.close(conn, pStmt, result);
+            log.error(e.getMessage(), e);
+            return null;
         }
-        return resultList;
     }
 
     public final T selectOne(String sql, Object... params) {
@@ -105,8 +109,8 @@ public class Entry<T> implements Serializable {
     }
 
     public int insert() {
-        JdbcUtils utils = JdbcUtils.getInstance();
         try {
+            JdbcUtils utils = JdbcUtils.getInstance();
             Table table = this.getClass().getAnnotation(Table.class);
             if (StringUtils.isEmpty(table.value())) {
                 throw new EntryException("无法确定表名");
@@ -140,15 +144,15 @@ public class Entry<T> implements Serializable {
                 flushFields(select());
                 return result;
             }
-        } catch (EntryException e) {
+        } catch (EntryException | SQLException e) {
             log.error(e.getMessage(), e);
         }
         return 0;
     }
 
     public int update() {
-        JdbcUtils utils = JdbcUtils.getInstance();
         try {
+            JdbcUtils utils = JdbcUtils.getInstance();
             Table table = this.getClass().getAnnotation(Table.class);
             if (StringUtils.isEmpty(table.value())) {
                 throw new EntryException("无法确定表名");
@@ -182,15 +186,15 @@ public class Entry<T> implements Serializable {
                 flushFields(select());
                 return result;
             }
-        } catch (EntryException e) {
+        } catch (EntryException | SQLException e) {
             log.error(e.getMessage(), e);
         }
         return 0;
     }
 
     public int delete() {
-        JdbcUtils utils = JdbcUtils.getInstance();
         try {
+            JdbcUtils utils = JdbcUtils.getInstance();
             Table table = this.getClass().getAnnotation(Table.class);
             if (StringUtils.isEmpty(table.value())) {
                 throw new EntryException("无法确定表名");
@@ -204,7 +208,7 @@ public class Entry<T> implements Serializable {
             if (result > 0) {
                 return result;
             }
-        } catch (EntryException e) {
+        } catch (EntryException | SQLException e) {
             log.error(e.getMessage(), e);
         }
         return 0;

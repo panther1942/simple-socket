@@ -10,20 +10,29 @@ import java.util.Date;
 public class DataInfo implements Serializable {
     private static final long serialVersionUID = 1L;
     // 数据头部长度
-    public static final int LEN = 13 + 2 + 10 + 10 + 32;
-
-    // 时间戳13字节
+    public static final int LEN = 36 + 13 + 2 + 19 + 10 + 19;
+    // UUID 36字节
+    private String uuid;
+    // 时间戳 13字节
     private Date timestamp;
-    // 是否压缩2字节 16进制
+    // 是否压缩 2字节 16进制
     private int compress = 0x00;
-    // 偏移量10字节
+    // 偏移量 19字节
     private long pos;
-    // 长度10字节
+    // 长度 10字节
     private int len;
-    // 签名 MD5 16
-    private String sign;
+    // crc校验码 19字节
+    private long crc;
     // 数据和数据头分两次发送 因为数据体长度不固定
     private byte[] data;
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
     public Date getTimestamp() {
         return timestamp;
@@ -57,12 +66,12 @@ public class DataInfo implements Serializable {
         this.len = len;
     }
 
-    public String getSign() {
-        return sign;
+    public long getCrc() {
+        return crc;
     }
 
-    public void setSign(String sign) {
-        this.sign = sign;
+    public void setCrc(long crc) {
+        this.crc = crc;
     }
 
     public byte[] getData() {
@@ -76,11 +85,12 @@ public class DataInfo implements Serializable {
     // 避免平台差异导致解析出错 故在此直接定死数据头格式 保证一致性
     @Override
     public String toString() {
+        String uuid = String.format("%36s", this.uuid).replaceAll("\\s", "0");
         String timestamp = String.format("%13s", this.timestamp.getTime()).replaceAll("\\s", "0");
         String compress = String.format("%2x", this.compress).replaceAll("\\s", "0");
-        String pos = String.format("%10s", this.pos).replaceAll("\\s", "0");
+        String pos = String.format("%19s", this.pos).replaceAll("\\s", "0");
         String len = String.format("%10s", this.len).replaceAll("\\s", "0");
-        String sign = String.format("%32s", this.sign);
-        return timestamp + compress + pos + len + sign;
+        String crc = String.format("%19s", this.crc).replaceAll("\\s", "0");
+        return new StringBuffer(uuid).append(timestamp).append(compress).append(pos).append(len).append(crc).toString();
     }
 }

@@ -10,5 +10,5 @@ public interface IFileTransInfoService {
 
     public FileTransInfo getTransInfoByFilepath(String filepath);
 
-    void mergeFile(String taskId) throws IOException, UnsupportedAlgorithmException;
+    public void mergeFile(String taskId) throws IOException, UnsupportedAlgorithmException;
 }

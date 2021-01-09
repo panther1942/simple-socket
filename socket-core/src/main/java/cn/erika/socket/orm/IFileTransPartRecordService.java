@@ -12,11 +12,11 @@ import java.util.List;
 public interface IFileTransPartRecordService extends ICommonService<FileTransPartRecord> {
     public List<FileTransPartRecord> getPartsByTaskId(String taskId);
 
-    List<FileInfo> getFileInfoList(List<FileTransPartRecord> partList);
+    public List<FileInfo> getFileInfoList(List<FileTransPartRecord> partList);
 
-    List<FileInfo> getFileInfoList(File file, String filename, int threads) throws IOException;
+    public List<FileInfo> getFileInfoList(File file, String filename, int threads) throws IOException;
 
-    List<FileTransPartRecord> createPartInfo(List<FileInfo> fileInfoList, FileTransRecord record) throws IOException;
+    public List<FileTransPartRecord> createPartInfo(List<FileInfo> fileInfoList, FileTransRecord record) throws IOException;
 
-    boolean checkPartInfo(List<FileInfo> src, List<FileInfo> dest);
+    public boolean checkPartInfo(List<FileInfo> src, List<FileInfo> dest);
 }
