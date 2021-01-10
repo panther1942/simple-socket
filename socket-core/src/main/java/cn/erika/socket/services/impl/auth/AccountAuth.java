@@ -5,7 +5,6 @@ import cn.erika.config.GlobalSettings;
 import cn.erika.context.BaseService;
 import cn.erika.context.annotation.Component;
 import cn.erika.context.annotation.Inject;
-import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.model.pto.Message;
 import cn.erika.socket.orm.IAccountService;

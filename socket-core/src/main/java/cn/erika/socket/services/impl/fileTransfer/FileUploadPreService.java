@@ -7,7 +7,6 @@ import cn.erika.context.BaseService;
 import cn.erika.context.annotation.Component;
 import cn.erika.context.annotation.Enhance;
 import cn.erika.context.annotation.Inject;
-import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.exception.LimitThreadException;
 import cn.erika.socket.handler.IServer;
