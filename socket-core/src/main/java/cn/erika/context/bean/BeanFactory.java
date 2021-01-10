@@ -72,14 +72,26 @@ public class BeanFactory {
     }
 
     public void addBean(Class<?> clazz, Object object) {
+        Object bean = beanList.get(clazz);
+        if (bean != null) {
+            log.warn("警告: 覆盖Bean[" + object.getClass().getName() + ":" + object.toString() + "]");
+        }
         beanList.put(clazz, object);
     }
 
     public void addBean(String name, Class<?> clazz) {
+        Class beanClass = aliasList.get(name);
+        if (beanClass != null) {
+            log.warn("警告: 覆盖Bean[" + beanClass.getName() + "]");
+        }
         aliasList.put(name, clazz);
     }
 
     public void addBean(String name, Method method) {
+        Method beanMethod = serviceList.get(name);
+        if (beanMethod != null) {
+            log.warn("警告: 覆盖Bean[" + beanMethod.getName() + "]");
+        }
         serviceList.put(name, method);
     }
 

@@ -37,29 +37,12 @@ public class CliApplication extends SocketApplication implements Runnable {
     static {
         LoggerFactory.register(new ConsoleLogger());
         LoggerFactory.register(new FileLogger(GlobalSettings.logDir, GlobalSettings.logName, GlobalSettings.charset));
-//        LoggerFactory.ignore(FileUploadService.cla ss);
+//        LoggerFactory.ignore(FileUploadService.class);
     }
 
     @Override
     protected void beforeStartup() {
         super.beforeStartup();
-        PackageScanner scanner = PackageScanner.getInstance();
-        scanner.addHandler(new PackageScannerHandler() {
-            @Override
-            public boolean filter(Class<?> clazz) {
-                return clazz.getAnnotation(Component.class) != null;
-            }
-
-            @Override
-            public void deal(Class<?> clazz) {
-                if (ICliService.class.isAssignableFrom(clazz)) {
-                    Component component = clazz.getAnnotation(Component.class);
-                    if (!StringUtils.isEmpty(component.value())) {
-                        beanFactory.addBean(component.value(), clazz);
-                    }
-                }
-            }
-        });
     }
 
     @Override
