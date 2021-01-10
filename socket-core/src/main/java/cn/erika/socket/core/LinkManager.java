@@ -14,12 +14,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class LinkManager {
     private Logger log = LoggerFactory.getLogger(this.getClass());
     private Map<String, ISocket> linkList = new ConcurrentHashMap<>();
+    private Timer timer = new Timer();
     private long cleanInterval = GlobalSettings.cleanInterval;
     private long invalidInterval = GlobalSettings.invalidInterval;
 
     public LinkManager() {
         log.info("启动定时清理器 清理间隔: " + cleanInterval / 1000 + "/" + invalidInterval / 1000);
-        Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -84,5 +84,9 @@ public class LinkManager {
             return true;
         }
         return false;
+    }
+
+    public void stop(){
+        timer.cancel();
     }
 }

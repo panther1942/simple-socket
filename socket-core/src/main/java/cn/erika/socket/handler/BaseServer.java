@@ -26,7 +26,6 @@ public abstract class BaseServer extends BaseHandler implements Runnable {
     // 运行时数据存放区 可以用redis代替
     private Map<String, Object> storage = new ConcurrentHashMap<>();
 
-
     public BaseServer() {
         // 测试数据库连接
         try {
@@ -113,6 +112,11 @@ public abstract class BaseServer extends BaseHandler implements Runnable {
         t.start();
     }
 
+    @Override
+    public void close() {
+        super.close();
+        linkManager.stop();
+    }
 
     public void add(String key, Object value) {
         storage.put(key, value);
