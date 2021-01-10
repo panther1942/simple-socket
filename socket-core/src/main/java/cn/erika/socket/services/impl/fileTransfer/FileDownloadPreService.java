@@ -6,6 +6,7 @@ import cn.erika.config.GlobalSettings;
 import cn.erika.context.BaseService;
 import cn.erika.context.annotation.Component;
 import cn.erika.context.annotation.Enhance;
+import cn.erika.context.annotation.Inject;
 import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.handler.IServer;
@@ -34,11 +35,9 @@ import java.util.UUID;
 public class FileDownloadPreService extends BaseService implements ISocketService {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
-    private IFileTransPartRecordService transPartService;
 
-    public FileDownloadPreService() throws BeanException {
-        this.transPartService = getBean("fileTransPartRecordService");
-    }
+    @Inject(name = "fileTransPartRecordService")
+    private IFileTransPartRecordService transPartService;
 
     @Override
     public void client(ISocket socket, Message message) {
@@ -66,7 +65,7 @@ public class FileDownloadPreService extends BaseService implements ISocketServic
         }
         try {
             if (!file.exists()) {
-                throw new IOException("文件不存在: "+file.getAbsolutePath());
+                throw new IOException("文件不存在: " + file.getAbsolutePath());
             }
             FileInfo localFileInfo = FileUtils.getFileInfo(file);
             if (localFileInfo.equals(remoteFileInfo)) {

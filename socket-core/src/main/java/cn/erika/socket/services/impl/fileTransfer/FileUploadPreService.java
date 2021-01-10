@@ -6,6 +6,7 @@ import cn.erika.config.GlobalSettings;
 import cn.erika.context.BaseService;
 import cn.erika.context.annotation.Component;
 import cn.erika.context.annotation.Enhance;
+import cn.erika.context.annotation.Inject;
 import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.exception.LimitThreadException;
@@ -31,13 +32,10 @@ import java.util.UUID;
 @Component(Constant.SRV_PRE_UPLOAD)
 public class FileUploadPreService extends BaseService implements ISocketService {
 
+    @Inject(name = "fileTransInfoService")
     private IFileTransInfoService transInfoService;
+    @Inject(name = "fileTransPartRecordService")
     private IFileTransPartRecordService transPartService;
-
-    public FileUploadPreService() throws BeanException {
-        this.transInfoService = getBean("fileTransInfoService");
-        this.transPartService = getBean("fileTransPartRecordService");
-    }
 
     @Enhance(AuthenticatedCheck.class)
     @Override

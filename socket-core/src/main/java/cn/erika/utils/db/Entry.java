@@ -271,7 +271,7 @@ public class Entry<T> implements Serializable {
     }
 
     @SuppressWarnings("unchecked")
-    private T convertArray2Entry(String[] fieldList, Object[] dataList) throws EntryException {
+    private T convertArray2Entry(String[] fieldList, Object[] dataArray) throws EntryException {
         try {
             T t = (T) this.getClass().newInstance();
             Field[] fields = this.getClass().getDeclaredFields();
@@ -290,13 +290,13 @@ public class Entry<T> implements Serializable {
                 if (column != null && !Void.class.equals(column.format())) {
                     Class<?> formatClass = column.format();
                     Format format = beanFactory.getBean(formatClass);
-                    field.set(t, format.format(dataList[index]));
+                    field.set(t, format.format(dataArray[index]));
                 } else {
                     if (field.getType().equals(String.class)) {
-                        field.set(t, String.valueOf(dataList[index]));
+                        field.set(t, String.valueOf(dataArray[index]));
                     } else {
                         Class<?> type = field.getType();
-                        String strObject = String.valueOf(dataList[index]);
+                        String strObject = String.valueOf(dataArray[index]);
                         switch (type.getSimpleName()) {
                             case "Byte":
                                 field.set(t, Byte.parseByte(strObject));
@@ -311,7 +311,7 @@ public class Entry<T> implements Serializable {
                                 field.set(t, Long.parseLong(strObject));
                                 break;
                             default:
-                                field.set(t, dataList[index]);
+                                field.set(t, dataArray[index]);
                         }
                     }
                 }

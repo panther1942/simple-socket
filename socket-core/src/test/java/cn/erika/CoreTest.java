@@ -9,25 +9,21 @@ import cn.erika.service.DemoServiceImpl;
 import cn.erika.service.IDemoService;
 import cn.erika.socket.model.po.FileTransPartRecord;
 import cn.erika.socket.model.po.FileTransRecord;
-import cn.erika.socket.model.pto.DataInfo;
 import cn.erika.socket.model.pto.Message;
 import cn.erika.socket.model.vo.FileTransInfo;
 import cn.erika.socket.orm.IAccountService;
 import cn.erika.socket.orm.impl.AccountServiceImpl;
-import cn.erika.utils.exception.NoSuchCompressAlgorithm;
+import cn.erika.utils.BinaryNode;
 import cn.erika.utils.exception.UnsupportedAlgorithmException;
-import cn.erika.utils.io.compress.CompressUtils;
 import cn.erika.utils.io.compress.file.ZIP;
 import cn.erika.utils.exception.CompressException;
 import cn.erika.utils.io.FileUtils;
-import cn.erika.utils.io.compress.stream.GZIP;
 import cn.erika.utils.log.ConsoleLogger;
 import cn.erika.utils.log.Logger;
 import cn.erika.utils.log.LoggerFactory;
 import cn.erika.utils.security.MessageDigestUtils;
 import cn.erika.utils.security.SecurityUtils;
 import cn.erika.utils.security.algorithm.BasicAsymmetricAlgorithm;
-import cn.erika.utils.security.algorithm.BasicMessageDigestAlgorithm;
 import cn.erika.utils.string.Base64Utils;
 import cn.erika.utils.io.SerialUtils;
 import cn.erika.utils.string.StringUtils;
@@ -420,5 +416,89 @@ public class CoreTest {
         System.out.println(String.valueOf(Long.MAX_VALUE).length());
         long crc = MessageDigestUtils.crc32Sum(uuid.getBytes());
         System.out.println(crc + " " + String.valueOf(crc).length());
+    }
+
+    @Test
+    public void testTree(){
+        BinaryNode<Integer> tree = new BinaryNode<>();
+        tree.addNode(13);
+        tree.addNode(25);
+        tree.addNode(6);
+        tree.addNode(44);
+        tree.addNode(30);
+        tree.addNode(27);
+        tree.balance();
+        tree = tree.getRoot();
+
+        System.out.println(tree.getDepth());
+
+        for (Integer num : tree.firstOrder()) {
+            System.out.print(num+" ");
+        }
+        System.out.println();
+        for (Integer num : tree.middleOrder()) {
+            System.out.print(num+" ");
+        }
+        System.out.println();
+        for (Integer num : tree.lastOrder()) {
+            System.out.print(num+" ");
+        }
+        System.out.println();
+    }
+
+    @Test
+    public void testTreeObject() {
+        BinaryNode<Person> tree = new BinaryNode<>();
+        tree.addNode(new Person("张三", 13));
+        tree.addNode(new Person("李四", 25));
+        tree.addNode(new Person("王五", 6));
+        tree.addNode(new Person("赵六", 44));
+        tree.addNode(new Person("孙七", 30));
+        tree.addNode(new Person("周八", 27));
+
+        tree.balance();
+        tree = tree.getRoot();
+
+        System.out.println(tree.getDepth());
+
+        for (Person person : tree.firstOrder()) {
+            System.out.println(person);
+        }
+        System.out.println();
+        for (Person person : tree.middleOrder()) {
+            System.out.println(person);
+        }
+        System.out.println();
+        for (Person person : tree.lastOrder()) {
+            System.out.println(person);
+        }
+        System.out.println();
+    }
+
+    private class Person implements Comparable<Person> {
+        private String name;
+        private int scope;
+
+        public Person(String name, int scope) {
+            this.name = name;
+            this.scope = scope;
+        }
+
+        @Override
+        public int compareTo(Person person) {
+            if (person == null) {
+                return 1;
+            } else {
+                return Integer.compare(this.scope, person.scope);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "Person{" +
+                    "name='" + name + '\'' +
+                    ", scope=" + scope +
+                    '}';
+        }
     }
 }

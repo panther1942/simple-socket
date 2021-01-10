@@ -29,8 +29,8 @@ CREATE TABLE IF NOT EXISTS tb_file_trans (
   `sender`      VARCHAR(255)             NOT NULL,
   `receiver`    VARCHAR(255)             NOT NULL,
   `status`      INTEGER                  NOT NULL  DEFAULT '0',
-  `create_time` LONG                     NOT NULL,
-  `update_time` LONG                     NOT NULL
+  `create_time` DATETIME                 NOT NULL,
+  `update_time` DATETIME                 NOT NULL
 );
 
 DROP TABLE IF EXISTS tb_file_trans_part;
@@ -42,6 +42,6 @@ CREATE TABLE IF NOT EXISTS tb_file_trans_part (
   `pos`         LONG                     NOT NULL  DEFAULT '0',
   `crc`         LONG                     NOT NULL  DEFAULT '0',
   `status`      INTEGER                  NOT NULL  DEFAULT '0',
-  `create_time` LONG                     NOT NULL,
-  `update_time` LONG                     NOT NULL
+  `create_time` DATETIME                 NOT NULL,
+  `update_time` DATETIME                 NOT NULL
 );

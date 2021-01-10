@@ -3,6 +3,7 @@ package cn.erika.context.bean;
 import cn.erika.config.Constant;
 import cn.erika.context.annotation.Component;
 import cn.erika.context.annotation.Enhance;
+import cn.erika.context.annotation.Inject;
 import cn.erika.context.exception.BeanException;
 import cn.erika.context.exception.NoSuchBeanException;
 import cn.erika.context.exception.UndeclaredBeanException;
@@ -10,6 +11,7 @@ import cn.erika.context.exception.UndeclaredMethodException;
 import cn.erika.socket.core.Task;
 import cn.erika.utils.log.Logger;
 import cn.erika.utils.log.LoggerFactory;
+import cn.erika.utils.string.StringUtils;
 
 import java.lang.reflect.*;
 import java.util.HashMap;
@@ -159,6 +161,22 @@ public class BeanFactory {
                 }
             } else {
                 obj = clazz.newInstance();
+            }
+            for (Field field : clazz.getDeclaredFields()) {
+                Inject inject = field.getAnnotation(Inject.class);
+                if (inject == null) {
+                    continue;
+                }
+                Object fieldBean = null;
+                if (inject.clazz() != Void.class) {
+                    fieldBean = getBean(inject.clazz());
+                } else if (!StringUtils.isEmpty(inject.name())) {
+                    fieldBean = getBean(inject.name());
+                }
+                if (fieldBean != null) {
+                    field.setAccessible(true);
+                    field.set(obj, fieldBean);
+                }
             }
             return getProxy(obj);
         } catch (NoSuchMethodException | InstantiationException e) {
@@ -330,6 +348,8 @@ public class BeanFactory {
                         targetMethod.add(method);
                         flag = false;
                     }
+                } else if (argTypes == null && types.length == 0) {
+                    return method;
                 } else if (argTypes == null) {
                     // 如果传入的参数个数为0 就是没有传入参数
                     // 那么匹配所有同名方法

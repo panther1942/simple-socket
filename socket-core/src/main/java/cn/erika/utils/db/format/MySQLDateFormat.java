@@ -15,7 +15,7 @@ public class MySQLDateFormat implements Format {
             if (obj instanceof java.sql.Timestamp || obj instanceof java.sql.Date) {
                 return (T) obj;
             } else {
-                throw new EntryException("无法转换的数据类型: " + obj.getClass().getName() + ":" + String.valueOf(obj));
+                throw new EntryException("无法转换的数据类型: " + obj.getClass().getName() + " : " + String.valueOf(obj));
             }
         }
         return null;
