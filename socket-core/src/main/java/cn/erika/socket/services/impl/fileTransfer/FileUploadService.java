@@ -62,7 +62,7 @@ public class FileUploadService extends BaseService implements ISocketService {
         long partLen = fileInfo.getLength();
         long filePos = message.get(Constant.FILE_POS);
         int len = message.get(Constant.LEN);
-        byte[] data = StringUtils.hexString2Byte(message.get(Constant.BIN));
+        byte[] data = message.get(Constant.BIN);
 
         try {
             FileUtils.receiveFile(socket, filename, partLen, filePos, len, data);

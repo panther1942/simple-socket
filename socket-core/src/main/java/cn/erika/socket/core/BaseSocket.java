@@ -88,7 +88,6 @@ public abstract class BaseSocket implements ISocket {
             info.setPos(0);
             info.setLen(data.length);
             info.setData(data);
-            info.setCrc(MessageDigestUtils.crc32Sum(data));
             send(info);
         } catch (CompressException | NoSuchCompressAlgorithm e) {
             log.error("压缩时出现错误: " + e.getMessage(), e);
@@ -122,11 +121,6 @@ public abstract class BaseSocket implements ISocket {
         try {
             boolean isEncrypt = get(Constant.ENCRYPT);
             byte[] data = info.getData();
-            long crc = MessageDigestUtils.crc32Sum(data);
-            if (crc != info.getCrc()) {
-                System.err.printf("[%s] 警告！ 校验码错误: %s", this.get(Constant.UID), info.toString());
-                throw new DataException("校验码错误");
-            }
             int compressCode = info.getCompress();
             data = CompressUtils.uncompress(data, compressCode);
             if (isEncrypt) {

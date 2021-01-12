@@ -10,7 +10,7 @@ import java.util.Date;
 public class DataInfo implements Serializable {
     private static final long serialVersionUID = 1L;
     // 数据头部长度
-    public static final int LEN = 36 + 13 + 2 + 19 + 10 + 19;
+    public static final int LEN = 36 + 13 + 2 + 19 + 10;
     // UUID 36字节
     private String uuid;
     // 时间戳 13字节
@@ -21,8 +21,6 @@ public class DataInfo implements Serializable {
     private long pos;
     // 长度 10字节
     private int len;
-    // crc校验码 19字节
-    private long crc;
     // 数据和数据头分两次发送 因为数据体长度不固定
     private byte[] data;
 
@@ -66,14 +64,6 @@ public class DataInfo implements Serializable {
         this.len = len;
     }
 
-    public long getCrc() {
-        return crc;
-    }
-
-    public void setCrc(long crc) {
-        this.crc = crc;
-    }
-
     public byte[] getData() {
         return data;
     }
@@ -90,7 +80,6 @@ public class DataInfo implements Serializable {
         String compress = String.format("%2x", this.compress).replaceAll("\\s", "0");
         String pos = String.format("%19s", this.pos).replaceAll("\\s", "0");
         String len = String.format("%10s", this.len).replaceAll("\\s", "0");
-        String crc = String.format("%19s", this.crc).replaceAll("\\s", "0");
-        return new StringBuffer(uuid).append(timestamp).append(compress).append(pos).append(len).append(crc).toString();
+        return new StringBuffer(uuid).append(timestamp).append(compress).append(pos).append(len).toString();
     }
 }

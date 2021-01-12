@@ -137,7 +137,7 @@ public class FileUtils {
                 Message msg = new Message(serviceName);
                 // 为了避免序列化和反序列化出现错误 数据使用BASE64编码
                 msg.add(Constant.FILE_POS, pos);
-                msg.add(Constant.BIN, StringUtils.byte2HexString(Base64Utils.encode(tmp)));
+                msg.add(Constant.BIN, tmp);
                 msg.add(Constant.LEN, tmp.length);
                 pos += len;
                 log.info("进度: " + df.format(pos / (double) partLength));
@@ -154,7 +154,7 @@ public class FileUtils {
         try (RandomAccessFile out = new RandomAccessFile(file, "rwd")) {
             log.info("当前进度: " + df.format((pos + len) / (double) partLen) + ": " + file.getName());
             out.seek(pos);
-            out.write(Base64Utils.decode(data), 0, len);
+            out.write(data, 0, len);
         } catch (IOException e) {
             Message error = new Message(Constant.SRV_TEXT);
             error.add(Constant.TEXT, e.getMessage());

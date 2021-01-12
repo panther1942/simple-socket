@@ -86,8 +86,6 @@ class TcpReader {
             info.setPos(Long.parseLong(strHead.substring(51, 61)));
             // 长度 19字节
             info.setLen(Integer.parseInt(strHead.substring(61, 80)));
-            // 签名 19
-            info.setCrc(Long.parseLong(strHead.substring(80, 99)));
             byte[] tmp = new byte[len - DataInfo.LEN];
             System.arraycopy(data, DataInfo.LEN, tmp, 0, len - DataInfo.LEN);
             return tmp;

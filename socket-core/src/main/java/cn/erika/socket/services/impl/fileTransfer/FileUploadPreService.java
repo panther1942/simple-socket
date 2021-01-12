@@ -8,6 +8,7 @@ import cn.erika.context.annotation.Component;
 import cn.erika.context.annotation.Enhance;
 import cn.erika.context.annotation.Inject;
 import cn.erika.socket.core.ISocket;
+import cn.erika.socket.exception.AuthenticateException;
 import cn.erika.socket.exception.LimitThreadException;
 import cn.erika.socket.handler.IServer;
 import cn.erika.socket.handler.bio.FileSender;
@@ -38,7 +39,7 @@ public class FileUploadPreService extends BaseService implements ISocketService 
 
     @Enhance(AuthenticatedCheck.class)
     @Override
-    public void client(ISocket socket, Message message) {
+    public void client(ISocket socket, Message message) throws AuthenticateException {
         if (message.get(Constant.SERVICE_NAME) == null) {
             preUpload(socket, message, GlobalSettings.threads);
         } else {
@@ -110,10 +111,18 @@ public class FileUploadPreService extends BaseService implements ISocketService 
                     record.setThreads(threads);
                     record.setSign(sign);
                     record.setAlgorithm(algorithm);
-                    if (record.update() > 0) {
+                    if (record.insert() > 0 || record.getUuid() != null) {
                         // 更新文件片段记录 同时给infoList添加uuid
                         transInfo.setParts(transPartService.createPartInfo(infoList, record));
                     } else {
+                        throw new IOException("更新文件记录失败");
+                    }
+                } else {
+                    FileTransRecord record = transInfo.getRecord();
+                    record.setThreads(threads);
+                    record.setSign(sign);
+                    record.setAlgorithm(algorithm);
+                    if (record.update() < 1) {
                         throw new IOException("更新文件记录失败");
                     }
                 }
@@ -136,7 +145,7 @@ public class FileUploadPreService extends BaseService implements ISocketService 
                 record.setSender(socket.get(Constant.USERNAME));
                 record.setReceiver("SERVER");
                 // 插入数据 如果大于0说明插入成功
-                if (record.insert() > 0) {
+                if (record.insert() > 0 || record.getUuid() != null) {
                     transInfo.setRecord(record);
                     // 更新文件片段记录 同时给infoList添加uuid
                     transInfo.setParts(transPartService.createPartInfo(infoList, record));
@@ -208,6 +217,7 @@ public class FileUploadPreService extends BaseService implements ISocketService 
                 throw new IOException("文件不可读");
             }
             // 获取文件的文件名（不带路径），文件长度，文件签名和算法
+            log.info("计算文件信息: " + localFile);
             FileInfo info = FileUtils.getFileInfo(file);
             Message request = new Message(Constant.SRV_PRE_UPLOAD);
             // 这里的文件名是最终保存的文件名
@@ -229,13 +239,17 @@ public class FileUploadPreService extends BaseService implements ISocketService 
         }
     }
 
-    private void upload(ISocket socket, Message message) {
+    private void upload(ISocket socket, Message message) throws AuthenticateException {
         Boolean status = message.get(Constant.RECEIVE_STATUS);
+        String fileToken = message.get(Constant.TOKEN);
+        if (fileToken == null) {
+            throw new AuthenticateException("缺少文件令牌信息");
+        }
+        String localFile = socket.get(fileToken);
         try {
             if (status != null && status) {
                 List<FileInfo> infoList = message.get(Constant.FILE_PART_INFO);
-                String fileToken = message.get(Constant.TOKEN);
-                String localFile = socket.get(fileToken);
+
                 boolean flag = false;
                 for (FileInfo info : infoList) {
                     if (info.getStatus() == 0) {
@@ -251,9 +265,9 @@ public class FileUploadPreService extends BaseService implements ISocketService 
                 Integer threads = message.get(Constant.THREADS);
                 if (threads != null) {
                     log.warn("使用服务器建议的线程数重试");
+                    message.add(Constant.LOCAL_FILE, localFile);
                     preUpload(socket, message, threads);
                 } else {
-                    String fileToken = message.get(Constant.TOKEN);
                     socket.remove(fileToken);
                     log.error(msg);
                 }
