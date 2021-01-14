@@ -57,9 +57,6 @@ public class FileDownloadPreService extends BaseService implements ISocketServic
             file = new File(pwd + FileUtils.SYS_FILE_SEPARATOR + remoteFile);
         }
         try {
-            if (!file.exists()) {
-                throw new IOException("文件不存在: " + file.getAbsolutePath());
-            }
             FileInfo localFileInfo = FileUtils.getFileInfo(file);
             if (localFileInfo.equals(remoteFileInfo)) {
                 throw new IOException("文件完整");

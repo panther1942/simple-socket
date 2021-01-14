@@ -10,35 +10,13 @@ import java.util.Date;
 public class DataInfo implements Serializable {
     private static final long serialVersionUID = 1L;
     // 数据头部长度
-    public static final int LEN = 36 + 13 + 2 + 19 + 10;
-    // UUID 36字节
-    private String uuid;
-    // 时间戳 13字节
-    private Date timestamp;
+    public static final int LEN = 2 + 10;
     // 是否压缩 2字节 16进制
     private int compress = 0x00;
-    // 偏移量 19字节
-    private long pos;
     // 长度 10字节
     private int len;
     // 数据和数据头分两次发送 因为数据体长度不固定
     private byte[] data;
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
-    public Date getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
-    }
 
     public int getCompress() {
         return compress;
@@ -46,14 +24,6 @@ public class DataInfo implements Serializable {
 
     public void setCompress(int compress) {
         this.compress = compress;
-    }
-
-    public long getPos() {
-        return pos;
-    }
-
-    public void setPos(long pos) {
-        this.pos = pos;
     }
 
     public int getLen() {
@@ -75,11 +45,8 @@ public class DataInfo implements Serializable {
     // 避免平台差异导致解析出错 故在此直接定死数据头格式 保证一致性
     @Override
     public String toString() {
-        String uuid = String.format("%36s", this.uuid).replaceAll("\\s", "0");
-        String timestamp = String.format("%13s", this.timestamp.getTime()).replaceAll("\\s", "0");
         String compress = String.format("%2x", this.compress).replaceAll("\\s", "0");
-        String pos = String.format("%19s", this.pos).replaceAll("\\s", "0");
         String len = String.format("%10s", this.len).replaceAll("\\s", "0");
-        return new StringBuffer(uuid).append(timestamp).append(compress).append(pos).append(len).toString();
+        return new StringBuffer(compress).append(len).toString();
     }
 }

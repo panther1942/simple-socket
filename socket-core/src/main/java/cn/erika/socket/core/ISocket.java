@@ -6,7 +6,7 @@ import cn.erika.socket.model.pto.Message;
 import java.net.SocketAddress;
 
 public interface ISocket {
-    void send(Message message);
+    boolean send(Message message);
 
     void receive(DataInfo info);
 

@@ -213,9 +213,6 @@ public class FileUploadPreService extends BaseService implements ISocketService 
         String remoteFile = message.get(Constant.REMOTE_FILE);
         File file = new File(localFile);
         try {
-            if (!file.canRead()) {
-                throw new IOException("文件不可读");
-            }
             // 获取文件的文件名（不带路径），文件长度，文件签名和算法
             log.info("计算文件信息: " + localFile);
             FileInfo info = FileUtils.getFileInfo(file);

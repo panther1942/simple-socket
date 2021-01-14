@@ -49,10 +49,9 @@ public abstract class BaseSocket implements ISocket {
      * @param message 需要发送的消息需要包裹在Message对象中以识别服务名称
      */
     @Override
-    public synchronized void send(Message message) {
+    public synchronized boolean send(Message message) {
         // 先刷新连接最后通信时间
-        Date now = new Date();
-        set(Constant.LAST_TIME, now);
+        set(Constant.LAST_TIME, new Date());
         try {
             boolean isEncrypt = get(Constant.ENCRYPT);
             // 因为可能复用Message 所以需要先去除上次的签名信息
@@ -79,16 +78,14 @@ public abstract class BaseSocket implements ISocket {
             }
             // 创建数据包
             DataInfo info = new DataInfo();
-            info.setTimestamp(now);
             if (GlobalSettings.enableCompress) {
                 int compressCode = GlobalSettings.compressCode;
                 info.setCompress(compressCode);
                 data = CompressUtils.compress(data, compressCode);
             }
-            info.setPos(0);
             info.setLen(data.length);
             info.setData(data);
-            send(info);
+            return send(info);
         } catch (CompressException | NoSuchCompressAlgorithm e) {
             log.error("压缩时出现错误: " + e.getMessage(), e);
             close();
@@ -102,6 +99,7 @@ public abstract class BaseSocket implements ISocket {
             log.error(e.getMessage(), e);
             close();
         }
+        return false;
     }
 
 
@@ -131,7 +129,7 @@ public abstract class BaseSocket implements ISocket {
             }
             Message message = SerialUtils.serialObject(data, Message.class);
             if (message == null) {
-                System.err.printf("[%d] Message is null", info.getTimestamp().getTime());
+                System.err.printf("Message is null");
                 throw new DataException("数据为空");
             }
             if (isEncrypt) {
@@ -164,16 +162,17 @@ public abstract class BaseSocket implements ISocket {
      *
      * @param info 要发送的数据包 要经过send(Message)包装
      */
-    private synchronized void send(DataInfo info) {
+    private synchronized boolean send(DataInfo info) {
         try {
             send(info.toString().getBytes(charset));
             send(info.getData());
+            return true;
         } catch (SocketException e) {
             log.warn("连接断开");
-            close();
         } catch (IOException e) {
             handler.onError(this, e);
         }
+        return false;
     }
 
     /**

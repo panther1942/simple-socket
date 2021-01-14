@@ -141,7 +141,9 @@ public class FileUtils {
                 msg.add(Constant.LEN, tmp.length);
                 pos += len;
                 log.info("进度: " + df.format(pos / (double) partLength));
-                socket.send(msg);
+                if (!socket.send(msg)) {
+                    throw new IOException("输出流中断");
+                }
                 if (pos >= partLength) {
                     break;
                 }

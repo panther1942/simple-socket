@@ -5,6 +5,7 @@ import cn.erika.config.GlobalSettings;
 import cn.erika.socket.core.BaseSocket;
 import cn.erika.socket.core.Handler;
 import cn.erika.socket.core.ISocket;
+import cn.erika.socket.core.Reader;
 import cn.erika.socket.exception.DataFormatException;
 
 import java.io.IOException;
@@ -17,10 +18,12 @@ import java.util.Date;
 
 public class TcpSocket extends BaseSocket implements Runnable {
     private Socket socket;
-    private TcpReader reader;
+    private Reader reader;
 
     private InputStream in;
     private OutputStream out;
+
+    private static int count = 0;
 
     public TcpSocket(Socket socket, Handler handler) throws IOException {
         set(Constant.TYPE, Constant.SERVER);
@@ -60,10 +63,11 @@ public class TcpSocket extends BaseSocket implements Runnable {
         set(Constant.LINK_TIME, new Date());
         this.socket.setTcpNoDelay(true);
         this.charset = GlobalSettings.charset;
-        this.reader = new TcpReader(charset);
+        this.reader = new TcpReader();
         this.in = socket.getInputStream();
         this.out = socket.getOutputStream();
-        Thread thread = new Thread(this, this.getClass().getSimpleName());
+        Thread thread = new Thread(this, this.getClass().getSimpleName()
+                + String.format("-%5s", count++).replaceAll("\\s","0"));
         thread.setDaemon(true);
         thread.start();
         handler.init(this);
@@ -88,7 +92,7 @@ public class TcpSocket extends BaseSocket implements Runnable {
     }
 
     @Override
-    public synchronized void send(byte[] data) throws IOException {
+    public void send(byte[] data) throws IOException {
         int pos = 0;
         int len = data.length;
         // 这里用pos标记发送数据的长度 每次发送缓冲区大小个字节 直到pos等于数据长度len

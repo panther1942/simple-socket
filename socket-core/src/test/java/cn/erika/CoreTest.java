@@ -81,11 +81,20 @@ public class CoreTest {
         System.out.println(Character.toChars(Base64Utils.base64Map[('A' & 0x00000011) + 1]));*/
 
 //        String src = "Hello World";
-        String src = "你好 世界";
-        byte[] encrypt = Base64Utils.encode(src.getBytes());
-        System.out.println(new String(encrypt));
-        byte[] decrypt = Base64Utils.decode(encrypt);
-        System.out.println(new String(decrypt));
+        Date start = new Date();
+        for (int i = 0; i < 100000; i++) {
+            String src = StringUtils.randomString(1024);
+//            byte[] encrypt = Base64Utils.encode(src.getBytes());
+            byte[] encrypt = Base64.getEncoder().encode(src.getBytes());
+//            System.out.println(new String(encrypt));
+//            byte[] decrypt = Base64Utils.decode(encrypt);
+            byte[] decrypt = Base64.getDecoder().decode(encrypt);
+//            System.out.println(new String(decrypt));
+        }
+        Date end = new Date();
+        System.out.println(end.getTime() - start.getTime());
+        // 9993ms cn.erika.utils.string.Base64Utils
+        // 4253ms java.util.Base64
     }
 
     @Test

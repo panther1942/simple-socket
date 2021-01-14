@@ -1,7 +1,8 @@
 package cn.erika.utils.string;
 
 /**
- * base64算法
+ * base64算法 只是个玩具 性能很差 可以拿到jdk6/7上做测试
+ * 生成1024位随机字符串 使用Base64编码后解码 循环100k次 速度比jdk8自带的慢将近一倍
  * <p>
  * 编码原理
  * ascii表上的每个字符都能用一个字节表示 也就是8bit

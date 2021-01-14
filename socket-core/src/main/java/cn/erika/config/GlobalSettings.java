@@ -63,7 +63,7 @@ public class GlobalSettings {
     // 客户端传输文件使用的线程数量
     public static int threads = 4;
     // 服务器传输文件对线程的限制数量（MAX）
-    public static int threadsLimit = 4;
+    public static int threadsLimit = 10;
     public static String fileSignAlgorithm = BasicMessageDigestAlgorithm.SHA1.getValue();
     public static int fileTransBlock = 4 * 1024 * 1024;
 

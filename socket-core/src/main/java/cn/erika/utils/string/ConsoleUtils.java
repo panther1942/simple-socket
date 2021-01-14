@@ -78,9 +78,9 @@ public class ConsoleUtils {
         Thread thread = Thread.currentThread();
         // 处理线程名称
         String threadName = thread.getName();
-        if (threadName.length() > 15) {
+        /*if (threadName.length() > 15) {
             threadName = threadName.substring(0, 15);
-        }
+        }*/
         // 处理类名
         String className = targetClass.getName();
         if (className.length() > 40) {

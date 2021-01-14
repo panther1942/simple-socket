@@ -57,7 +57,7 @@ public class TcpChannel extends BaseSocket {
     private void init() throws IOException {
         set(Constant.LINK_TIME, new Date());
         this.charset = GlobalSettings.charset;
-        this.reader = new TcpReader(charset);
+        this.reader = new TcpReader();
 
         handler.init(this);
     }
