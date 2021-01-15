@@ -54,6 +54,7 @@
         - 消息摘要 MD5 SHA384之类的 支持扩展cn.erika.utils.security.SecurityAlgorithm接口
     - string 字符串工具集
         - Base64Utils 自己实现了一下BASE64算法 感觉这应该作为大学计算机科的必考题 又不难
+            当然 性能很渣 差不多是jdk8内置Base64性能的一半左右
         - ConsoleUtils 控制台输出格式化 提供了标题居中输出 和仿照spring日志格式的输出字符串
         - StringUtils 提供了生成指定长度的字符串和字节数组和十六进制字符串之间的转换
         
