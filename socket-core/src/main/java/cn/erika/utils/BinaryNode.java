@@ -126,8 +126,8 @@ public class BinaryNode<T extends Comparable<T>> {
         if (this.right == null) {
             return this;
         }
-        BinaryNode b = this.right;
-        BinaryNode c = this.right.left;
+        BinaryNode<T> b = this.right;
+        BinaryNode<T> c = this.right.left;
         swapParent(b);
         this.right = c;
         b.left = this;
@@ -141,8 +141,8 @@ public class BinaryNode<T extends Comparable<T>> {
         if (this.left == null) {
             return this;
         }
-        BinaryNode b = this.left;
-        BinaryNode c = this.left.right;
+        BinaryNode<T> b = this.left;
+        BinaryNode<T> c = this.left.right;
         swapParent(b);
         this.left = c;
         b.right = this;

@@ -10,10 +10,10 @@ import java.lang.reflect.Method;
 /**
  * 自动根据socket的type选择方法
  */
-public class ServiceSelector implements BeanSelector {
+public class SocketServiceSelector implements BeanSelector {
     private String type;
 
-    public ServiceSelector(ISocket socket) {
+    public SocketServiceSelector(ISocket socket) {
         this.type = socket.get(Constant.TYPE);
     }
 

@@ -2,7 +2,6 @@ package cn.erika.context;
 
 import cn.erika.context.annotation.Component;
 import cn.erika.context.annotation.PackageScan;
-import cn.erika.context.annotation.ServiceMapping;
 import cn.erika.context.bean.BeanFactory;
 import cn.erika.context.scan.PackageScanner;
 import cn.erika.context.scan.PackageScannerHandler;
@@ -11,8 +10,6 @@ import cn.erika.utils.log.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 全局容器 不要多次生成该类对象 因为BeanFactory是单例的
@@ -71,9 +68,9 @@ public abstract class Application {
             public void deal(Class<?> clazz) {
                 Method[] methods = clazz.getMethods();
                 for (Method method : methods) {
-                    ServiceMapping mapping = method.getAnnotation(ServiceMapping.class);
-                    if (mapping != null) {
-                        beanFactory.addBean(mapping.value(), method);
+                    Component component = method.getAnnotation(Component.class);
+                    if (component != null) {
+                        beanFactory.addBean(component.value(), method);
                     }
                 }
             }

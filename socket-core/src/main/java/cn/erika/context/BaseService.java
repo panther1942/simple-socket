@@ -10,10 +10,17 @@ import cn.erika.utils.security.SecurityUtils;
 import java.nio.charset.Charset;
 import java.util.Base64;
 
+/**
+ * 服务类的工具方法 提供了一些方法避免反复书写
+ */
 public abstract class BaseService {
+    // 对象工厂
     private BeanFactory beanFactory = BeanFactory.getInstance();
+    // 日志
     protected Logger log = LoggerFactory.getLogger(this.getClass());
+    // 字符编码
     protected Charset charset = GlobalSettings.charset;
+    // Base64的解编码对象
     protected Base64.Encoder encoder = Base64.getEncoder();
     protected Base64.Decoder decoder = Base64.getDecoder();
 
@@ -27,10 +34,6 @@ public abstract class BaseService {
 
     protected void addBean(Class<?> clazz, Object object) {
         beanFactory.addBean(clazz, object);
-    }
-
-    protected <T> T createBean(Class<?> clazz, Object... args) throws BeanException {
-        return beanFactory.createBean(clazz, args);
     }
 
     protected byte[] encryptWithRsa(byte[] data, byte[] publicKey) {

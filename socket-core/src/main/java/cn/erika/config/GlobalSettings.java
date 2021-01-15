@@ -19,7 +19,7 @@ public class GlobalSettings {
     // 传输使用的字符编码
     public static Charset charset = Charset.forName(Constant.UTF8);
     // 运行模式 支持BIO和NIO
-    public static String type = Constant.BIO;
+    public static String type = Constant.NIO;
     public static long cleanInterval = 5 * 30 * 1000;
     public static long invalidInterval = 5 * 60 * 1000;
 

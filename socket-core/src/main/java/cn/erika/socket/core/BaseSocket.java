@@ -225,17 +225,4 @@ public abstract class BaseSocket implements ISocket {
     public Handler getHandler() {
         return this.handler;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof ISocket)) {
-            return false;
-        }
-        ISocket that = (ISocket) o;
-        if (this.getLocalAddress().equals(that.getLocalAddress())
-                && this.getRemoteAddress().equals(that.getRemoteAddress())) {
-            return true;
-        }
-        return false;
-    }
 }

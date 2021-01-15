@@ -2,7 +2,6 @@ package cn.erika.service;
 
 import cn.erika.context.annotation.Component;
 import cn.erika.context.annotation.Inject;
-import cn.erika.context.annotation.ServiceMapping;
 import cn.erika.socket.model.po.Account;
 import cn.erika.socket.orm.IAccountService;
 
@@ -21,7 +20,7 @@ public class DemoServiceImpl extends BaseService implements IDemoService {
         System.out.println("静态代码块");
     }
 
-    @ServiceMapping("sum")
+    @Component(value = "sum")
     @Override
     public int sum(int a, int b) {
         return super.sum(a, b);

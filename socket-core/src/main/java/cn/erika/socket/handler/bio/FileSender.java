@@ -35,6 +35,7 @@ public class FileSender extends BaseClient {
     public void init(ISocket socket) {
         super.init(socket);
         emptyTasks();
+        // 添加发送文件的任务 在身份验证完成后执行
         addTask(new Task() {
             @Override
             public void run() {
@@ -52,11 +53,13 @@ public class FileSender extends BaseClient {
         });
 
         try {
+            // 初始化参数
             ISocket parent = socket.get(Constant.PARENT_SOCKET);
             String token = fileInfo.getPartToken();
             socket.set(Constant.TOKEN, token);
             socket.set(Constant.PUBLIC_KEY, parent.get(Constant.PUBLIC_KEY));
             socket.set(Constant.DIGITAL_SIGNATURE_ALGORITHM, parent.get(Constant.DIGITAL_SIGNATURE_ALGORITHM));
+            // 执行连接后动作(身份校验-令牌)
             onConnected(socket);
         } catch (BeanException e) {
             onError(socket, e);

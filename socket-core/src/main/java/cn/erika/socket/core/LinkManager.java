@@ -70,7 +70,7 @@ public class LinkManager {
 
     public String isExistLink(ISocket socket) {
         for (String uid : linkList.keySet()) {
-            if (socket.equals(linkList.get(uid))) {
+            if (uid.equals(socket.get(Constant.UID))) {
                 return uid;
             }
         }
@@ -86,7 +86,7 @@ public class LinkManager {
         return false;
     }
 
-    public void stop(){
+    public void stop() {
         timer.cancel();
     }
 }

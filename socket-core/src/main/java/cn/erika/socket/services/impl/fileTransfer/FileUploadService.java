@@ -7,6 +7,7 @@ import cn.erika.context.BaseService;
 import cn.erika.context.annotation.Component;
 import cn.erika.context.annotation.Enhance;
 import cn.erika.aop.FileUploadTimeCount;
+import cn.erika.context.annotation.Inject;
 import cn.erika.context.exception.BeanException;
 import cn.erika.socket.core.ISocket;
 import cn.erika.socket.model.po.FileTransPartRecord;
@@ -24,16 +25,11 @@ import java.text.DecimalFormat;
 
 @Component(Constant.SRV_UPLOAD)
 public class FileUploadService extends BaseService implements ISocketService {
-    private static DecimalFormat df = new DecimalFormat("0.00%");
-    private static int blockSize = GlobalSettings.fileTransBlock;
 
+    @Inject(name = "fileTransInfoService")
     private IFileTransInfoService fileTransInfoService;
+    @Inject(name = "fileTransPartRecordService")
     private IFileTransPartRecordService fileTransPartRecordService;
-
-    public FileUploadService() throws BeanException {
-        this.fileTransInfoService = getBean("fileTransInfoService");
-        this.fileTransPartRecordService = getBean("fileTransPartRecordService");
-    }
 
     @Enhance(FileUploadTimeCount.class)
     @Override

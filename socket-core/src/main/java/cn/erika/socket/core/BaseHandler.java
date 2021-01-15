@@ -5,7 +5,7 @@ import cn.erika.config.GlobalSettings;
 import cn.erika.context.bean.BeanFactory;
 import cn.erika.context.exception.BeanException;
 import cn.erika.socket.model.pto.Message;
-import cn.erika.socket.services.ServiceSelector;
+import cn.erika.socket.services.SocketServiceSelector;
 import cn.erika.utils.log.Logger;
 import cn.erika.utils.log.LoggerFactory;
 import cn.erika.utils.security.SecurityUtils;
@@ -76,7 +76,7 @@ public abstract class BaseHandler implements Handler {
                 @Override
                 public void run() {
                     try {
-                        beanFactory.execute(new ServiceSelector(socket), serviceName, socket, message);
+                        beanFactory.execute(new SocketServiceSelector(socket), serviceName, socket, message);
                     } catch (Throwable e) {
                         onError(socket, e);
                     }

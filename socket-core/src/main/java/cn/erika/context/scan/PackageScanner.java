@@ -15,9 +15,11 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 
-// 包扫描器
-// 注意!!! loadClass可能会导致提前触发依赖缺失的异常
-// 扫包时注意适用范围
+/**
+ * 包扫描
+ * 注意!!! forName和loadClass可能会导致提前触发依赖缺失的异常
+ * 扫包时注意适用范围
+ */
 public class PackageScanner {
     private static final String LINUX = "Linux";
     private static final String WINDOWS = "Windows";
@@ -51,10 +53,13 @@ public class PackageScanner {
 
     // 添加要扫描的包
     public void addPackage(String packageName) {
-        if (packageName == null || !packageName.matches("[\\w]+(\\.[\\w]+)*")) {
+        if (packageName == null || packageName.startsWith("java") || !packageName.matches("[\\w]+(\\.[\\w]+)*")) {
             throw new IllegalArgumentException("包名非法: " + packageName);
         }
-        this.packageList.add(packageName);
+        // 避免重复添加
+        if (!packageList.contains(packageName)) {
+            this.packageList.add(packageName);
+        }
     }
 
     // 开始扫描
@@ -67,12 +72,13 @@ public class PackageScanner {
     /**
      * 扫描类文件的方法 通过加载类加载器获取项目根目录
      * 遍历该目录下的所有文件
-     * 如果路径匹配包名 则
+     * 如果路径匹配包名 则尝试读取类
      *
-     * @param packageName
-     * @throws IOException
+     * @param packageName 包名
+     * @throws IOException 如果读取类的过程出现异常
      */
     private void scan(String packageName) throws IOException {
+        // 将包名转换为对应java类在文件系统中的路径
         String dirName = convertClassName2Path(packageName);
 
         Enumeration<URL> dirs = Thread.currentThread().getContextClassLoader().getResources(dirName);
@@ -159,8 +165,11 @@ public class PackageScanner {
         }
     }
 
+    /**
+     * 当读取类的时候执行扫描处理器
+     * @param clazz 扫描到的类
+     */
     private void onScan(Class<?> clazz) {
-//        System.out.println("加载类: " + clazz.getName());
         for (PackageScannerHandler handler : this.handlerList) {
             if (handler.filter(clazz)) {
                 handler.deal(clazz);
@@ -168,6 +177,12 @@ public class PackageScanner {
         }
     }
 
+    /**
+     * 将包名转换为类文件在文件系统中的路径
+     *
+     * @param packageName 包名
+     * @return 类文件的绝对路径
+     */
     public static String convertClassName2Path(String packageName) {
         // 需要判断操作系统类型 因为不同系统的分隔符不一样
         String systemName = System.getProperty(JAVA_OS_NAME);
@@ -186,6 +201,12 @@ public class PackageScanner {
         }
     }
 
+    /**
+     * 将类文件在文件系统中的路径转换为包名
+     *
+     * @param path 类文件的绝对路径
+     * @return 包名
+     */
     public static String convertPath2ClassName(String path) {
         // 需要判断操作系统类型 因为不同系统的分隔符不一样
         String systemName = System.getProperty(JAVA_OS_NAME);
