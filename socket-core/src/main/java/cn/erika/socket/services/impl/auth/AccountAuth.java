@@ -41,8 +41,6 @@ public class AccountAuth extends BaseService implements ISocketService {
                 if (result != null && result) {
                     log.info("认证成功");
                     socket.set(Constant.AUTHENTICATED, true);
-                    socket.set(Constant.PROMPT, message.get(Constant.PROMPT));
-                    GlobalSettings.prompt = message.get(Constant.PROMPT);
                 } else {
                     log.warn("认证失败");
                     socket.set(Constant.AUTHENTICATED, false);
@@ -62,7 +60,6 @@ public class AccountAuth extends BaseService implements ISocketService {
             socket.set(Constant.AUTHENTICATED, true);
             socket.set(Constant.USERNAME, username);
             socket.set(Constant.PWD, System.getProperty("user.dir"));
-            reply.add(Constant.PROMPT, socket.get(Constant.PWD));
             reply.add(Constant.RESULT, true);
         } else {
             socket.set(Constant.AUTHENTICATED, false);

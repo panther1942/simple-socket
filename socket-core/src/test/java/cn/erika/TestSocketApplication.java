@@ -9,7 +9,7 @@ import cn.erika.socket.model.pto.Message;
 import cn.erika.socket.core.Task;
 import cn.erika.utils.security.algorithm.BasicSecurityAlgorithm;
 
-@PackageScan({"cn.erika.aop", "cn.erika.socket", "cn.erika.utils", "cn.erika.service"})
+@PackageScan({"cn.erika.aop", "cn.erika.config", "cn.erika.socket", "cn.erika.utils", "cn.erika.service"})
 public class TestSocketApplication extends SocketApplication {
 
     public static void main(String[] args) {
@@ -19,7 +19,6 @@ public class TestSocketApplication extends SocketApplication {
     @Override
     protected void beforeStartup() {
         super.beforeStartup();
-        GlobalSettings.securityAlgorithm = BasicSecurityAlgorithm.AES128GCM;
         try {
             beanFactory.addTasks(Constant.SERVER, new Task() {
                 @Override

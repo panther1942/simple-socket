@@ -20,16 +20,19 @@ import java.text.DecimalFormat;
 import java.util.List;
 
 public class FileUtils {
+    // 工作目录
+    public static final String SYS_USER_DIR = System.getProperty("user.dir");
+    // 系统临时目录
     public static final String SYS_TEMP_DIR = System.getProperty("java.io.tmpdir");
+    // 文件路径分隔符
     public static final String SYS_FILE_SEPARATOR = System.getProperty("file.separator");
 
-    private static final int DEFAULT_BLOCK_SIZE = 4 * 1024;
     private static int blockSize = GlobalSettings.fileTransBlock;
     private static Logger log = LoggerFactory.getLogger(FileUtils.class);
     private static DecimalFormat df = new DecimalFormat("0.00%");
 
     public static void copyStream(InputStream in, OutputStream out) throws IOException {
-        copyStream(in, out, DEFAULT_BLOCK_SIZE);
+        copyStream(in, out, blockSize);
     }
 
     public static void copyStream(InputStream in, OutputStream out, int blockSize) throws IOException {
@@ -86,7 +89,7 @@ public class FileUtils {
             throw new IOException("文件不可读");
         }
         try {
-            MessageDigestAlgorithm algorithm = SecurityUtils.getMessageDigestAlgorithmByValue(GlobalSettings.fileSignAlgorithm);
+            MessageDigestAlgorithm algorithm = GlobalSettings.fileSignAlgorithm;
             byte[] sign = MessageDigestUtils.sum(file, algorithm);
             FileInfo info = new FileInfo();
             info.setFilename(file.getName());

@@ -69,20 +69,18 @@ public abstract class BaseSocket implements ISocket {
             // 序列化Message
             byte[] data = SerialUtils.serialObject(message);
             // 如果加密通信已启用
-            if (isEncrypt) {
+            SecurityAlgorithm securityAlgorithm = get(Constant.SECURITY_ALGORITHM);
+            if (isEncrypt && !"NONE".equalsIgnoreCase(securityAlgorithm.getValue())) {
                 // 根据协商的加密算法进行数据加密
-                SecurityAlgorithm securityAlgorithm = get(Constant.SECURITY_ALGORITHM);
                 String securityKey = get(Constant.SECURITY_KEY);
                 byte[] securityIv = get(Constant.SECURITY_IV); // 向量会根据算法需要使用或者忽略
                 data = SecurityUtils.encrypt(data, securityKey, securityAlgorithm, securityIv);
             }
             // 创建数据包
             DataInfo info = new DataInfo();
-            if (GlobalSettings.enableCompress) {
-                int compressCode = GlobalSettings.compressCode;
-                info.setCompress(compressCode);
-                data = CompressUtils.compress(data, compressCode);
-            }
+            int compressCode = GlobalSettings.compressCode;
+            info.setCompress(compressCode);
+            data = CompressUtils.compress(data, compressCode);
             info.setLen(data.length);
             info.setData(data);
             return send(info);
@@ -121,8 +119,8 @@ public abstract class BaseSocket implements ISocket {
             byte[] data = info.getData();
             int compressCode = info.getCompress();
             data = CompressUtils.uncompress(data, compressCode);
-            if (isEncrypt) {
-                SecurityAlgorithm securityAlgorithm = get(Constant.SECURITY_ALGORITHM);
+            SecurityAlgorithm securityAlgorithm = get(Constant.SECURITY_ALGORITHM);
+            if (isEncrypt && !"NONE".equalsIgnoreCase(securityAlgorithm.getValue())) {
                 String securityKey = get(Constant.SECURITY_KEY);
                 byte[] securityIv = get(Constant.SECURITY_IV);
                 data = SecurityUtils.decrypt(data, securityKey, securityAlgorithm, securityIv);

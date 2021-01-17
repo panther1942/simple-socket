@@ -7,6 +7,7 @@ import cn.erika.utils.security.SecurityUtils;
  * 对称加密算法的枚举类
  */
 public enum BasicSecurityAlgorithm implements SecurityAlgorithm {
+    NONE("NONE", null, null, 0, false, 0),
     AES128ECB("AES128ECB", "AES", "ECB", 128, false, 0),
     AES192ECB("AES192ECB", "AES", "ECB", 192, false, 0),
     AES256ECB("AES256ECB", "AES", "ECB", 256, false, 0),

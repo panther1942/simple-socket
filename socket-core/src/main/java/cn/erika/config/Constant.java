@@ -38,7 +38,6 @@ public class Constant {
     public static final String LEN = "len";
     public static final String EXIT = "exit";
     public static final String PWD = "pwd";
-    public static final String PROMPT = "prompt";
 
     public static final String LOCAL_FILE = "localFile";
     public static final String REMOTE_FILE = "remoteFile";

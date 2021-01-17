@@ -41,7 +41,7 @@ public class FileUploadPreService extends BaseService implements ISocketService 
     @Override
     public void client(ISocket socket, Message message) throws AuthenticateException {
         if (message.get(Constant.SERVICE_NAME) == null) {
-            preUpload(socket, message, GlobalSettings.threads);
+            preUpload(socket, message, GlobalSettings.fileThreads);
         } else {
             upload(socket, message);
         }
@@ -78,7 +78,7 @@ public class FileUploadPreService extends BaseService implements ISocketService 
             if (threads == null || threads < 1) {
                 throw new LimitThreadException("错误的线程数");
             }
-            if (threads > GlobalSettings.threadsLimit) {
+            if (threads > GlobalSettings.fileThreadsLimit) {
                 throw new LimitThreadException("线程数超出服务器限制");
             }
             IServer server = getBean(IServer.class);
@@ -195,7 +195,7 @@ public class FileUploadPreService extends BaseService implements ISocketService 
             // 如果是线程数量错误 则将服务器设置的线程数返回给客户端
             // 让客户端使用服务器配置重发请求（分段文件的CRC只能是在发送端进行校验）
             log.warn(e.getMessage());
-            message.add(Constant.THREADS, GlobalSettings.threads);
+            message.add(Constant.THREADS, GlobalSettings.fileThreads);
             message.add(Constant.RECEIVE_STATUS, false);
             message.add(Constant.TEXT, e.getMessage());
             socket.send(message);

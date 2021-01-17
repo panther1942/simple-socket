@@ -61,8 +61,8 @@ public class FileDownloadPreService extends BaseService implements ISocketServic
             if (localFileInfo.equals(remoteFileInfo)) {
                 throw new IOException("文件完整");
             }
-            if (threads == null || threads < 1 || threads > GlobalSettings.threadsLimit) {
-                threads = GlobalSettings.threads;
+            if (threads == null || threads < 1 || threads > GlobalSettings.fileThreadsLimit) {
+                threads = GlobalSettings.fileThreads;
             }
             IServer server = getBean(IServer.class);
             List<FileInfo> fileInfoList = transPartService.getFileInfoList(file, localFileInfo.getFilename(), threads);
@@ -102,7 +102,7 @@ public class FileDownloadPreService extends BaseService implements ISocketServic
             request.add(Constant.REMOTE_FILE, remoteFile);
             request.add(Constant.FILE_INFO, fileInfo);
             request.add(Constant.TOKEN, fileToken);
-            request.add(Constant.THREADS, GlobalSettings.threads);
+            request.add(Constant.THREADS, GlobalSettings.fileThreads);
             socket.send(request);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
