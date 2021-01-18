@@ -59,6 +59,6 @@ public abstract class BaseService {
     }
 
     protected String decryptWithRsaToString(byte[] data, byte[] privateKey) {
-        return new String(decryptWithRsa(data, privateKey));
+        return new String(decryptWithRsa(data, privateKey), charset);
     }
 }

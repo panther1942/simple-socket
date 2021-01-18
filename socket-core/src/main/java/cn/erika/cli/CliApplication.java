@@ -25,7 +25,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-@PackageScan({"cn.erika.aop", "cn.erika.cli", "cn.erika.socket", "cn.erika.utils"})
+@PackageScan({"cn.erika.aop", "cn.erika.cli", "cn.erika.config", "cn.erika.socket", "cn.erika.utils"})
 public class CliApplication extends SocketApplication implements Runnable {
     private Logger log = LoggerFactory.getLogger(this.getClass());
     private KeyboardReader reader = KeyboardReader.getInstance();
@@ -37,7 +37,6 @@ public class CliApplication extends SocketApplication implements Runnable {
     static {
         LoggerFactory.register(new ConsoleLogger());
         LoggerFactory.register(new FileLogger(GlobalSettings.logDir, GlobalSettings.logName, GlobalSettings.charset));
-//        LoggerFactory.ignore(FileUploadService.class);
     }
 
     @Override

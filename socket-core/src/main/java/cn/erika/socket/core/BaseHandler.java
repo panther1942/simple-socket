@@ -27,6 +27,7 @@ public abstract class BaseHandler implements Handler {
             // 初始化的时候生成RSA密钥对 以后可以把密钥对存起来 这玩意一直变也不是个事
             if (GlobalSettings.privateKey == null || GlobalSettings.publicKey == null) {
                 byte[][] keyPair = SecurityUtils.initKey();
+                System.out.println("初始化密钥");
                 GlobalSettings.publicKey = keyPair[0];
                 GlobalSettings.privateKey = keyPair[1];
             }

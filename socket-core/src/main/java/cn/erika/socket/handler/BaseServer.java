@@ -31,7 +31,7 @@ public abstract class BaseServer extends BaseHandler implements Runnable {
         try {
             JdbcUtils.getInstance();
         } catch (SQLException e) {
-            log.error("无法连接到数据库: " + e.getMessage());
+            log.error("无法连接到数据库: " + e.getMessage(), e);
         }
         List<Task> taskList = beanFactory.getTasks(Constant.SERVER);
         addTasks(taskList);

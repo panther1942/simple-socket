@@ -78,6 +78,9 @@ public class NIOServer extends BaseServer implements IServer {
             if (server != null && server.isOpen()) {
                 server.close();
                 log.info("关闭服务器");
+                if (selector != null) {
+                    selector.close();
+                }
             }
         } catch (IOException e) {
             log.error(e.getMessage());

@@ -52,7 +52,7 @@ public class ExchangeKey extends BaseService implements ISocketService {
                 encoder.encode(GlobalSettings.publicKey));
         reply.add(Constant.DIGITAL_SIGNATURE_ALGORITHM,
                 GlobalSettings.signAlgorithm.getValue());
-        log.debug("客户端请求加密通信 使用本地签名算法: " + GlobalSettings.signAlgorithm);
+        log.debug("客户端请求加密通信 使用数字签名算法: " + GlobalSettings.signAlgorithm);
         socket.send(reply);
     }
 }

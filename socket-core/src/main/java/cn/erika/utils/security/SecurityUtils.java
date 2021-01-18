@@ -233,7 +233,8 @@ public class SecurityUtils {
      */
     private static PublicKey getPublicKey(byte[] key, AsymmetricAlgorithm algorithm)
             throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-        KeyFactory factory = KeyFactory.getInstance(algorithm.getValue(), algorithm.getProvider());
+//        KeyFactory factory = KeyFactory.getInstance(algorithm.getValue(), algorithm.getProvider());
+        KeyFactory factory = KeyFactory.getInstance(algorithm.getValue());
         X509EncodedKeySpec spec = new X509EncodedKeySpec(key);
         return factory.generatePublic(spec);
     }
@@ -248,7 +249,8 @@ public class SecurityUtils {
      */
     private static PrivateKey getPrivateKey(byte[] key, AsymmetricAlgorithm algorithm)
             throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
-        KeyFactory factory = KeyFactory.getInstance(algorithm.getValue(), algorithm.getProvider());
+//        KeyFactory factory = KeyFactory.getInstance(algorithm.getValue(), algorithm.getProvider());
+        KeyFactory factory = KeyFactory.getInstance(algorithm.getValue());
         PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(key);
         return factory.generatePrivate(spec);
     }
